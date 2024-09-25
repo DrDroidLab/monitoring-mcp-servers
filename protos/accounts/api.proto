@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package protos.accounts;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
+
+import "protos/base.proto";
+import "protos/accounts/account.proto";
+
+/////////////////////  Api Tokens APIs  /////////////////////
+message GetAccountApiTokensRequest {
+  Meta meta = 1;
+}
+
+message GetAccountApiTokensResponse {
+  Meta meta = 1;
+  repeated AccountApiToken account_api_tokens = 2;
+}
+
+message CreateAccountApiTokenRequest {
+}
+
+message CreateAccountApiTokenResponse {
+  google.protobuf.BoolValue success = 1;
+  AccountApiToken account_api_token = 2;
+}
+
+message DeleteAccountApiTokenRequest {
+  string account_api_token_key = 1;
+}
+
+message DeleteAccountApiTokenResponse {
+  google.protobuf.BoolValue success = 1;
+}
+
+
+/////////////////////  User APIs  /////////////////////
+message GetUserRequest {
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message GetVersionInfoResponse {
+  string current_version = 1;
+  string latest_version = 2;
+  bool should_upgrade = 3;
+  string upgrade_message = 4;
+}
+
+message InviteUsersRequest {
+  repeated string emails = 1;
+  string signup_domain = 2;
+}
+
+message InviteUsersResponse {
+  Message message = 1;
+}
+
+message GetCurrentAccountUsersResponse {
+  Meta meta = 1;
+  repeated User users = 2;
+}
+
+
+/////////////////////  Reset Password APIs  /////////////////////
+message ResetPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+  Message message = 2;
+}
+
+message ResetPasswordConfirmRequest {
+  string token = 1;
+  string email = 2;
+  string new_password = 3;
+}
+
+message ResetPasswordConfirmResponse {
+  bool success = 1;
+  Message message = 2;
+}
+
+/////// Okta Auth APIs //////
+message OktaAuthData {
+  google.protobuf.UInt64Value pk = 1;
+  google.protobuf.StringValue email = 2;
+  google.protobuf.StringValue first_name = 3;
+  google.protobuf.StringValue last_name = 4;
+  google.protobuf.BoolValue is_new_user = 5;
+}
+
+message OktaAuthResponse {
+  google.protobuf.StringValue access_token = 3;
+  google.protobuf.StringValue refresh_token = 4;
+  OktaAuthData user = 5;
+}
