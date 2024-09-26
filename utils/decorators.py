@@ -43,6 +43,27 @@ def proto_schema_validator(request_schema):
     return decorator
 
 
+def get_proto_schema_validator():
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(request: HttpRequest):
+            try:
+                response = func(request)
+                if isinstance(response, ProtoMessage):
+                    return JsonResponse(proto_to_dict(response), status=200, content_type='application/json')
+                elif isinstance(response, dict):
+                    return JsonResponse(response, status=200, content_type='application/json')
+                elif isinstance(response, HttpResponse):
+                    return response
+            except Exception as e:
+                return JsonResponse({'message': 'Error while processing the request'}, status=500,
+                                    content_type='application/json')
+
+        return wrapper
+
+    return decorator
+
+
 def api_auth_check(func):
     @functools.wraps(func)
     def _wrapped_view(request, *args, **kwargs):
@@ -52,7 +73,7 @@ def api_auth_check(func):
         bearer, auth_token = request_headers['Authorization'].split(' ')
         if bearer != 'Bearer':
             return JsonResponse({'error': 'Invalid Authorization header'}, status=401)
-        drd_proxy_api_token = settings.DRD_PROXY_API_TOKEN
+        drd_proxy_api_token = settings.DRD_CLOUD_API_TOKEN
         if drd_proxy_api_token is None:
             return JsonResponse({'error': 'API token is not set'}, status=401)
         if auth_token != drd_proxy_api_token:
@@ -69,6 +90,22 @@ def account_post_api(request_schema):
         @api_view(['POST'])
         @api_auth_check
         @proto_schema_validator(request_schema)
+        @log_function_call
+        def wrapper(message):
+            return func(message)
+
+        return wrapper
+
+    return decorator
+
+
+def account_get_api():
+    def decorator(func):
+        @functools.wraps(func)
+        @csrf_exempt
+        @api_view(['GET'])
+        @api_auth_check
+        @get_proto_schema_validator()
         @log_function_call
         def wrapper(message):
             return func(message)

@@ -17,7 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+import agent.views as agent_views
+
 urlpatterns = [
+    path('agent/status', agent_views.status),
+
     path('admin/', admin.site.urls),
     path('connectors/', include('connectors.urls')),
     path('asset_manager/', include('asset_manager.urls')),
