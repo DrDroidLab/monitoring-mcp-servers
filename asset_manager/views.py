@@ -21,10 +21,10 @@ loaded_connections = settings.LOADED_CONNECTIONS
 @account_post_api(FetchAssetRequest)
 def assets_models_fetch(request_message: FetchAssetRequest) -> \
         Union[FetchAssetResponse, HttpResponse]:
-    if not request_message.connector_name or not request_message.connector_name.value:
+    if not request_message.connector.name or not request_message.connector.name.value:
         return FetchAssetResponse(success=BoolValue(value=False), message=Message(title="Invalid Request",
                                                                                   description="Missing connector name"))
-    connector_name = request_message.connector_name.value
+    connector_name = request_message.connector.name.value
     if not loaded_connections:
         return FetchAssetResponse(success=BoolValue(value=False), message=Message(title="Invalid Request",
                                                                                   description="No loaded connections found"))

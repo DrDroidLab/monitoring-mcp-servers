@@ -15,19 +15,19 @@ from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb
 from protos import base_pb2 as protos_dot_base__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n$protos/assets/clickhouse_asset.proto\x12\rprotos.assets\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"N\n\x1c\x43lickhouseDatabaseAssetModel\x12.\n\x08\x64\x61tabase\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"3\n\x1e\x43lickhouseDatabaseAssetOptions\x12\x11\n\tdatabases\x18\x01 \x03(\t\"\xfa\x01\n\x14\x43lickhouseAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12J\n\x13\x63lickhouse_database\x18\x05 \x01(\x0b\x32+.protos.assets.ClickhouseDatabaseAssetModelH\x00\x42\x07\n\x05\x61sset\"G\n\x10\x43lickhouseAssets\x12\x33\n\x06\x61ssets\x18\x01 \x03(\x0b\x32#.protos.assets.ClickhouseAssetModelb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n$protos/assets/clickhouse_asset.proto\x12\x11protos.connectors\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"N\n\x1c\x43lickhouseDatabaseAssetModel\x12.\n\x08\x64\x61tabase\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"3\n\x1e\x43lickhouseDatabaseAssetOptions\x12\x11\n\tdatabases\x18\x01 \x03(\t\"\xfe\x01\n\x14\x43lickhouseAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12N\n\x13\x63lickhouse_database\x18\x05 \x01(\x0b\x32/.protos.connectors.ClickhouseDatabaseAssetModelH\x00\x42\x07\n\x05\x61sset\"K\n\x10\x43lickhouseAssets\x12\x37\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\'.protos.connectors.ClickhouseAssetModelb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.assets.clickhouse_asset_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _CLICKHOUSEDATABASEASSETMODEL._serialized_start=106
-  _CLICKHOUSEDATABASEASSETMODEL._serialized_end=184
-  _CLICKHOUSEDATABASEASSETOPTIONS._serialized_start=186
-  _CLICKHOUSEDATABASEASSETOPTIONS._serialized_end=237
-  _CLICKHOUSEASSETMODEL._serialized_start=240
-  _CLICKHOUSEASSETMODEL._serialized_end=490
-  _CLICKHOUSEASSETS._serialized_start=492
-  _CLICKHOUSEASSETS._serialized_end=563
+  _CLICKHOUSEDATABASEASSETMODEL._serialized_start=110
+  _CLICKHOUSEDATABASEASSETMODEL._serialized_end=188
+  _CLICKHOUSEDATABASEASSETOPTIONS._serialized_start=190
+  _CLICKHOUSEDATABASEASSETOPTIONS._serialized_end=241
+  _CLICKHOUSEASSETMODEL._serialized_start=244
+  _CLICKHOUSEASSETMODEL._serialized_end=498
+  _CLICKHOUSEASSETS._serialized_start=500
+  _CLICKHOUSEASSETS._serialized_end=575
 # @@protoc_insertion_point(module_scope)

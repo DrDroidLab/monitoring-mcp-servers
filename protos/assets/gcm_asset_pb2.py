@@ -15,21 +15,21 @@ from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb
 from protos import base_pb2 as protos_dot_base__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1dprotos/assets/gcm_asset.proto\x12\rprotos.assets\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"\xf9\x01\n\x13GcmMetricAssetModel\x12\x31\n\x0bmetric_type\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12N\n\x16label_value_metric_map\x18\x02 \x03(\x0b\x32..protos.assets.GcmMetricAssetModel.MetricLabel\x1a_\n\x0bMetricLabel\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x13\n\x0b\x64\x65scription\x18\x02 \x03(\t\x12\x0f\n\x07metrics\x18\x03 \x03(\t\"-\n\x15GcmMetricAssetOptions\x12\x14\n\x0cmetric_types\x18\x01 \x03(\t\"\xe1\x01\n\rGcmAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12\x38\n\ngcm_metric\x18\x06 \x01(\x0b\x32\".protos.assets.GcmMetricAssetModelH\x00\x42\x07\n\x05\x61sset\"9\n\tGcmAssets\x12,\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x1c.protos.assets.GcmAssetModelb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1dprotos/assets/gcm_asset.proto\x12\x11protos.connectors\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"\xfd\x01\n\x13GcmMetricAssetModel\x12\x31\n\x0bmetric_type\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12R\n\x16label_value_metric_map\x18\x02 \x03(\x0b\x32\x32.protos.connectors.GcmMetricAssetModel.MetricLabel\x1a_\n\x0bMetricLabel\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x13\n\x0b\x64\x65scription\x18\x02 \x03(\t\x12\x0f\n\x07metrics\x18\x03 \x03(\t\"-\n\x15GcmMetricAssetOptions\x12\x14\n\x0cmetric_types\x18\x01 \x03(\t\"\xe5\x01\n\rGcmAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12<\n\ngcm_metric\x18\x06 \x01(\x0b\x32&.protos.connectors.GcmMetricAssetModelH\x00\x42\x07\n\x05\x61sset\"=\n\tGcmAssets\x12\x30\n\x06\x61ssets\x18\x01 \x03(\x0b\x32 .protos.connectors.GcmAssetModelb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.assets.gcm_asset_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _GCMMETRICASSETMODEL._serialized_start=100
-  _GCMMETRICASSETMODEL._serialized_end=349
-  _GCMMETRICASSETMODEL_METRICLABEL._serialized_start=254
-  _GCMMETRICASSETMODEL_METRICLABEL._serialized_end=349
-  _GCMMETRICASSETOPTIONS._serialized_start=351
-  _GCMMETRICASSETOPTIONS._serialized_end=396
-  _GCMASSETMODEL._serialized_start=399
-  _GCMASSETMODEL._serialized_end=624
-  _GCMASSETS._serialized_start=626
-  _GCMASSETS._serialized_end=683
+  _GCMMETRICASSETMODEL._serialized_start=104
+  _GCMMETRICASSETMODEL._serialized_end=357
+  _GCMMETRICASSETMODEL_METRICLABEL._serialized_start=262
+  _GCMMETRICASSETMODEL_METRICLABEL._serialized_end=357
+  _GCMMETRICASSETOPTIONS._serialized_start=359
+  _GCMMETRICASSETOPTIONS._serialized_end=404
+  _GCMASSETMODEL._serialized_start=407
+  _GCMASSETMODEL._serialized_end=636
+  _GCMASSETS._serialized_start=638
+  _GCMASSETS._serialized_end=699
 # @@protoc_insertion_point(module_scope)

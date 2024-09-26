@@ -1,14 +1,13 @@
 syntax = "proto3";
-package protos.assets;
+package protos.connectors;
 
 import "google/protobuf/wrappers.proto";
 import "protos/base.proto";
+import "protos/connectors/connector.proto";
 
 message FetchAssetRequest {
   Meta meta = 1;
-  Source connector_type = 2;
-  google.protobuf.StringValue connector_id = 3;
-  google.protobuf.StringValue connector_name = 4;
+  Connector connector = 2;
 }
 
 message FetchAssetResponse {

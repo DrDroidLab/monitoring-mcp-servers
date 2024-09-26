@@ -1,5 +1,5 @@
 syntax = "proto3";
-package protos.assets;
+package protos.connectors;
 
 import "google/protobuf/wrappers.proto";
 import "protos/base.proto";

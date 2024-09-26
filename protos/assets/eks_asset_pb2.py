@@ -15,27 +15,27 @@ from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb
 from protos import base_pb2 as protos_dot_base__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1dprotos/assets/eks_asset.proto\x12\rprotos.assets\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"h\n\x07\x43ommand\x12*\n\x04type\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x31\n\x0b\x64\x65scription\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"E\n\tNamespace\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x0c\n\x04pods\x18\x02 \x03(\t\"c\n\x07\x43luster\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12,\n\nnamespaces\x18\x02 \x03(\x0b\x32\x18.protos.assets.Namespace\"g\n\rRegionCluster\x12,\n\x06region\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12(\n\x08\x63lusters\x18\x02 \x03(\x0b\x32\x16.protos.assets.Cluster\"\x98\x01\n\x14\x45ksClusterAssetModel\x12,\n\x06region\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12(\n\x08\x63lusters\x18\x02 \x03(\x0b\x32\x16.protos.assets.Cluster\x12(\n\x08\x63ommands\x18\x03 \x03(\x0b\x32\x16.protos.assets.Command\"G\n\x16\x45ksClusterAssetOptions\x12-\n\x07regions\x18\x01 \x03(\x0b\x32\x1c.protos.assets.RegionCluster\"\xe3\x01\n\rEksAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12:\n\x0b\x65ks_cluster\x18\x05 \x01(\x0b\x32#.protos.assets.EksClusterAssetModelH\x00\x42\x07\n\x05\x61sset\"9\n\tEksAssets\x12,\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x1c.protos.assets.EksAssetModelb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1dprotos/assets/eks_asset.proto\x12\x11protos.connectors\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"h\n\x07\x43ommand\x12*\n\x04type\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x31\n\x0b\x64\x65scription\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"E\n\tNamespace\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x0c\n\x04pods\x18\x02 \x03(\t\"g\n\x07\x43luster\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x30\n\nnamespaces\x18\x02 \x03(\x0b\x32\x1c.protos.connectors.Namespace\"k\n\rRegionCluster\x12,\n\x06region\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12,\n\x08\x63lusters\x18\x02 \x03(\x0b\x32\x1a.protos.connectors.Cluster\"\xa0\x01\n\x14\x45ksClusterAssetModel\x12,\n\x06region\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12,\n\x08\x63lusters\x18\x02 \x03(\x0b\x32\x1a.protos.connectors.Cluster\x12,\n\x08\x63ommands\x18\x03 \x03(\x0b\x32\x1a.protos.connectors.Command\"K\n\x16\x45ksClusterAssetOptions\x12\x31\n\x07regions\x18\x01 \x03(\x0b\x32 .protos.connectors.RegionCluster\"\xe7\x01\n\rEksAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12>\n\x0b\x65ks_cluster\x18\x05 \x01(\x0b\x32\'.protos.connectors.EksClusterAssetModelH\x00\x42\x07\n\x05\x61sset\"=\n\tEksAssets\x12\x30\n\x06\x61ssets\x18\x01 \x03(\x0b\x32 .protos.connectors.EksAssetModelb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.assets.eks_asset_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _COMMAND._serialized_start=99
-  _COMMAND._serialized_end=203
-  _NAMESPACE._serialized_start=205
-  _NAMESPACE._serialized_end=274
-  _CLUSTER._serialized_start=276
-  _CLUSTER._serialized_end=375
-  _REGIONCLUSTER._serialized_start=377
-  _REGIONCLUSTER._serialized_end=480
-  _EKSCLUSTERASSETMODEL._serialized_start=483
-  _EKSCLUSTERASSETMODEL._serialized_end=635
-  _EKSCLUSTERASSETOPTIONS._serialized_start=637
-  _EKSCLUSTERASSETOPTIONS._serialized_end=708
-  _EKSASSETMODEL._serialized_start=711
-  _EKSASSETMODEL._serialized_end=938
-  _EKSASSETS._serialized_start=940
-  _EKSASSETS._serialized_end=997
+  _COMMAND._serialized_start=103
+  _COMMAND._serialized_end=207
+  _NAMESPACE._serialized_start=209
+  _NAMESPACE._serialized_end=278
+  _CLUSTER._serialized_start=280
+  _CLUSTER._serialized_end=383
+  _REGIONCLUSTER._serialized_start=385
+  _REGIONCLUSTER._serialized_end=492
+  _EKSCLUSTERASSETMODEL._serialized_start=495
+  _EKSCLUSTERASSETMODEL._serialized_end=655
+  _EKSCLUSTERASSETOPTIONS._serialized_start=657
+  _EKSCLUSTERASSETOPTIONS._serialized_end=732
+  _EKSASSETMODEL._serialized_start=735
+  _EKSASSETMODEL._serialized_end=966
+  _EKSASSETS._serialized_start=968
+  _EKSASSETS._serialized_end=1029
 # @@protoc_insertion_point(module_scope)

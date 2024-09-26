@@ -5,7 +5,6 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
-import google.protobuf.wrappers_pb2
 import protos.assets.azure_asset_pb2
 import protos.assets.bash_asset_pb2
 import protos.assets.clickhouse_asset_pb2
@@ -19,6 +18,7 @@ import protos.assets.grafana_asset_pb2
 import protos.assets.newrelic_asset_pb2
 import protos.assets.postgres_asset_pb2
 import protos.assets.slack_asset_pb2
+import protos.connectors.connector_pb2
 import sys
 
 if sys.version_info >= (3, 8):
@@ -32,8 +32,7 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class AccountConnectorAssets(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    CONNECTOR_ID_FIELD_NUMBER: builtins.int
-    CONNECTOR_NAME_FIELD_NUMBER: builtins.int
+    CONNECTOR_FIELD_NUMBER: builtins.int
     CLOUDWATCH_FIELD_NUMBER: builtins.int
     GRAFANA_FIELD_NUMBER: builtins.int
     CLICKHOUSE_FIELD_NUMBER: builtins.int
@@ -48,9 +47,7 @@ class AccountConnectorAssets(google.protobuf.message.Message):
     ELASTIC_SEARCH_FIELD_NUMBER: builtins.int
     GCM_FIELD_NUMBER: builtins.int
     @property
-    def connector_id(self) -> google.protobuf.wrappers_pb2.StringValue: ...
-    @property
-    def connector_name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+    def connector(self) -> protos.connectors.connector_pb2.Connector: ...
     @property
     def cloudwatch(self) -> protos.assets.cloudwatch_asset_pb2.CloudwatchAssets: ...
     @property
@@ -80,8 +77,7 @@ class AccountConnectorAssets(google.protobuf.message.Message):
     def __init__(
         self,
         *,
-        connector_id: google.protobuf.wrappers_pb2.StringValue | None = ...,
-        connector_name: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        connector: protos.connectors.connector_pb2.Connector | None = ...,
         cloudwatch: protos.assets.cloudwatch_asset_pb2.CloudwatchAssets | None = ...,
         grafana: protos.assets.grafana_asset_pb2.GrafanaAssets | None = ...,
         clickhouse: protos.assets.clickhouse_asset_pb2.ClickhouseAssets | None = ...,
@@ -96,8 +92,8 @@ class AccountConnectorAssets(google.protobuf.message.Message):
         elastic_search: protos.assets.elastic_search_asset_pb2.ElasticSearchAssets | None = ...,
         gcm: protos.assets.gcm_asset_pb2.GcmAssets | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector_id", b"connector_id", "connector_name", b"connector_name", "datadog", b"datadog", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "gke", b"gke", "grafana", b"grafana", "new_relic", b"new_relic", "postgres", b"postgres", "slack", b"slack"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector_id", b"connector_id", "connector_name", b"connector_name", "datadog", b"datadog", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "gke", b"gke", "grafana", b"grafana", "new_relic", b"new_relic", "postgres", b"postgres", "slack", b"slack"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector", b"connector", "datadog", b"datadog", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "gke", b"gke", "grafana", b"grafana", "new_relic", b"new_relic", "postgres", b"postgres", "slack", b"slack"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector", b"connector", "datadog", b"datadog", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "gke", b"gke", "grafana", b"grafana", "new_relic", b"new_relic", "postgres", b"postgres", "slack", b"slack"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["assets", b"assets"]) -> typing_extensions.Literal["cloudwatch", "grafana", "clickhouse", "slack", "new_relic", "datadog", "postgres", "eks", "bash", "azure", "gke", "elastic_search", "gcm"] | None: ...
 
 global___AccountConnectorAssets = AccountConnectorAssets

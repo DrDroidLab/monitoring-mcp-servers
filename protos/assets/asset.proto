@@ -1,8 +1,9 @@
 syntax = "proto3";
-package protos.assets;
+package protos.connectors;
 
-import "google/protobuf/wrappers.proto";
 import "protos/base.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
 import "protos/connectors/connector.proto";
 import "protos/assets/cloudwatch_asset.proto";
 import "protos/assets/grafana_asset.proto";
@@ -20,8 +21,7 @@ import "protos/assets/gcm_asset.proto";
 
 
 message AccountConnectorAssets {
-  google.protobuf.StringValue connector_id = 1;
-  google.protobuf.StringValue connector_name = 2;
+  Connector connector = 1;
   oneof assets {
     CloudwatchAssets cloudwatch = 101;
     GrafanaAssets grafana = 102;

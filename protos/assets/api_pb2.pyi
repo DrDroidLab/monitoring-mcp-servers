@@ -7,6 +7,7 @@ import google.protobuf.descriptor
 import google.protobuf.message
 import google.protobuf.wrappers_pb2
 import protos.base_pb2
+import protos.connectors.connector_pb2
 import sys
 
 if sys.version_info >= (3, 8):
@@ -21,26 +22,19 @@ class FetchAssetRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     META_FIELD_NUMBER: builtins.int
-    CONNECTOR_TYPE_FIELD_NUMBER: builtins.int
-    CONNECTOR_ID_FIELD_NUMBER: builtins.int
-    CONNECTOR_NAME_FIELD_NUMBER: builtins.int
+    CONNECTOR_FIELD_NUMBER: builtins.int
     @property
     def meta(self) -> protos.base_pb2.Meta: ...
-    connector_type: protos.base_pb2.Source.ValueType
     @property
-    def connector_id(self) -> google.protobuf.wrappers_pb2.StringValue: ...
-    @property
-    def connector_name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+    def connector(self) -> protos.connectors.connector_pb2.Connector: ...
     def __init__(
         self,
         *,
         meta: protos.base_pb2.Meta | None = ...,
-        connector_type: protos.base_pb2.Source.ValueType = ...,
-        connector_id: google.protobuf.wrappers_pb2.StringValue | None = ...,
-        connector_name: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        connector: protos.connectors.connector_pb2.Connector | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["connector_id", b"connector_id", "connector_name", b"connector_name", "meta", b"meta"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["connector_id", b"connector_id", "connector_name", b"connector_name", "connector_type", b"connector_type", "meta", b"meta"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["connector", b"connector", "meta", b"meta"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["connector", b"connector", "meta", b"meta"]) -> None: ...
 
 global___FetchAssetRequest = FetchAssetRequest
 

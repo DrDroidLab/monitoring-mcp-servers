@@ -15,19 +15,19 @@ from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb
 from protos import base_pb2 as protos_dot_base__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\"protos/assets/postgres_asset.proto\x12\rprotos.assets\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"L\n\x1aPostgresDatabaseAssetModel\x12.\n\x08\x64\x61tabase\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"1\n\x1cPostgresDatabaseAssetOptions\x12\x11\n\tdatabases\x18\x01 \x03(\t\"\xf4\x01\n\x12PostgresAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12\x46\n\x11postgres_database\x18\x05 \x01(\x0b\x32).protos.assets.PostgresDatabaseAssetModelH\x00\x42\x07\n\x05\x61sset\"C\n\x0ePostgresAssets\x12\x31\n\x06\x61ssets\x18\x01 \x03(\x0b\x32!.protos.assets.PostgresAssetModelb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\"protos/assets/postgres_asset.proto\x12\x11protos.connectors\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"L\n\x1aPostgresDatabaseAssetModel\x12.\n\x08\x64\x61tabase\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"1\n\x1cPostgresDatabaseAssetOptions\x12\x11\n\tdatabases\x18\x01 \x03(\t\"\xf8\x01\n\x12PostgresAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12J\n\x11postgres_database\x18\x05 \x01(\x0b\x32-.protos.connectors.PostgresDatabaseAssetModelH\x00\x42\x07\n\x05\x61sset\"G\n\x0ePostgresAssets\x12\x35\n\x06\x61ssets\x18\x01 \x03(\x0b\x32%.protos.connectors.PostgresAssetModelb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.assets.postgres_asset_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _POSTGRESDATABASEASSETMODEL._serialized_start=104
-  _POSTGRESDATABASEASSETMODEL._serialized_end=180
-  _POSTGRESDATABASEASSETOPTIONS._serialized_start=182
-  _POSTGRESDATABASEASSETOPTIONS._serialized_end=231
-  _POSTGRESASSETMODEL._serialized_start=234
-  _POSTGRESASSETMODEL._serialized_end=478
-  _POSTGRESASSETS._serialized_start=480
-  _POSTGRESASSETS._serialized_end=547
+  _POSTGRESDATABASEASSETMODEL._serialized_start=108
+  _POSTGRESDATABASEASSETMODEL._serialized_end=184
+  _POSTGRESDATABASEASSETOPTIONS._serialized_start=186
+  _POSTGRESDATABASEASSETOPTIONS._serialized_end=235
+  _POSTGRESASSETMODEL._serialized_start=238
+  _POSTGRESASSETMODEL._serialized_end=486
+  _POSTGRESASSETS._serialized_start=488
+  _POSTGRESASSETS._serialized_end=559
 # @@protoc_insertion_point(module_scope)
