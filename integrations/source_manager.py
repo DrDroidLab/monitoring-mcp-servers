@@ -110,8 +110,7 @@ class SourceManager:
                                                                              loaded_connections[connector_name])
         return connector_proto
 
-    def execute_task(self, account_id, time_range: TimeRange, global_variable_set: Struct,
-                     task: PlaybookTask) -> PlaybookTaskResult:
+    def execute_task(self, time_range: TimeRange, global_variable_set, task: PlaybookTask) -> PlaybookTaskResult:
         try:
             source_connector_proto = None
             if task.task_connector_sources and len(task.task_connector_sources) > 0:

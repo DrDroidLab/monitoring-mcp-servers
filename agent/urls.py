@@ -25,4 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('connectors/', include('connectors.urls')),
     path('asset_manager/', include('asset_manager.urls')),
+    path('playbooks_engine/', include('playbooks_engine.urls')),
 ]

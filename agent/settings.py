@@ -46,6 +46,7 @@ LOCAL_APPS = [
     'agent.apps.AgentConfig',
     'connectors.apps.ConnectorsConfig',
     'asset_manager.apps.AssetManagerConfig',
+    'playbooks_engine.apps.PlaybooksEngineConfig'
 ]
 
 INSTALLED_APPS = [
