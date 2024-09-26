@@ -1,0 +1,40 @@
+syntax = "proto3";
+package protos.connectors;
+
+import "protos/base.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
+import "protos/connectors/connector.proto";
+import "protos/assets/cloudwatch_asset.proto";
+import "protos/assets/grafana_asset.proto";
+import "protos/assets/clickhouse_asset.proto";
+import "protos/assets/slack_asset.proto";
+import "protos/assets/newrelic_asset.proto";
+import "protos/assets/datadog_asset.proto";
+import "protos/assets/postgres_asset.proto";
+import "protos/assets/eks_asset.proto";
+import "protos/assets/azure_asset.proto";
+import "protos/assets/bash_asset.proto";
+import "protos/assets/gke_asset.proto";
+import "protos/assets/elastic_search_asset.proto";
+import "protos/assets/gcm_asset.proto";
+
+
+message AccountConnectorAssets {
+  Connector connector = 1;
+  oneof assets {
+    CloudwatchAssets cloudwatch = 101;
+    GrafanaAssets grafana = 102;
+    ClickhouseAssets clickhouse = 103;
+    SlackAssets slack = 104;
+    NewRelicAssets new_relic = 105;
+    DatadogAssets datadog = 106;
+    PostgresAssets postgres = 107;
+    EksAssets eks = 108;
+    BashAssets bash = 109;
+    AzureAssets azure = 110;
+    GkeAssets gke = 111;
+    ElasticSearchAssets elastic_search = 112;
+    GcmAssets gcm = 113;
+  }
+}

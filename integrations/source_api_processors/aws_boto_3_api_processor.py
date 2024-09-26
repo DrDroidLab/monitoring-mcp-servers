@@ -1,0 +1,177 @@
+import logging
+
+import boto3
+
+from integrations.processor import Processor
+from utils.time_utils import current_milli_time
+
+logger = logging.getLogger(__name__)
+
+
+def generate_aws_access_secret_session_key(aws_assumed_role_arn):
+    default_session = boto3.setup_default_session(aws_access_key_id='AKIAUBE6G3THBBZXFPFR',
+                                                  aws_secret_access_key='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',
+                                                  region_name='us-west-2')
+    role_arn = "arn:aws:iam::277357190350:role/diagnosis-ai"
+    role_session_name = "drd_session"
+
+    sts_client = boto3.client('sts')
+
+    assumed_role = sts_client.assume_role(
+        RoleArn=role_arn,
+        RoleSessionName=role_session_name
+    )
+
+    aws_access_key_id = assumed_role['Credentials']['AccessKeyId']
+    aws_secret_access_key = assumed_role['Credentials']['SecretAccessKey']
+    aws_session_token = assumed_role['Credentials']['SessionToken']
+    region_name = 'us-west-2'
+
+    assumed_client = boto3.client('sts', aws_access_key_id=aws_access_key_id,
+                                  aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token,
+                                  region_name=region_name)
+
+    # Assume the Prodigal role
+    assumed_role_2 = assumed_client.assume_role(
+        RoleArn=aws_assumed_role_arn,
+        RoleSessionName="client_session"
+    )
+
+    return {'aws_access_key': assumed_role_2['Credentials']['AccessKeyId'],
+            'aws_secret_key': assumed_role_2['Credentials']['SecretAccessKey'],
+            'aws_session_token': assumed_role_2['Credentials']['SessionToken']}
+
+
+class AWSBoto3ApiProcessor(Processor):
+    def __init__(self, client_type: str, region: str, aws_access_key: str = None, aws_secret_key: str = None,
+                 aws_assumed_role_arn: str = None):
+
+        if (not aws_access_key or not aws_secret_key) and not aws_assumed_role_arn:
+            raise Exception("Received invalid AWS Credentials")
+
+        self.client_type = client_type
+        self.__aws_access_key = aws_access_key
+        self.__aws_secret_key = aws_secret_key
+        self.region = region
+        self.__aws_session_token = None
+        if aws_assumed_role_arn:
+            credentials = generate_aws_access_secret_session_key(aws_assumed_role_arn)
+            self.__aws_access_key = credentials['aws_access_key']
+            self.__aws_secret_key = credentials['aws_secret_key']
+            self.__aws_session_token = credentials['aws_session_token']
+
+    def get_connection(self):
+        try:
+            client = boto3.client(self.client_type, aws_access_key_id=self.__aws_access_key,
+                                  aws_secret_access_key=self.__aws_secret_key, region_name=self.region,
+                                  aws_session_token=self.__aws_session_token)
+            return client
+        except Exception as e:
+            logger.error(f"Exception occurred while creating boto3 client with error: {e}")
+            raise e
+
+    def test_connection(self):
+        try:
+            if self.client_type == 'cloudwatch':
+                client = self.get_connection()
+                response = client.list_metrics()
+                if response:
+                    return True
+                else:
+                    raise Exception("No metrics found in the cloudwatch connection")
+            elif self.client_type == 'logs':
+                log_groups = self.logs_describe_log_groups()
+                if log_groups:
+                    return True
+                else:
+                    raise Exception("No log groups found in the logs connection")
+        except Exception as e:
+            logger.error(f"Exception occurred while testing cloudwatch connection with error: {e}")
+            raise e
+
+    def cloudwatch_describe_alarms(self, alarm_names):
+        try:
+            client = self.get_connection()
+            response = client.describe_alarms(AlarmNames=alarm_names)
+            if response['ResponseMetadata']['HTTPStatusCode'] == 200 and response['MetricAlarms']:
+                return response['MetricAlarms']
+            else:
+                print(f"No alarms found for '{alarm_names}'")
+        except Exception as e:
+            logger.error(
+                f"Exception occurred while fetching cloudwatch alarms for alarm_names: {alarm_names} with error: {e}")
+            raise e
+
+    def cloudwatch_list_metrics(self):
+        try:
+            all_metrics = []
+            client = self.get_connection()
+            paginator = client.get_paginator('list_metrics')
+            for response in paginator.paginate():
+                metrics = response['Metrics']
+                all_metrics.extend(metrics)
+            return all_metrics
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching cloudwatch metrics with error: {e}")
+            raise e
+
+    def cloudwatch_get_metric_statistics(self, namespace, metric, start_time, end_time, period, statistics, dimensions):
+        try:
+            client = self.get_connection()
+            response = client.get_metric_statistics(
+                Namespace=namespace,
+                MetricName=metric,
+                StartTime=start_time,
+                EndTime=end_time,
+                Period=period,
+                Statistics=statistics,
+                Dimensions=dimensions
+            )
+            return response
+        except Exception as e:
+            logger.error(
+                f"Exception occurred while fetching cloudwatch metric statistics for metric: {metric} with error: {e}")
+            raise e
+
+    def logs_describe_log_groups(self):
+        try:
+            client = self.get_connection()
+            paginator = client.get_paginator('describe_log_groups')
+            log_groups = []
+            for page in paginator.paginate():
+                for log_group in page['logGroups']:
+                    log_groups.append(log_group['logGroupName'])
+            return log_groups
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching log groups with error: {e}")
+            raise e
+
+    def logs_filter_events(self, log_group, query_pattern, start_time, end_time):
+        try:
+            client = self.get_connection()
+            start_query_response = client.start_query(
+                logGroupName=log_group,
+                startTime=start_time,
+                endTime=end_time,
+                queryString=query_pattern,
+            )
+
+            query_id = start_query_response['queryId']
+
+            status = 'Running'
+            query_start_time = current_milli_time()
+            while status == 'Running' or status == 'Scheduled':
+                print("Waiting for query to complete...")
+                response = client.get_query_results(queryId=query_id)
+                status = response['status']
+                if status == 'Complete':
+                    return response['results']
+                elif current_milli_time() - query_start_time > 60000:
+                    print("Query took too long to complete. Aborting...")
+                    stop_query_response = client.stop_query(queryId=query_id)
+                    print(f"Query stopped with response: {stop_query_response}")
+                    return None
+            return None
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching logs for log_group: {log_group} with error: {e}")
+            raise e
