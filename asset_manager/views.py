@@ -1,14 +1,15 @@
 import logging
+import uuid
 from typing import Union
 
 from django.conf import settings
 from django.http import HttpResponse
 from google.protobuf.wrappers_pb2 import BoolValue, StringValue
 
-from asset_manager.utils import trigger_connector_metadata_fetch
+from asset_manager.tasks import populate_connector_metadata
 from protos.assets.api_pb2 import FetchAssetRequest, FetchAssetResponse
-from protos.base_pb2 import Message
-from utils.credentilal_utils import credential_yaml_to_connector_proto
+from protos.base_pb2 import Message, Source
+from utils.credentilal_utils import credential_yaml_to_connector_proto, generate_credentials_dict
 from utils.decorators import account_post_api
 from utils.static_mappings import integrations_connector_type_connector_keys_map
 
@@ -43,6 +44,12 @@ def assets_models_fetch(request_message: FetchAssetRequest) -> \
         return FetchAssetResponse(success=BoolValue(value=False),
                                   message=Message(title="Invalid Request",
                                                   description="Missing required connector keys"))
-
-    request_id = trigger_connector_metadata_fetch(connector_proto)
-    return FetchAssetResponse(success=BoolValue(value=True), request_id=StringValue(value=request_id))
+    connector_type: Source = connector_proto.type
+    credentials_dict = generate_credentials_dict(connector_type, connector_keys_proto)
+    if credentials_dict:
+        request_id = uuid.uuid4().hex
+        populate_connector_metadata.delay(request_id, connector_name, connector_type, credentials_dict)
+        return FetchAssetResponse(success=BoolValue(value=True), request_id=StringValue(value=request_id))
+    else:
+        return FetchAssetResponse(success=BoolValue(value=False), message=Message(title="Invalid Request",
+                                                                                  description="Invalid credentials"))
