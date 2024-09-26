@@ -199,6 +199,9 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8080', 'http://localhost', 'https://ap
 
 SITE_ID = 1
 
-DRD_PROXY_API_TOKEN = env.str("DRD_API_TOKEN", "test-123")
+DRD_CLOUD_API_TOKEN = env.str("DRD_CLOUD_API_TOKEN", "test-123")
+DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST", "http://localhost:8000")
+DRD_AGENT_API_TOKEN = env.str("DRD_AGENT_API_TOKEN", "test-abc")
+
 SECRETS_FILE_PATH = BASE_DIR / 'credentials/secrets.yaml'
 LOADED_CONNECTIONS = load_yaml(SECRETS_FILE_PATH)
