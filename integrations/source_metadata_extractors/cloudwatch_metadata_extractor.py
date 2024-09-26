@@ -54,7 +54,7 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
         model_type = SourceModelType.CLOUDWATCH_LOG_GROUP
         model_data = {}
         cloudwatch_boto3_processor = AWSBoto3ApiProcessor('logs', self.__region, self.__aws_access_key,
-                                                          self.__aws_secret_key, self.__aws_session_token)
+                                                          self.__aws_secret_key, self.__aws_assumed_role_arn)
         try:
             all_log_groups = cloudwatch_boto3_processor.logs_describe_log_groups()
             model_data[self.__region] = {'log_groups': all_log_groups}

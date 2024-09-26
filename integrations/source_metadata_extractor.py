@@ -17,11 +17,9 @@ class SourceMetadataExtractor:
     @log_function_call
     def create_or_update_model_metadata(self, model_type, collected_models):
         try:
-            for model_uid, metadata in collected_models:
+            for model_uid, metadata in collected_models.items():
                 for k, v in metadata.items():
                     if isinstance(v, (datetime, date)):
                         metadata[k] = v.isoformat()
-                logger.info(f"Request ID: {self.request_id}, Connector Name: {self.connector_name}, "
-                            f"model_type: {model_type}, model_uid: {model_uid}")
         except Exception as e:
             logger.error(f'Error creating or updating model_type: {model_type}, model_uid: {model_uid}: {e}')
