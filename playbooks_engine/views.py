@@ -1,7 +1,7 @@
 from typing import Union
 
 from django.http import HttpResponse
-from google.protobuf.internal.well_known_types import Struct
+from google.protobuf.struct_pb2 import Struct
 from google.protobuf.wrappers_pb2 import StringValue, BoolValue
 
 from integrations.source_facade import source_facade
