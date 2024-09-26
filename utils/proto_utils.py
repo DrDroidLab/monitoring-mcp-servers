@@ -2,6 +2,9 @@ from typing import Dict
 
 from google.protobuf.json_format import MessageToJson, Parse, MessageToDict, ParseDict
 from google.protobuf.message import Message
+from google.protobuf.wrappers_pb2 import BoolValue, UInt32Value
+
+from protos.base_pb2 import TimeRange, Page, Meta
 
 
 class ProtoException(ValueError):
@@ -52,3 +55,8 @@ def dict_to_proto(d: Dict, proto_clazz, ignore_unknown_fields=True) -> Message:
     except Exception as e:
         raise ProtoException(f'Error while parsing text: {e}')
     return msg
+
+
+def get_meta(tr: TimeRange = TimeRange(), page: Page = Page(), total_count: int = 0,
+             show_inactive: BoolValue = BoolValue(value=False)):
+    return Meta(time_range=tr, page=page, total_count=UInt32Value(value=total_count), show_inactive=show_inactive)
