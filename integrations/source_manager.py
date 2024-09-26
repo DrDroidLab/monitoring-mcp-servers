@@ -6,8 +6,8 @@ from google.protobuf.struct_pb2 import Struct
 from utils.credentilal_utils import credential_yaml_to_connector_proto
 from utils.static_mappings import integrations_connector_type_connector_keys_map
 from integrations.processor import Processor
-from integrations.source_processors.lambda_function_processor import LambdaFunctionProcessor
-from integrations.source_processors.no_op_processor import NoOpProcessor
+from integrations.source_api_processors.lambda_function_processor import LambdaFunctionProcessor
+from integrations.source_api_processors.no_op_processor import NoOpProcessor
 from protos.base_pb2 import TimeRange, Source
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType

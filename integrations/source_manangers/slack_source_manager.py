@@ -3,7 +3,7 @@ import os
 
 from google.protobuf.wrappers_pb2 import StringValue
 
-from integrations.source_processors.slack_api_processor import SlackApiProcessor
+from integrations.source_api_processors.slack_api_processor import SlackApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

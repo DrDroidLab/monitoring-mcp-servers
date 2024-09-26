@@ -1,6 +1,6 @@
 import logging
 
-from integrations.source_processors.zenduty_api_processor import ZenDutyApiProcessor
+from integrations.source_api_processors.zenduty_api_processor import ZenDutyApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

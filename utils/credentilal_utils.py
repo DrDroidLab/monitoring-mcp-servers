@@ -38,6 +38,8 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['aws_secret_key'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.AWS_REGION:
                 credentials_dict['region'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.AWS_ASSUMED_ROLE_ARN:
+                credentials_dict['aws_assumed_role_arn'] = conn_key.key.value
     elif connector_type == Source.EKS:
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.AWS_ACCESS_KEY:
@@ -48,6 +50,8 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['region'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.EKS_ROLE_ARN:
                 credentials_dict['k8_role_arn'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.AWS_ASSUMED_ROLE_ARN:
+                credentials_dict['aws_assumed_role_arn'] = conn_key.key.value
     elif connector_type == Source.GRAFANA:
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.GRAFANA_API_KEY:
@@ -230,7 +234,11 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
     if 'type' not in credential_yaml:
         raise Exception(f'Type not found in credential yaml for connector: {connector_name}')
 
+    if not connector_name:
+        raise Exception(f'Connector name not found in credential yaml for connector: {connector_name}')
+
     c_type = credential_yaml['type']
+    c_keys: [ConnectorKey] = []
     if c_type == 'CLOUDWATCH':
         if 'region' not in credential_yaml:
             raise Exception(f'Region not found in credential yaml for cloudwatch source in connector: {connector_name}')
@@ -240,10 +248,12 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             raise Exception(
                 f'No credentials found in credential yaml for cloudwatch source in connector: {connector_name}')
 
-        c_keys: [ConnectorKey] = [ConnectorKey(
+        c_source = Source.CLOUDWATCH
+
+        c_keys.append(ConnectorKey(
             key_type=SourceKeyType.AWS_REGION,
             key=StringValue(value=credential_yaml['region'])
-        )]
+        ))
         if credential_yaml.get('aws_access_key', None):
             c_keys.append(ConnectorKey(
                 key_type=SourceKeyType.AWS_ACCESS_KEY,
@@ -260,12 +270,6 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
                 key=StringValue(value=credential_yaml['aws_assumed_role_arn'])
             ))
-
-        return Connector(
-            type=Source.CLOUDWATCH,
-            name=StringValue(value=connector_name),
-            keys=c_keys
-        )
     elif c_type == 'EKS':
         if 'region' not in credential_yaml:
             raise Exception(f'Region not found in credential yaml for eks source in connector: {connector_name}')
@@ -275,10 +279,12 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             raise Exception(
                 f'No credentials found in credential yaml for eks source in connector: {connector_name}')
 
-        c_keys: [ConnectorKey] = [ConnectorKey(
+        c_source = Source.EKS
+
+        c_keys.append(ConnectorKey(
             key_type=SourceKeyType.AWS_REGION,
             key=StringValue(value=credential_yaml['region'])
-        )]
+        ))
         if credential_yaml.get('aws_access_key', None):
             c_keys.append(ConnectorKey(
                 key_type=SourceKeyType.AWS_ACCESS_KEY,
@@ -295,11 +301,6 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
                 key=StringValue(value=credential_yaml['aws_assumed_role_arn'])
             ))
-
-        return Connector(
-            type=Source.EKS,
-            name=StringValue(value=connector_name),
-            keys=c_keys
-        )
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
+    return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)

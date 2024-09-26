@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 
-from integrations.source_processors.new_relic_graph_ql_processor import NewRelicGraphQlConnector
+from integrations.source_api_processors.new_relic_graph_ql_processor import NewRelicGraphQlConnector
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import TimeRange, Source, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

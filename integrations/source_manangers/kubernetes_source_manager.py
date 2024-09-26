@@ -1,6 +1,6 @@
 from google.protobuf.wrappers_pb2 import StringValue
 
-from integrations.source_processors.kubectl_api_processor import KubectlApiProcessor
+from integrations.source_api_processors.kubectl_api_processor import KubectlApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

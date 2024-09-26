@@ -1,6 +1,6 @@
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
-from integrations.source_processors.bigquery_api_processor import BigQueryApiProcessor
+from integrations.source_api_processors.bigquery_api_processor import BigQueryApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

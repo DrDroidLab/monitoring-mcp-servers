@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pytz
 from google.protobuf.wrappers_pb2 import StringValue, DoubleValue, UInt64Value
 
-from integrations.source_processors.aws_boto_3_api_processor import AWSBoto3ApiProcessor
+from integrations.source_api_processors.aws_boto_3_api_processor import AWSBoto3ApiProcessor
 from protos.base_pb2 import TimeRange, Source, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType, Literal

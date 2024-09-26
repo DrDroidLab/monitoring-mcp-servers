@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 
-from integrations.source_processors.mimir_api_processor import MimirApiProcessor
+from integrations.source_api_processors.mimir_api_processor import MimirApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import TimeRange
 from protos.base_pb2 import Source

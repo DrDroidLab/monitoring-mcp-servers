@@ -5,8 +5,8 @@ import kubernetes
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value
 from kubernetes.client import V1PodList, V1DeploymentList, CoreV1EventList, V1ServiceList
 
-from integrations.source_processors.eks_api_processor import EKSApiProcessor
-from integrations.source_processors.kubectl_api_processor import KubectlApiProcessor
+from integrations.source_api_processors.eks_api_processor import EKSApiProcessor
+from integrations.source_api_processors.kubectl_api_processor import KubectlApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

@@ -1,6 +1,6 @@
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
-from integrations.source_processors.elastic_search_api_processor import ElasticSearchApiProcessor
+from integrations.source_api_processors.elastic_search_api_processor import ElasticSearchApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

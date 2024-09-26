@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 
-from integrations.source_processors.grafana_api_processor import GrafanaApiProcessor
+from integrations.source_api_processors.grafana_api_processor import GrafanaApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import TimeRange, Source, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

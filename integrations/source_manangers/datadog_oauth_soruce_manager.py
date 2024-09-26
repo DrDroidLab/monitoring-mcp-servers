@@ -1,6 +1,6 @@
 from google.protobuf.wrappers_pb2 import DoubleValue, StringValue, UInt64Value
 
-from integrations.source_processors.datadog_api_processor import DatadogApiProcessor
+from integrations.source_api_processors.datadog_api_processor import DatadogApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import TimeRange, Source, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

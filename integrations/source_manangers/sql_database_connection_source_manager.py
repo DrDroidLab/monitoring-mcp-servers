@@ -2,7 +2,7 @@ import threading
 
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
-from integrations.source_processors.db_connection_string_processor import DBConnectionStringProcessor
+from integrations.source_api_processors.db_connection_string_processor import DBConnectionStringProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto

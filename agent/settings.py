@@ -45,6 +45,7 @@ ALLOWED_HOSTS = ['*']
 LOCAL_APPS = [
     'agent.apps.AgentConfig',
     'connectors.apps.ConnectorsConfig',
+    'asset_manager.apps.AssetManagerConfig',
 ]
 
 INSTALLED_APPS = [

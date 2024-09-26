@@ -1,0 +1,19 @@
+syntax = "proto3";
+package protos.assets;
+
+import "google/protobuf/wrappers.proto";
+import "protos/base.proto";
+
+message FetchAssetRequest {
+  Meta meta = 1;
+  Source connector_type = 2;
+  google.protobuf.StringValue connector_id = 3;
+  google.protobuf.StringValue connector_name = 4;
+}
+
+message FetchAssetResponse {
+  Meta meta = 1;
+  google.protobuf.BoolValue success = 2;
+  Message message = 3;
+  google.protobuf.StringValue request_id = 4;
+}
