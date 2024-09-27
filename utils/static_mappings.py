@@ -102,6 +102,11 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.AWS_SECRET_KEY,
             SourceKeyType.AWS_REGION,
             SourceKeyType.EKS_ROLE_ARN,
+        ],
+        [
+            SourceKeyType.AWS_REGION,
+            SourceKeyType.AWS_ASSUMED_ROLE_ARN,
+            SourceKeyType.EKS_ROLE_ARN,
         ]
     ],
     Source.SQL_DATABASE_CONNECTION: [

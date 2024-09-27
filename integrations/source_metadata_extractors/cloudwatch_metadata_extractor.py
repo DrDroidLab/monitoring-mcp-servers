@@ -41,9 +41,6 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                                                     'DimensionNames': list(dimension_map.keys())}
                 namespace_map[self.__region] = region_map
                 model_data[namespace] = namespace_map
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting metrics: {e}')
         if len(model_data) > 0:
@@ -58,9 +55,6 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             all_log_groups = cloudwatch_boto3_processor.logs_describe_log_groups()
             model_data[self.__region] = {'log_groups': all_log_groups}
-            if len(model_data) >= 10:
-                self.create_or_update_model_metadata(model_type, model_data)
-                model_data = {}
         except Exception as e:
             logger.error(f'Error extracting log groups: {e}')
         if len(model_data) > 0:

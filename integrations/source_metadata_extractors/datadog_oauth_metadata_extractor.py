@@ -60,7 +60,8 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
             service_model_data = model_data.get(service, {})
             service_model_data['metrics'] = metrics
             model_data[service] = service_model_data
-        self.create_or_update_model_metadata(model_type, model_data)
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
     def extract_monitor(self):
@@ -74,9 +75,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
                 monitor_dict = monitor.to_dict()
                 monitor_id = str(monitor_dict['id'])
                 model_data[monitor_id] = monitor_dict
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting monitors: {e}')
         if len(model_data) > 0:
@@ -102,9 +100,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
                     continue
                 dashboard_id = str(dashboard['id'])
                 model_data[dashboard_id] = dashboard
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting dashboards: {e}')
         if len(model_data) > 0:
@@ -127,9 +122,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
                         enabled_account_specific_namespace_rules[service] = enabled
                 account['account_specific_namespace_rules'] = enabled_account_specific_namespace_rules
                 model_data[aws_account_id] = account
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active aws integrations: {e}')
         if len(model_data) > 0:
@@ -147,9 +139,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
                 account_dict = account.to_dict()
                 aws_account_id = str(account_dict['account_id'])
                 model_data[aws_account_id] = account_dict
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active aws log integrations: {e}')
         if len(model_data) > 0:
@@ -167,9 +156,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
                 client_id = str(azure_account.get('client_id', None))
                 if client_id:
                     model_data[client_id] = azure_account
-                    if len(model_data) >= 10:
-                        self.create_or_update_model_metadata(model_type, model_data)
-                        model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active azure integrations: {e}')
         if len(model_data) > 0:
@@ -187,9 +173,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
             for ca in data:
                 c_id = str(ca['id'])
                 model_data[c_id] = ca
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active cloudflare integrations: {e}')
         if len(model_data) > 0:
@@ -207,9 +190,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
             for ca in data:
                 c_id = str(ca['id'])
                 model_data[c_id] = ca
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active confluent integrations: {e}')
         if len(model_data) > 0:
@@ -227,9 +207,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
             for fa in data:
                 f_id = str(fa['id'])
                 model_data[f_id] = fa
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active fastly integrations: {e}')
         if len(model_data) > 0:
@@ -247,9 +224,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
             for gcpa in data:
                 gcp_id = str(gcpa['id'])
                 model_data[gcp_id] = gcpa
-                if len(model_data) >= 10:
-                    self.create_or_update_model_metadata(model_type, model_data)
-                    model_data = {}
         except Exception as e:
             logger.error(f'Error extracting active gcp integrations: {e}')
         if len(model_data) > 0:
@@ -275,8 +249,5 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
                 tags = []
             family = mt['id'].split('.')[0]
             model_data[mt['id']] = {**mt, 'tags': tags, 'family': family}
-            if len(model_data) >= 10:
-                self.create_or_update_model_metadata(model_type, model_data)
-                model_data = {}
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
