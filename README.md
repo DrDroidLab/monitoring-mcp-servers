@@ -28,16 +28,16 @@ Currently, the agent supports the following metric sources in your VPC:
 
 ## Configuration
 
-Identify the auth token needed for the authenticating http calls between doctor droid platform and agent by
+1. To get started create credentials/secret.yaml file with connections and corresponding credentials.
+Secret format for different connections can be referenced from credentials/credentials_template.yaml. 
+
+2. Identify the auth token needed for the authenticating http calls between doctor droid platform and agent by
 visiting [site](https://playbooks.drdroid.io/api-keys)
 Once auth token is available, you can set the env var as:
 
 ```shell
 DRD_CLOUD_API_TOKEN=<API_TOKEN> docker-compose -f agent.docker-compose.yml up
 ```
-
-To get started create populate credentials/secret.yaml file with connections and corresponding credentials.
-Secret format for different connections can be referenced in credentials/credentials_template.yaml.
 
 ## Support
 
