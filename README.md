@@ -36,8 +36,8 @@ Once auth token is available, you can set the env var as:
 DRD_CLOUD_API_TOKEN=<API_TOKEN> docker-compose -f agent.docker-compose.yml up
 ```
 
-To get started create populate secret.yaml file with connections and corresponding credentials.
-
+To get started create populate credentials/secret.yaml file with connections and corresponding credentials.
+Secret format for different connections can be referenced in credentials/credentials_template.yaml.
 
 ## Support
 
