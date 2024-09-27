@@ -7,8 +7,8 @@ services:
       - "6379:6379"
     networks:
       - mynetwork
+
   fluentd:
-    platform: linux/amd64
     build:
       context: ./fluentd
       dockerfile: Dockerfile
@@ -35,7 +35,7 @@ services:
       - "CELERY_RESULT_BACKEND=redis://redis:6379/0"
       - "REDIS_URL=redis://redis:6379/0"
       - DRD_CLOUD_API_TOKEN=${DRD_CLOUD_API_TOKEN}
-      - DRD_CLOUD_API_HOST=${DRD_CLOUD_API_HOST}
+      - DRD_CLOUD_API_HOST=https://agent-api.drdroid.io
     depends_on:
       - redis
       - fluentd
@@ -60,7 +60,7 @@ services:
       - "CELERY_RESULT_BACKEND=redis://redis:6379/0"
       - "REDIS_URL=redis://redis:6379/0"
       - DRD_CLOUD_API_TOKEN=${DRD_CLOUD_API_TOKEN}
-      - DRD_CLOUD_API_HOST=${DRD_CLOUD_API_HOST}
+      - DRD_CLOUD_API_HOST=https://agent-api.drdroid.io
     depends_on:
       - redis
       - fluentd
