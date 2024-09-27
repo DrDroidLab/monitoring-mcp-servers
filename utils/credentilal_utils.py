@@ -297,10 +297,83 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             ))
 
         if credential_yaml.get('aws_assumed_role_arn', None):
+            pass
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
+            key=StringValue(value=credential_yaml['aws_assumed_role_arn'])
+        ))
+    elif c_type == 'GRAFANA':
+        if 'grafana_host' not in credential_yaml or 'grafana_api_key' not in credential_yaml:
+            raise Exception(
+                f'Host not found in credential yaml for grafana source in connector: {connector_name}')
+
+        if 'grafana_api_key' not in credential_yaml:
+            raise Exception(
+                f'Api key not found in credential yaml for grafana source in connector: {connector_name}')
+
+        c_source = Source.GRAFANA
+
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GRAFANA_HOST,
+            key=StringValue(value=credential_yaml['grafana_host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GRAFANA_API_KEY,
+            key=StringValue(value=credential_yaml['grafana_api_key'])
+        ))
+        if credential_yaml.get('ssl_verify', None):
             c_keys.append(ConnectorKey(
-                key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
-                key=StringValue(value=credential_yaml['aws_assumed_role_arn'])
+                key_type=SourceKeyType.SSL_VERIFY,
+                key=StringValue(value=credential_yaml['ssl_verify'])
             ))
+    elif c_type == 'GRAFANA_LOKI':
+        # host: str, port: int, protocol: str, x_scope_org_id: str = 'anonymous', ssl_verify: bool = True):
+        if 'host' not in credential_yaml or 'grafana_api_key' not in credential_yaml:
+            raise Exception(
+                f'Host not found in credential yaml for grafana loki source in connector: {connector_name}')
+
+        if 'port' not in credential_yaml:
+            raise Exception(
+                f'Port not found in credential yaml for grafana loki source in connector: {connector_name}')
+
+        if 'protocol' not in credential_yaml:
+            raise Exception(
+                f'Protocol not found in credential yaml for grafana loki source in connector: {connector_name}')
+
+        c_source = Source.GRAFANA
+
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GRAFANA_LOKI_HOST,
+            key=StringValue(value=credential_yaml['host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GRAFANA_LOKI_PORT,
+            key=StringValue(value=credential_yaml['port'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GRAFANA_LOKI_PROTOCOL,
+            key=StringValue(value=credential_yaml['protocol'])
+        ))
+        if credential_yaml.get('x_scope_org_id', None):
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.X_SCOPE_ORG_ID,
+                key=StringValue(value=credential_yaml['x_scope_org_id'])
+            ))
+        if credential_yaml.get('ssl_verify', None):
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.SSL_VERIFY,
+                key=StringValue(value=credential_yaml['ssl_verify'])
+            ))
+    elif c_type == 'SQL_DATABASE_CONNECTION':
+        if 'connection_string' not in credential_yaml:
+            raise Exception(
+                f'connection_string not found in credential yaml for database source in connector: {connector_name}')
+
+        c_source = Source.SQL_DATABASE_CONNECTION
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.SQL_DATABASE_CONNECTION_STRING_URI,
+            key=StringValue(value=credential_yaml['connection_string'])
+        ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
