@@ -32,9 +32,14 @@ class SourceMetadataExtractor:
                     'model_type': model_type,
                     'metadata': metadata
                 })
-
-            requests.post(f'{drd_cloud_host}/connectors/proxy/connector/metadata/register',
-                          headers={'Authorization': f'Bearer {drd_cloud_api_token}'},
-                          json={'connector': {'name': self.connector_name}, 'assets': asset_metadata_models})
+                if len(asset_metadata_models) >= 100:
+                    requests.post(f'{drd_cloud_host}/connectors/proxy/connector/metadata/register',
+                                  headers={'Authorization': f'Bearer {drd_cloud_api_token}'},
+                                  json={'connector': {'name': self.connector_name}, 'assets': asset_metadata_models})
+                    asset_metadata_models = []
+            if len(asset_metadata_models) > 0:
+                requests.post(f'{drd_cloud_host}/connectors/proxy/connector/metadata/register',
+                              headers={'Authorization': f'Bearer {drd_cloud_api_token}'},
+                              json={'connector': {'name': self.connector_name}, 'assets': asset_metadata_models})
         except Exception as e:
             logger.error(f'Error creating or updating model_type: {model_type} with error: {e}')

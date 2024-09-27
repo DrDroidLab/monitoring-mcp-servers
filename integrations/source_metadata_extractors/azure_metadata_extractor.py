@@ -29,8 +29,5 @@ class AzureConnectorMetadataExtractor(SourceMetadataExtractor):
         for w in workspaces:
             workspace_id = w.get('customer_id', '')
             model_data[workspace_id] = w
-            if len(model_data) >= 10:
-                self.create_or_update_model_metadata(model_type, model_data)
-                model_data = {}
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)

@@ -31,4 +31,3 @@ class EksSourceMetadataExtractor(SourceMetadataExtractor):
         model_data[self.__region] = {'clusters': clusters}
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
-        return model_data

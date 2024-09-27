@@ -29,8 +29,5 @@ class ClickhouseSourceMetadataExtractor(SourceMetadataExtractor):
         model_data = {}
         for db in databases:
             model_data[db] = {}
-            if len(model_type) >= 10:
-                self.create_or_update_model_metadata(model_type, model_data)
-                model_data = {}
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
