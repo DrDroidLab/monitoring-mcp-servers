@@ -22,7 +22,7 @@ services:
       - mynetwork
 
   server:
-    image: public.ecr.aws/y9s1f3r5/drdroid/playbooks-backend:latest
+    image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
     platform: linux/amd64
     command: ./start-server.sh
     ports:
@@ -47,7 +47,7 @@ services:
       - mynetwork
 
   celery_worker:
-    image: public.ecr.aws/y9s1f3r5/drdroid/playbooks-backend:latest
+    image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
     platform: linux/amd64
     command: ./start-celery-worker.sh
     environment:
