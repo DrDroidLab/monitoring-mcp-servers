@@ -196,12 +196,12 @@ LOGGING = {
 }
 
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8080', 'http://localhost', 'https://app.drdroid.io',
-                        'https://sandbox.drdroid.io']
+                        'https://agent-api.drdroid.io']
 
 SITE_ID = 1
 
 DRD_CLOUD_API_TOKEN = env.str("DRD_CLOUD_API_TOKEN")
-DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST")
+DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST", "https://agent-api.drdroid.io")
 DRD_AGENT_API_TOKEN = env.str("DRD_AGENT_API_TOKEN", "test-abc")
 
 SECRETS_FILE_PATH = BASE_DIR / 'credentials/secrets.yaml'
