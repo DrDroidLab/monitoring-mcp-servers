@@ -37,7 +37,7 @@ visiting [site](https://playbooks.drdroid.io/api-keys)
 Once auth token is available, you can set the env var as:
 
 ```shell
-DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f agent.docker-compose.yml up
+DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f deploy.docker-compose.yml up
 ```
 
 ## Support
