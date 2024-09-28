@@ -25,6 +25,7 @@ Currently, the agent supports the following metric sources in your VPC:
 | Env Var Name        | Description                                    | Required | 
 |---------------------|------------------------------------------------|----------|
 | DRD_CLOUD_API_TOKEN | Authentication token for doctor droid platform | True     |
+| DRD_CLOUD_API_HOST  | API server host for droid platform             | True     |
 
 ## Configuration
 
@@ -36,7 +37,7 @@ visiting [site](https://playbooks.drdroid.io/api-keys)
 Once auth token is available, you can set the env var as:
 
 ```shell
-DRD_CLOUD_API_TOKEN=<API_TOKEN> docker-compose -f agent.docker-compose.yml up
+DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f agent.docker-compose.yml up
 ```
 
 ## Support
