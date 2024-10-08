@@ -225,6 +225,26 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['project_id'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.BIG_QUERY_SERVICE_ACCOUNT_JSON:
                 credentials_dict['service_account_json'] = conn_key.key.value
+    elif connector_type == Source.MONGODB:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.MONGODB_URI:
+                credentials_dict['uri'] = conn_key.key.value
+    elif connector_type == Source.OPEN_SEARCH:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.OPEN_SEARCH_HOST:
+                credentials_dict['host'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.OPEN_SEARCH_PORT:
+                credentials_dict['port'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.OPEN_SEARCH_PROTOCOL:
+                credentials_dict['protocol'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.OPEN_SEARCH_USERNAME:
+                credentials_dict['username'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.OPEN_SEARCH_PASSWORD:
+                credentials_dict['password'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.SSL_VERIFY:
+                credentials_dict['verify_certs'] = True
+                if conn_key.key.value.lower() == 'false':
+                    credentials_dict['verify_certs'] = False
     else:
         return None
     return credentials_dict
@@ -374,6 +394,14 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.SQL_DATABASE_CONNECTION_STRING_URI,
             key=StringValue(value=credential_yaml['connection_string'])
         ))
+    elif c_type == 'OPEN_SEARCH':
+        if 'host' not in credential_yaml or 'port' not in credential_yaml or 'protocol' not in credential_yaml or 'username' not in credential_yaml or 'password' not in credential_yaml:
+            raise Exception(
+                f'Host, port, protocol, username or password not found in credential yaml for open search source in connector: {connector_name}')
+    elif c_type == 'MONGODB':
+        if 'connection_string' not in credential_yaml:
+            raise Exception(
+                f'uri not found in credential yaml for mongodb source in connector: {connector_name}')
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)

@@ -171,6 +171,9 @@ enum Source {
   CONFLUENCE_SELF_HOSTED = 55;
   GOOGLE_DRIVE = 56;
   NOTION = 57;
+  MONGODB = 59;
+  OPEN_SEARCH = 60;
+  LINEAR = 61;
 }
 
 enum SourceKeyType {
@@ -295,6 +298,16 @@ enum SourceKeyType {
   CONFLUENCE_CLOUD_API_KEY = 87;
 
   NOTION_API_KEY = 88;
+
+  MONGODB_CONNECTION_STRING = 92;
+
+  OPEN_SEARCH_PROTOCOL = 94;
+  OPEN_SEARCH_HOST = 95;
+  OPEN_SEARCH_PORT = 96;
+  OPEN_SEARCH_USERNAME = 97;
+  OPEN_SEARCH_PASSWORD = 98;
+
+
 }
 
 enum SourceModelType {
@@ -386,4 +399,11 @@ enum SourceModelType {
 
   //Google Chat Models
   GOOGLE_CHAT_SPACE = 2101;
+
+  // MongoDB Models
+  MONGODB_DATABASE = 2201;
+  MONGODB_COLLECTION = 2202;
+
+  //Open Search Models
+  OPEN_SEARCH_INDEX = 2301;
 }

@@ -1,0 +1,32 @@
+from sentry_sdk import capture_exception
+
+from integrations.source_metadata_extractor import SourceMetadataExtractor
+from integrations.source_api_processors.open_search_api_processor import OpenSearchApiProcessor
+from protos.event.connectors_pb2 import ConnectorType as Source, ConnectorMetadataModelType as SourceModelType
+from utils.logging_utils import log_function_call
+
+
+class OpenSearchSourceMetadataExtractor(SourceMetadataExtractor):
+
+    def __init__(self, protocol: str, host: str, port: str, username: str, password: str, verify_certs: bool = False,
+                 account_id=None, connector_id=None):
+        self.__os_api_processor = OpenSearchApiProcessor(protocol, host, port, username, password, verify_certs)
+
+        super().__init__(account_id, connector_id, Source.OPEN_SEARCH)
+
+    @log_function_call
+    def extract_index(self, save_to_db=False):
+        model_type = SourceModelType.OPEN_SEARCH_INDEX
+        try:
+            indexes = self.__os_api_processor.fetch_indices()
+        except Exception as e:
+            capture_exception(Exception(f'Error fetching OpenSearch indexes: {e}'))
+            return
+        if not indexes:
+            return
+        model_data = {}
+        for ind in indexes:
+            model_data[ind] = {}
+            if save_to_db:
+                self.create_or_update_model_metadata(model_type, ind, {})
+        return model_data

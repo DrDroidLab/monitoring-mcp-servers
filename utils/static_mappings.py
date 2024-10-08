@@ -248,6 +248,29 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.BIG_QUERY_PROJECT_ID,
             SourceKeyType.BIG_QUERY_SERVICE_ACCOUNT_JSON,
         ]
+    ],
+    Source.MONGODB: [
+        [
+            SourceKeyType.MONGODB_CONNECTION_STRING,
+        ]
+    ],
+    Source.OPEN_SEARCH: [
+        [
+            SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            SourceKeyType.OPEN_SEARCH_HOST,
+            SourceKeyType.OPEN_SEARCH_PORT,
+            SourceKeyType.OPEN_SEARCH_USERNAME,
+            SourceKeyType.OPEN_SEARCH_PASSWORD,
+            SourceKeyType.SSL_VERIFY
+        ],
+        [
+            SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            SourceKeyType.OPEN_SEARCH_HOST,
+            SourceKeyType.OPEN_SEARCH_PORT,
+            SourceKeyType.OPEN_SEARCH_USERNAME,
+            SourceKeyType.OPEN_SEARCH_PASSWORD,
+            SourceKeyType.SSL_VERIFY
+        ]
     ]
 }
 integrations_connector_type_display_name_map = {
@@ -283,7 +306,9 @@ integrations_connector_type_display_name_map = {
     Source.KUBERNETES: 'KUBERNETES',
     Source.SMTP: 'EMAIL SERVER',
     Source.ZENDUTY: 'ZENDUTY',
-    Source.BIG_QUERY: 'BIG QUERY'
+    Source.BIG_QUERY: 'BIG QUERY',
+    Source.MONGODB: 'MONGODB',
+    Source.OPEN_SEARCH: 'OPEN SEARCH',
 }
 
 model_type_display_name_maps = {
@@ -303,4 +328,6 @@ model_type_display_name_maps = {
     SourceModelType.POSTGRES_QUERY: "Sql Query",
     SourceModelType.AZURE_WORKSPACE: "Azure Log Analytics Workspace",
     SourceModelType.SSH_SERVER: "SSH Server",
+    SourceModelType.OPEN_SEARCH: "Open Search",
+    SourceModelType.MONGODB: "MongoDB",
 }
