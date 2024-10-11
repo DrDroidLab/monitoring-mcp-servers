@@ -269,7 +269,9 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.OPEN_SEARCH_PORT,
             SourceKeyType.OPEN_SEARCH_USERNAME,
             SourceKeyType.OPEN_SEARCH_PASSWORD,
-            SourceKeyType.SSL_VERIFY
+        ],
+        [
+            SourceKeyType.OPEN_SEARCH_HOST,
         ]
     ]
 }
@@ -282,7 +284,7 @@ integrations_connector_type_display_name_map = {
     Source.DATADOG_OAUTH: 'DATADOG',
     Source.GRAFANA: 'GRAFANA',
     Source.GRAFANA_VPC: 'GRAFANA VPC',
-    Source.GITHUB_ACTIONS: 'GITHUB ACTIONS',
+    Source.GITHUB: 'GITHUB',
     Source.ELASTIC_APM: 'ELASTIC APM',
     Source.VICTORIA_METRICS: 'VictoriaMetrics',
     Source.PROMETHEUS: 'PROMETHEUS',
@@ -328,6 +330,5 @@ model_type_display_name_maps = {
     SourceModelType.POSTGRES_QUERY: "Sql Query",
     SourceModelType.AZURE_WORKSPACE: "Azure Log Analytics Workspace",
     SourceModelType.SSH_SERVER: "SSH Server",
-    SourceModelType.OPEN_SEARCH: "Open Search",
-    SourceModelType.MONGODB: "MongoDB",
+    SourceModelType.OPEN_SEARCH_INDEX: "Open Search Index",
 }
