@@ -1,5 +1,5 @@
 syntax = "proto3";
-package protos.event.playbooks;
+package protos.playbooks;
 
 import "google/protobuf/wrappers.proto";
 

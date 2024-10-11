@@ -1,9 +1,8 @@
 syntax = "proto3";
-package protos.event.connectors.assets;
+package protos.connectors;
 
 import "google/protobuf/wrappers.proto";
-import "protos/event/base.proto";
-import "protos/event/connectors.proto";
+import "protos/base.proto";
 
 message OpenSearchIndexAssetModel {
   google.protobuf.StringValue index = 1;
@@ -15,8 +14,8 @@ message OpenSearchIndexAssetOptions {
 
 message OpenSearchAssetModel {
   google.protobuf.UInt64Value id = 1;
-  ConnectorType connector_type = 2;
-  ConnectorMetadataModelType type = 3;
+  Source connector_type = 2;
+  SourceModelType type = 3;
   sfixed64 last_updated = 4;
   oneof asset {
     OpenSearchIndexAssetModel open_search_index = 5;

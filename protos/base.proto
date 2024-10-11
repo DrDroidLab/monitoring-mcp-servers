@@ -174,6 +174,7 @@ enum Source {
   MONGODB = 59;
   OPEN_SEARCH = 60;
   LINEAR = 61;
+  JENKINS = 62;
 }
 
 enum SourceKeyType {
@@ -307,7 +308,11 @@ enum SourceKeyType {
   OPEN_SEARCH_USERNAME = 97;
   OPEN_SEARCH_PASSWORD = 98;
 
+  LINEAR_API_KEY = 99;
 
+  JENKINS_URL = 100;
+  JENKINS_USERNAME = 101;
+  JENKINS_API_TOKEN = 102;
 }
 
 enum SourceModelType {
@@ -406,4 +411,7 @@ enum SourceModelType {
 
   //Open Search Models
   OPEN_SEARCH_INDEX = 2301;
+
+  // Asana Models
+  ASANA_PROJECT = 2401;
 }
