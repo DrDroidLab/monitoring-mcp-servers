@@ -33,6 +33,7 @@ class MongoDBProcessor(Processor):
             logger.error(f"Exception occurred while testing mongodb connection with error: {e}")
             raise e
 
+    # TODO (Dipesh): Add support for fetching databases, tables and table assets
     # def fetch_databases(self):
     #     try:
     #         db_databases = []
@@ -100,15 +101,14 @@ class MongoDBProcessor(Processor):
             collec = db.get_collection(collection)
 
             if order_by_field:
-                result = collec.find(filters, projection).sort(order_by_field).limit(limit).max_time_ms(timeout*1000)
+                result = collec.find(filters, projection).sort(order_by_field).limit(limit).max_time_ms(timeout * 1000)
             else:
-                result = collec.find(filters, projection).limit(limit).max_time_ms(timeout*1000)
+                result = collec.find(filters, projection).limit(limit).max_time_ms(timeout * 1000)
             return result
         except Exception as e:
             logger.error(f"Exception occurred while fetching mongodb query result with error: {e}")
             raise e
-        
-    
+
     def get_query_result_count(self, database, collection, filters, limit, timeout=120):
         try:
             client = self.get_connection()
