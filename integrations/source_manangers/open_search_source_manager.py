@@ -2,19 +2,18 @@ import json
 
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
-from connectors.utils import generate_credentials_dict
 from integrations.source_api_processors.open_search_api_processor import OpenSearchApiProcessor
-from playbooks_engine.executor.playbook_source_manager import PlaybookSourceManager
-from protos.event.base_pb2 import TimeRange
-from protos.event.connectors_pb2 import Connector as ConnectorProto, ConnectorType as Source, \
-    ConnectorMetadataModelType as SourceModelType
-from protos.event.literal_pb2 import LiteralType, Literal
-from protos.event.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType
-from protos.event.playbooks.source_task_definitions.open_search_task_pb2 import OpenSearch
-from protos.event.ui_definition_pb2 import FormField, FormFieldType
+from integrations.source_manager import SourceManager
+from protos.base_pb2 import Source, SourceModelType, TimeRange
+from protos.connectors.connector_pb2 import Connector as ConnectorProto
+from protos.literal_pb2 import LiteralType, Literal
+from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResultType, TableResult, PlaybookTaskResult
+from protos.playbooks.source_task_definitions.open_search_task_pb2 import OpenSearch
+from protos.ui_definition_pb2 import FormField, FormFieldType
+from utils.credentilal_utils import generate_credentials_dict
 
 
-class OpenSearchSourceManager(PlaybookSourceManager):
+class OpenSearchSourceManager(SourceManager):
 
     def __init__(self):
         self.source = Source.OPEN_SEARCH
@@ -39,12 +38,12 @@ class OpenSearchSourceManager(PlaybookSourceManager):
                     FormField(key_name=StringValue(value="limit"),
                               display_name=StringValue(value="Enter Limit"),
                               data_type=LiteralType.LONG,
-                              default_value=Literal(literal_type=LiteralType.LONG, long=Int64Value(value=2000)),
+                              default_value=Literal(type=LiteralType.LONG, long=Int64Value(value=2000)),
                               form_field_type=FormFieldType.TEXT_FT),
                     FormField(key_name=StringValue(value="offset"),
                               display_name=StringValue(value="Enter Offset"),
                               data_type=LiteralType.LONG,
-                              default_value=Literal(literal_type=LiteralType.LONG, long=Int64Value(value=0)),
+                              default_value=Literal(type=LiteralType.LONG, long=Int64Value(value=0)),
                               form_field_type=FormFieldType.TEXT_FT),
                 ]
             },

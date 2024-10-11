@@ -1,6 +1,5 @@
 import logging
 
-from google.protobuf.struct_pb2 import Struct
 from google.protobuf.wrappers_pb2 import StringValue
 
 from integrations.source_manager import SourceManager

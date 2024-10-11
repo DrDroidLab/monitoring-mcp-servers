@@ -398,10 +398,42 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         if 'host' not in credential_yaml or 'port' not in credential_yaml or 'protocol' not in credential_yaml or 'username' not in credential_yaml or 'password' not in credential_yaml:
             raise Exception(
                 f'Host, port, protocol, username or password not found in credential yaml for open search source in connector: {connector_name}')
+
+        c_source = Source.OPEN_SEARCH
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.OPEN_SEARCH_HOST,
+            key=StringValue(value=credential_yaml['host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.OPEN_SEARCH_PORT,
+            key=StringValue(value=credential_yaml['port'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            key=StringValue(value=credential_yaml['protocol'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.OPEN_SEARCH_USERNAME,
+            key=StringValue(value=credential_yaml['username'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.OPEN_SEARCH_PASSWORD,
+            key=StringValue(value=credential_yaml['password'])
+        ))
+        if credential_yaml.get('verify_certs', None):
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.SSL_VERIFY,
+                key=StringValue(value=credential_yaml['verify_certs'])
+            ))
     elif c_type == 'MONGODB':
         if 'connection_string' not in credential_yaml:
             raise Exception(
                 f'uri not found in credential yaml for mongodb source in connector: {connector_name}')
+        c_source = Source.MONGODB
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.MONGODB_CONNECTION_STRING,
+            key=StringValue(value=credential_yaml['connection_string'])
+        ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)

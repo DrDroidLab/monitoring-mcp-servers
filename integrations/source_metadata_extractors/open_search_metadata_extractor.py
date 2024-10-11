@@ -1,8 +1,6 @@
-from sentry_sdk import capture_exception
-
 from integrations.source_metadata_extractor import SourceMetadataExtractor
-from integrations.source_api_processors.open_search_api_processor import OpenSearchApiProcessor
-from protos.event.connectors_pb2 import ConnectorType as Source, ConnectorMetadataModelType as SourceModelType
+from integrations.source_api_processors.open_search_api_processor import OpenSearchApiProcessor, logger
+from protos.base_pb2 import Source, SourceModelType
 from utils.logging_utils import log_function_call
 
 
@@ -20,7 +18,7 @@ class OpenSearchSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             indexes = self.__os_api_processor.fetch_indices()
         except Exception as e:
-            capture_exception(Exception(f'Error fetching OpenSearch indexes: {e}'))
+            logger.error(f"Error while fetching OpenSearch indices: {e}")
             return
         if not indexes:
             return

@@ -5,21 +5,22 @@ import ast
 
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
-from connectors.utils import generate_credentials_dict
 from integrations.source_api_processors.mongodb_processor import MongoDBProcessor
-from playbooks_engine.executor.playbook_source_manager import PlaybookSourceManager
-from protos.event.base_pb2 import TimeRange
-from protos.event.connectors_pb2 import Connector as ConnectorProto, ConnectorType as Source, \
-    ConnectorMetadataModelType as SourceModelType
-from protos.event.literal_pb2 import LiteralType, Literal
-from protos.event.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType
-from protos.event.playbooks.source_task_definitions.mongodb_task_pb2 import MongoDB
-from protos.event.ui_definition_pb2 import FormField, FormFieldType
+from integrations.source_manager import SourceManager
+from protos.connectors.connector_pb2 import Connector as ConnectorProto
+from protos.base_pb2 import TimeRange, Source
+from protos.literal_pb2 import LiteralType, Literal
+from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType
+from protos.playbooks.source_task_definitions.mongodb_task_pb2 import MongoDB
+from protos.ui_definition_pb2 import FormField, FormFieldType
+from utils.credentilal_utils import generate_credentials_dict
+
 
 class TimeoutException(Exception):
     pass
 
-class MongoDBSourceManager(PlaybookSourceManager):
+
+class MongoDBSourceManager(SourceManager):
 
     def __init__(self):
         self.source = Source.MONGODB
@@ -46,27 +47,27 @@ class MongoDBSourceManager(PlaybookSourceManager):
                               display_name=StringValue(value="Filters"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='\{\}'))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='\{\}'))),
                     FormField(key_name=StringValue(value="projection"),
                               display_name=StringValue(value="Projection"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='null'))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='null'))),
                     FormField(key_name=StringValue(value="order_by_field"),
                               display_name=StringValue(value="Sort order"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='[]'))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='[]'))),
                     FormField(key_name=StringValue(value="limit"),
                               display_name=StringValue(value="Limit"),
                               data_type=LiteralType.LONG,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='10'))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='10'))),
                     FormField(key_name=StringValue(value="timeout"),
                               display_name=StringValue(value="Timeout (in seconds)"),
                               description=StringValue(value='Enter Timeout (in seconds)'),
                               data_type=LiteralType.LONG,
-                              default_value=Literal(literal_type=LiteralType.LONG, long=Int64Value(value=120)),
+                              default_value=Literal(type=LiteralType.LONG, long=Int64Value(value=120)),
                               form_field_type=FormFieldType.TEXT_FT)
                 ]
             },
@@ -77,7 +78,7 @@ class MongoDBSourceManager(PlaybookSourceManager):
         return MongoDBProcessor(**generated_credentials)
 
     def execute_mongo_query(self, time_range: TimeRange, mongodb_task: MongoDB,
-                          mongodb_connector: ConnectorProto) -> PlaybookTaskResult:
+                            mongodb_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not mongodb_connector:
                 raise Exception("Task execution Failed:: No MongoDB source found")
@@ -91,7 +92,8 @@ class MongoDBSourceManager(PlaybookSourceManager):
 
             filters = json.loads(mongo_query.filters.value) if mongo_query.filters.value else {}
             projection = json.loads(mongo_query.projection.value) if mongo_query.projection.value else {}
-            order_by_field = ast.literal_eval(mongo_query.order_by_field.value) if mongo_query.order_by_field.value else []
+            order_by_field = ast.literal_eval(
+                mongo_query.order_by_field.value) if mongo_query.order_by_field.value else []
             limit = mongo_query.limit.value
             timeout = mongo_query.timeout.value if mongo_query.timeout.value else 120
 
@@ -99,8 +101,10 @@ class MongoDBSourceManager(PlaybookSourceManager):
                 nonlocal count_result, result, exception
                 try:
                     mongodb_processor = self.get_connector_processor(mongodb_connector)
-                    count_result = mongodb_processor.get_query_result_count(database, collection, filters, limit, timeout=timeout)
-                    result = mongodb_processor.get_query_result(database, collection, filters, projection, order_by_field, limit, timeout=timeout)
+                    count_result = mongodb_processor.get_query_result_count(database, collection, filters, limit,
+                                                                            timeout=timeout)
+                    result = mongodb_processor.get_query_result(database, collection, filters, projection,
+                                                                order_by_field, limit, timeout=timeout)
                 except Exception as e:
                     exception = e
 
@@ -118,15 +122,17 @@ class MongoDBSourceManager(PlaybookSourceManager):
             if exception:
                 raise exception
 
-            print("Playbook Task Downstream Request: Type -> {}, Account -> {}".format("MongoDB", mongodb_connector.account_id.value), database, collection, filters, projection, order_by_field, limit, flush=True)
+            print("Playbook Task Downstream Request: Type -> {}, Account -> {}".format("MongoDB",
+                                                                                       mongodb_connector.account_id.value),
+                  database, collection, filters, projection, order_by_field, limit, flush=True)
 
             table_rows: [TableResult.TableRow] = []
             for r in list(result):
                 table_columns = []
                 for key, value in r.items():
                     table_columns.append(TableResult.TableColumn(name=StringValue(value=str(key)),
-                                                                              value=StringValue(value=str(value))))
-                
+                                                                 value=StringValue(value=str(value))))
+
                 table_row = TableResult.TableRow(columns=table_columns)
                 table_rows.append(table_row)
 
