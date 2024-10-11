@@ -2,6 +2,8 @@
 
 The present repository contains the source code of the Doctor Droid Python Proxy Agent version 1.0.0.
 Read more [here](https://github.com/DrDroidLab/drd-vpc-agent).
+![VPC Agent](https://github.com/user-attachments/assets/a17b8904-7811-4597-b4cc-bae34f02cb48)
+
 
 ## Documentation
 
