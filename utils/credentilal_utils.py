@@ -227,8 +227,8 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['service_account_json'] = conn_key.key.value
     elif connector_type == Source.MONGODB:
         for conn_key in connector_keys:
-            if conn_key.key_type == SourceKeyType.MONGODB_URI:
-                credentials_dict['uri'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.MONGODB_CONNECTION_STRING:
+                credentials_dict['connection_string'] = conn_key.key.value
     elif connector_type == Source.OPEN_SEARCH:
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.OPEN_SEARCH_HOST:
