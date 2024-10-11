@@ -192,7 +192,7 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     EKS: _Source.ValueType  # 33
     AGENT_PROXY: _Source.ValueType  # 34
     GRAFANA_VPC: _Source.ValueType  # 35
-    GITHUB_ACTIONS: _Source.ValueType  # 36
+    GITHUB: _Source.ValueType  # 36
     SQL_DATABASE_CONNECTION: _Source.ValueType  # 37
     OPEN_AI: _Source.ValueType  # 38
     REMOTE_SERVER: _Source.ValueType  # 39
@@ -214,6 +214,10 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     CONFLUENCE_SELF_HOSTED: _Source.ValueType  # 55
     GOOGLE_DRIVE: _Source.ValueType  # 56
     NOTION: _Source.ValueType  # 57
+    MONGODB: _Source.ValueType  # 59
+    OPEN_SEARCH: _Source.ValueType  # 60
+    LINEAR: _Source.ValueType  # 61
+    JENKINS: _Source.ValueType  # 62
 
 class Source(_Source, metaclass=_SourceEnumTypeWrapper): ...
 
@@ -253,7 +257,7 @@ OPS_GENIE: Source.ValueType  # 32
 EKS: Source.ValueType  # 33
 AGENT_PROXY: Source.ValueType  # 34
 GRAFANA_VPC: Source.ValueType  # 35
-GITHUB_ACTIONS: Source.ValueType  # 36
+GITHUB: Source.ValueType  # 36
 SQL_DATABASE_CONNECTION: Source.ValueType  # 37
 OPEN_AI: Source.ValueType  # 38
 REMOTE_SERVER: Source.ValueType  # 39
@@ -275,6 +279,10 @@ CONFLUENCE_CLOUD: Source.ValueType  # 54
 CONFLUENCE_SELF_HOSTED: Source.ValueType  # 55
 GOOGLE_DRIVE: Source.ValueType  # 56
 NOTION: Source.ValueType  # 57
+MONGODB: Source.ValueType  # 59
+OPEN_SEARCH: Source.ValueType  # 60
+LINEAR: Source.ValueType  # 61
+JENKINS: Source.ValueType  # 62
 global___Source = Source
 
 class _SourceKeyType:
@@ -330,7 +338,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     OPS_GENIE_API_KEY: _SourceKeyType.ValueType  # 42
     AGENT_PROXY_HOST: _SourceKeyType.ValueType  # 43
     AGENT_PROXY_API_KEY: _SourceKeyType.ValueType  # 44
-    GITHUB_ACTIONS_TOKEN: _SourceKeyType.ValueType  # 45
+    GITHUB_TOKEN: _SourceKeyType.ValueType  # 45
     OPEN_AI_API_KEY: _SourceKeyType.ValueType  # 47
     REMOTE_SERVER_PEM: _SourceKeyType.ValueType  # 49
     REMOTE_SERVER_USER: _SourceKeyType.ValueType  # 50
@@ -371,6 +379,16 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ASANA_ACCESS_TOKEN: _SourceKeyType.ValueType  # 86
     CONFLUENCE_CLOUD_API_KEY: _SourceKeyType.ValueType  # 87
     NOTION_API_KEY: _SourceKeyType.ValueType  # 88
+    MONGODB_CONNECTION_STRING: _SourceKeyType.ValueType  # 92
+    OPEN_SEARCH_PROTOCOL: _SourceKeyType.ValueType  # 94
+    OPEN_SEARCH_HOST: _SourceKeyType.ValueType  # 95
+    OPEN_SEARCH_PORT: _SourceKeyType.ValueType  # 96
+    OPEN_SEARCH_USERNAME: _SourceKeyType.ValueType  # 97
+    OPEN_SEARCH_PASSWORD: _SourceKeyType.ValueType  # 98
+    LINEAR_API_KEY: _SourceKeyType.ValueType  # 99
+    JENKINS_URL: _SourceKeyType.ValueType  # 100
+    JENKINS_USERNAME: _SourceKeyType.ValueType  # 101
+    JENKINS_API_TOKEN: _SourceKeyType.ValueType  # 102
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -421,7 +439,7 @@ PAGER_DUTY_CONFIGURED_EMAIL: SourceKeyType.ValueType  # 63
 OPS_GENIE_API_KEY: SourceKeyType.ValueType  # 42
 AGENT_PROXY_HOST: SourceKeyType.ValueType  # 43
 AGENT_PROXY_API_KEY: SourceKeyType.ValueType  # 44
-GITHUB_ACTIONS_TOKEN: SourceKeyType.ValueType  # 45
+GITHUB_TOKEN: SourceKeyType.ValueType  # 45
 OPEN_AI_API_KEY: SourceKeyType.ValueType  # 47
 REMOTE_SERVER_PEM: SourceKeyType.ValueType  # 49
 REMOTE_SERVER_USER: SourceKeyType.ValueType  # 50
@@ -462,6 +480,16 @@ JIRA_CLOUD_API_KEY: SourceKeyType.ValueType  # 85
 ASANA_ACCESS_TOKEN: SourceKeyType.ValueType  # 86
 CONFLUENCE_CLOUD_API_KEY: SourceKeyType.ValueType  # 87
 NOTION_API_KEY: SourceKeyType.ValueType  # 88
+MONGODB_CONNECTION_STRING: SourceKeyType.ValueType  # 92
+OPEN_SEARCH_PROTOCOL: SourceKeyType.ValueType  # 94
+OPEN_SEARCH_HOST: SourceKeyType.ValueType  # 95
+OPEN_SEARCH_PORT: SourceKeyType.ValueType  # 96
+OPEN_SEARCH_USERNAME: SourceKeyType.ValueType  # 97
+OPEN_SEARCH_PASSWORD: SourceKeyType.ValueType  # 98
+LINEAR_API_KEY: SourceKeyType.ValueType  # 99
+JENKINS_URL: SourceKeyType.ValueType  # 100
+JENKINS_USERNAME: SourceKeyType.ValueType  # 101
+JENKINS_API_TOKEN: SourceKeyType.ValueType  # 102
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:
@@ -537,6 +565,13 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     OPS_GENIE_TEAM: _SourceModelType.ValueType  # 2002
     GOOGLE_CHAT_SPACE: _SourceModelType.ValueType  # 2101
     """Google Chat Models"""
+    MONGODB_DATABASE: _SourceModelType.ValueType  # 2201
+    """MongoDB Models"""
+    MONGODB_COLLECTION: _SourceModelType.ValueType  # 2202
+    OPEN_SEARCH_INDEX: _SourceModelType.ValueType  # 2301
+    """Open Search Models"""
+    ASANA_PROJECT: _SourceModelType.ValueType  # 2401
+    """Asana Models"""
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -607,6 +642,13 @@ OPS_GENIE_ESCALATION: SourceModelType.ValueType  # 2001
 OPS_GENIE_TEAM: SourceModelType.ValueType  # 2002
 GOOGLE_CHAT_SPACE: SourceModelType.ValueType  # 2101
 """Google Chat Models"""
+MONGODB_DATABASE: SourceModelType.ValueType  # 2201
+"""MongoDB Models"""
+MONGODB_COLLECTION: SourceModelType.ValueType  # 2202
+OPEN_SEARCH_INDEX: SourceModelType.ValueType  # 2301
+"""Open Search Models"""
+ASANA_PROJECT: SourceModelType.ValueType  # 2401
+"""Asana Models"""
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final

@@ -149,7 +149,7 @@ enum Source {
   EKS = 33;
   AGENT_PROXY = 34;
   GRAFANA_VPC = 35;
-  GITHUB_ACTIONS = 36;
+  GITHUB = 36;
   SQL_DATABASE_CONNECTION = 37;
   OPEN_AI = 38;
   REMOTE_SERVER = 39;
@@ -171,6 +171,10 @@ enum Source {
   CONFLUENCE_SELF_HOSTED = 55;
   GOOGLE_DRIVE = 56;
   NOTION = 57;
+  MONGODB = 59;
+  OPEN_SEARCH = 60;
+  LINEAR = 61;
+  JENKINS = 62;
 }
 
 enum SourceKeyType {
@@ -236,7 +240,7 @@ enum SourceKeyType {
   AGENT_PROXY_HOST = 43;
   AGENT_PROXY_API_KEY = 44;
 
-  GITHUB_ACTIONS_TOKEN = 45;
+  GITHUB_TOKEN = 45;
 
   OPEN_AI_API_KEY = 47;
 
@@ -295,6 +299,20 @@ enum SourceKeyType {
   CONFLUENCE_CLOUD_API_KEY = 87;
 
   NOTION_API_KEY = 88;
+
+  MONGODB_CONNECTION_STRING = 92;
+
+  OPEN_SEARCH_PROTOCOL = 94;
+  OPEN_SEARCH_HOST = 95;
+  OPEN_SEARCH_PORT = 96;
+  OPEN_SEARCH_USERNAME = 97;
+  OPEN_SEARCH_PASSWORD = 98;
+
+  LINEAR_API_KEY = 99;
+
+  JENKINS_URL = 100;
+  JENKINS_USERNAME = 101;
+  JENKINS_API_TOKEN = 102;
 }
 
 enum SourceModelType {
@@ -386,4 +404,14 @@ enum SourceModelType {
 
   //Google Chat Models
   GOOGLE_CHAT_SPACE = 2101;
+
+  // MongoDB Models
+  MONGODB_DATABASE = 2201;
+  MONGODB_COLLECTION = 2202;
+
+  //Open Search Models
+  OPEN_SEARCH_INDEX = 2301;
+
+  // Asana Models
+  ASANA_PROJECT = 2401;
 }

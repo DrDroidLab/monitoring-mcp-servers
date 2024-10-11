@@ -248,6 +248,31 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.BIG_QUERY_PROJECT_ID,
             SourceKeyType.BIG_QUERY_SERVICE_ACCOUNT_JSON,
         ]
+    ],
+    Source.MONGODB: [
+        [
+            SourceKeyType.MONGODB_CONNECTION_STRING,
+        ]
+    ],
+    Source.OPEN_SEARCH: [
+        [
+            SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            SourceKeyType.OPEN_SEARCH_HOST,
+            SourceKeyType.OPEN_SEARCH_PORT,
+            SourceKeyType.OPEN_SEARCH_USERNAME,
+            SourceKeyType.OPEN_SEARCH_PASSWORD,
+            SourceKeyType.SSL_VERIFY
+        ],
+        [
+            SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            SourceKeyType.OPEN_SEARCH_HOST,
+            SourceKeyType.OPEN_SEARCH_PORT,
+            SourceKeyType.OPEN_SEARCH_USERNAME,
+            SourceKeyType.OPEN_SEARCH_PASSWORD,
+        ],
+        [
+            SourceKeyType.OPEN_SEARCH_HOST,
+        ]
     ]
 }
 integrations_connector_type_display_name_map = {
@@ -259,7 +284,7 @@ integrations_connector_type_display_name_map = {
     Source.DATADOG_OAUTH: 'DATADOG',
     Source.GRAFANA: 'GRAFANA',
     Source.GRAFANA_VPC: 'GRAFANA VPC',
-    Source.GITHUB_ACTIONS: 'GITHUB ACTIONS',
+    Source.GITHUB: 'GITHUB',
     Source.ELASTIC_APM: 'ELASTIC APM',
     Source.VICTORIA_METRICS: 'VictoriaMetrics',
     Source.PROMETHEUS: 'PROMETHEUS',
@@ -283,7 +308,9 @@ integrations_connector_type_display_name_map = {
     Source.KUBERNETES: 'KUBERNETES',
     Source.SMTP: 'EMAIL SERVER',
     Source.ZENDUTY: 'ZENDUTY',
-    Source.BIG_QUERY: 'BIG QUERY'
+    Source.BIG_QUERY: 'BIG QUERY',
+    Source.MONGODB: 'MONGODB',
+    Source.OPEN_SEARCH: 'OPEN SEARCH',
 }
 
 model_type_display_name_maps = {
@@ -303,4 +330,5 @@ model_type_display_name_maps = {
     SourceModelType.POSTGRES_QUERY: "Sql Query",
     SourceModelType.AZURE_WORKSPACE: "Azure Log Analytics Workspace",
     SourceModelType.SSH_SERVER: "SSH Server",
+    SourceModelType.OPEN_SEARCH_INDEX: "Open Search Index",
 }

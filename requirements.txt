@@ -141,3 +141,4 @@ wcwidth==0.2.13
 websocket-client==1.8.0
 yarl==1.12.1
 zstandard==0.23.0
+pymongo[srv]==3.9

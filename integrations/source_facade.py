@@ -1,6 +1,5 @@
 import logging
 
-from google.protobuf.struct_pb2 import Struct
 from google.protobuf.wrappers_pb2 import StringValue
 
 from integrations.source_manager import SourceManager
@@ -21,7 +20,9 @@ from integrations.source_manangers.grafana_source_manager import GrafanaSourceMa
 from integrations.source_manangers.grafana_vpc_source_manager import GrafanaVpcSourceManager
 from integrations.source_manangers.kubernetes_source_manager import KubernetesSourceManager
 from integrations.source_manangers.mimir_source_manager import MimirSourceManager
+from integrations.source_manangers.mongodb_source_manager import MongoDBSourceManager
 from integrations.source_manangers.newrelic_source_manager import NewRelicSourceManager
+from integrations.source_manangers.open_search_source_manager import OpenSearchSourceManager
 from integrations.source_manangers.postgres_source_manager import PostgresSourceManager
 from integrations.source_manangers.rootly_source_manager import RootlySourceManager
 from integrations.source_manangers.slack_source_manager import SlackSourceManager
@@ -92,6 +93,8 @@ source_facade.register(Source.CLICKHOUSE, ClickhouseSourceManager())
 source_facade.register(Source.SQL_DATABASE_CONNECTION, SqlDatabaseConnectionSourceManager())
 source_facade.register(Source.ELASTIC_SEARCH, ElasticSearchSourceManager())
 source_facade.register(Source.BIG_QUERY, BigQuerySourceManager())
+source_facade.register(Source.MONGODB, MongoDBSourceManager())
+source_facade.register(Source.OPEN_SEARCH, OpenSearchSourceManager())
 
 source_facade.register(Source.API, ApiSourceManager())
 source_facade.register(Source.BASH, BashSourceManager())

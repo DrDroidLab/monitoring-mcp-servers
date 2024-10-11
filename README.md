@@ -21,6 +21,8 @@ Currently, the agent supports the following metric sources in your VPC:
 * Bash Commands
 * New Relic
 * Datadog
+* Opensearch
+* MongoDB
 
 ## Env vars
 
