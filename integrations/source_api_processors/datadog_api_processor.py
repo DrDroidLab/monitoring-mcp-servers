@@ -190,7 +190,8 @@ class DatadogApiProcessor(Processor):
 
     def fetch_monitors(self):
         try:
-            with ApiClient(self.configuration) as api_client:
+            configuration = self.get_connection()
+            with ApiClient(configuration) as api_client:
                 api_instance = MonitorsApi(api_client)
                 response = api_instance.list_monitors()
                 return response
