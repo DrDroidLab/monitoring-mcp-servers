@@ -31,40 +31,6 @@ def get_eks_token(cluster_name: str, aws_access_key: str, aws_secret_key: str, r
     return token
 
 
-def generate_aws_access_secret_session_key(aws_assumed_role_arn):
-    default_session = boto3.setup_default_session(aws_access_key_id='AKIAUBE6G3THBBZXFPFR',
-                                                  aws_secret_access_key='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',
-                                                  region_name='us-west-2')
-    role_arn = "arn:aws:iam::277357190350:role/diagnosis-ai"
-    role_session_name = "drd_session"
-
-    sts_client = boto3.client('sts')
-
-    assumed_role = sts_client.assume_role(
-        RoleArn=role_arn,
-        RoleSessionName=role_session_name
-    )
-
-    aws_access_key_id = assumed_role['Credentials']['AccessKeyId']
-    aws_secret_access_key = assumed_role['Credentials']['SecretAccessKey']
-    aws_session_token = assumed_role['Credentials']['SessionToken']
-    region_name = 'us-west-2'
-
-    assumed_client = boto3.client('sts', aws_access_key_id=aws_access_key_id,
-                                  aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token,
-                                  region_name=region_name)
-
-    # Assume the Prodigal role
-    assumed_role_2 = assumed_client.assume_role(
-        RoleArn=aws_assumed_role_arn,
-        RoleSessionName="client_session"
-    )
-
-    return {'aws_access_key': assumed_role_2['Credentials']['AccessKeyId'],
-            'aws_secret_key': assumed_role_2['Credentials']['SecretAccessKey'],
-            'aws_session_token': assumed_role_2['Credentials']['SessionToken']}
-
-
 class EKSApiProcessor(Processor):
     def __init__(self, region: str, k8_role_arn: str, aws_access_key: str = None, aws_secret_key: str = None,
                  aws_assumed_role_arn: str = None):
@@ -77,10 +43,7 @@ class EKSApiProcessor(Processor):
         self.__k8_role_arn = k8_role_arn
         self.__aws_session_token = None
         if aws_assumed_role_arn:
-            credentials = generate_aws_access_secret_session_key(aws_assumed_role_arn)
-            self.__aws_access_key = credentials['aws_access_key']
-            self.__aws_secret_key = credentials['aws_secret_key']
-            self.__aws_session_token = credentials['aws_session_token']
+            raise Exception("Assumed role is not implemented")
 
     def get_connection(self):
         try:
