@@ -22,12 +22,18 @@ class ClickhouseSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             databases = self.__ch_db_processor.fetch_databases()
         except Exception as e:
-            logger.error(f'Error fetching databases: {e}')
+            logger.error(f"Exception occurred while fetching clickhouse databases with error: {e}")
             return
         if not databases:
             return
         model_data = {}
-        for db in databases:
-            model_data[db] = {}
-        if len(model_data) > 0:
-            self.create_or_update_model_metadata(model_type, model_data)
+        try:
+            db_table_map = self.__ch_db_processor.fetch_tables(databases)
+            db_table_details_map = self.__ch_db_processor.fetch_table_details(db_table_map)
+            if db_table_details_map:
+                for db_name, table_details in db_table_details_map.items():
+                    model_data[db_name] = table_details
+                    self.create_or_update_model_metadata(model_type, db_name, table_details)
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching clickhouse tables with error: {e}")
+        return model_data

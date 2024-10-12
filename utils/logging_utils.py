@@ -22,11 +22,15 @@ def log_function_call(func):
         logger.info(f"Call ID: {uuid_str} Function '{func.__name__}', args: {args}, kwargs: {kwargs}")
 
         # Call the actual function and get the response
-        response = func(*args, **kwargs)
+        try:
+            response = func(*args, **kwargs)
 
-        # Log the function's response
-        logger.info(f"Call ID: {uuid_str} Function '{func.__name__}' response: {response}")
+            # Log the function's response
+            logger.info(f"Call ID: {uuid_str} Function '{func.__name__}' response: {response}")
 
-        return response
+            return response
+        except Exception as e:
+            logger.error(f"Call ID: {uuid_str} Function '{func.__name__}' raised a runtime exception: {e}")
+            raise e
 
     return wrapper
