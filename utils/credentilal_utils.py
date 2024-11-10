@@ -394,6 +394,49 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.SQL_DATABASE_CONNECTION_STRING_URI,
             key=StringValue(value=credential_yaml['connection_string'])
         ))
+    elif c_type == 'CLICKHOUSE':
+        if 'host' not in credential_yaml:
+            raise Exception(
+                f'Host not found in credential yaml for clickhouse source in connector: {connector_name}')
+
+        if 'port' not in credential_yaml:
+            raise Exception(
+                f'Port not found in credential yaml for clickhouse in connector: {connector_name}')
+        
+        if 'user' not in credential_yaml:
+            raise Exception(
+                f'User not found in credential yaml for clickhouse in connector: {connector_name}')
+        
+        if 'password' not in credential_yaml:
+            raise Exception(
+                f'Password not found in credential yaml for clickhouse in connector: {connector_name}')
+        
+        if 'interface' not in credential_yaml:
+            raise Exception(
+                f'Interface not found in credential yaml for clickhouse in connector: {connector_name}')
+        
+        c_source = Source.CLICKHOUSE
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.CLICKHOUSE_HOST,
+            key=StringValue(value=credential_yaml['host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.CLICKHOUSE_USER,
+            key=StringValue(value=credential_yaml['user'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.CLICKHOUSE_PASSWORD,
+            key=StringValue(value=credential_yaml['password'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.CLICKHOUSE_INTERFACE,
+            key=StringValue(value=credential_yaml['interface'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.CLICKHOUSE_PORT,
+            key=StringValue(value=credential_yaml['port'])
+        ))
+        
     elif c_type == 'OPEN_SEARCH':
         if 'host' not in credential_yaml or 'port' not in credential_yaml or 'protocol' not in credential_yaml or 'username' not in credential_yaml or 'password' not in credential_yaml:
             raise Exception(
