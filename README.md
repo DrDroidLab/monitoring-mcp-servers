@@ -53,8 +53,15 @@ DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-comp
 4. Install via Helm Charts
 ```shell
 cd helm
+kubectl create namespace drdroid
 kubectl apply -f configmap.yaml -n drdroid
 helm upgrade --install drd-vpc-agent . -n drdroid
+```
+
+In case you are looking to create access for running kubectl commands on this cluster from Doctor Droid platform, run the following as well.
+```shell
+kubectl apply -f clusterRole.yaml -n drdroid
+kubectl apply -f clusterRoleBinding.yaml -n drdroid
 ```
 
 ## Support
