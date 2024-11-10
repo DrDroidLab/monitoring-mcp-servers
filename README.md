@@ -40,8 +40,21 @@ Secret format for different connections can be referenced from credentials/crede
 visiting [site](https://playbooks.drdroid.io/api-keys)
 Once auth token is available, you can set the env var as:
 
+3. Install via Docker-Compose
 ```shell
-DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f deploy.docker-compose.yml up
+DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f deploy.docker-compose.yaml up
+```
+
+If you want to build this locally, then run this:
+```shell
+DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f agent.docker-compose.yaml up
+```
+
+4. Install via Helm Charts
+```shell
+cd helm
+kubectl apply -f configmap.yaml -n drdroid
+helm upgrade --install drd-vpc-agent . -n drdroid
 ```
 
 ## Support

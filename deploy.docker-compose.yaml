@@ -23,7 +23,6 @@ services:
 
   server:
     image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
-    platform: linux/amd64
     command: ./start-server.sh
     ports:
       - 8080:8080
@@ -37,6 +36,8 @@ services:
     depends_on:
       - redis
       - fluentd
+    volumes:
+      - ./credentials/secrets.yaml:/code/credentials/secrets.yaml
     logging:
       driver: fluentd
       options:
@@ -48,7 +49,6 @@ services:
 
   celery_worker:
     image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
-    platform: linux/amd64
     command: ./start-celery-worker.sh
     environment:
       - "DJANGO_DEBUG=True"

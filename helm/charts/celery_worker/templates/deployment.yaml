@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drd-vpc-agent-celery
+  annotations:
+    meta.helm.sh/release-name: "{{ .Release.name }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drd-vpc-agent-celery
+  template:
+    metadata:
+      labels:
+        app: drd-vpc-agent-celery
+    spec:
+      containers:
+        - name: celery-worker
+          image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
+          command: ["./start-celery-worker.sh"]
+          env:
+            - name: DJANGO_DEBUG
+              value: "True"
+            - name: CELERY_BROKER_URL
+              value: "redis://redis-service:6379/0"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://redis-service:6379/0"
+            - name: REDIS_URL
+              value: "redis://redis-service:6379/0"
+            - name: DRD_CLOUD_API_TOKEN
+              value: {{ .Values.DRD_CLOUD_API_TOKEN }}
+            - name: DRD_CLOUD_API_HOST
+              value: {{ .Values.DRD_CLOUD_API_HOST }}
+          volumeMounts:
+            - name: credentials-volume
+              mountPath: /code/credentials/secrets.yaml
+              subPath: secrets.yaml
+
+      volumes:
+        - name: credentials-volume
+          configMap:
+            name: credentials-config
