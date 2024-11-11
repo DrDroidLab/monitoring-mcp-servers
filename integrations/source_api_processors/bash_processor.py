@@ -14,10 +14,14 @@ class BashProcessor(Processor):
 
     def __init__(self, remote_host=None, remote_password=None, remote_pem=None):
         if remote_host:
-            self.remote_user = remote_host.split("@")[0]
-            self.remote_host = remote_host.split("@")[1]
+            if remote_host.find("@") == -1:
+                self.remote_user = None
+                self.remote_host = remote_host
+            else:
+                self.remote_user = remote_host.split("@")[0]
+                self.remote_host = remote_host.split("@")[1]
         self.remote_password = remote_password
-        self.remote_pem = remote_pem.strip()
+        self.remote_pem = remote_pem.strip() if remote_pem else None
 
     def get_connection(self):
         try:
