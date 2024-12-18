@@ -95,6 +95,8 @@ message PlaybookTaskResult {
   Source source = 3;
   google.protobuf.Struct task_local_variable_set = 4;
   google.protobuf.Struct result_transformer_lambda_function_variable_set = 5;
+  PlaybookExecutionStatusType proxy_execution_request_id = 6;
+  PlaybookExecutionStatusType status = 7;
   oneof result {
     TimeseriesResult timeseries = 101;
     TableResult table = 102;

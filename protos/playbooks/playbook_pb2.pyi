@@ -309,6 +309,8 @@ class PlaybookTaskExecutionLog(google.protobuf.message.Message):
     TIME_RANGE_FIELD_NUMBER: builtins.int
     CREATED_BY_FIELD_NUMBER: builtins.int
     EXECUTION_GLOBAL_VARIABLE_SET_FIELD_NUMBER: builtins.int
+    PROXY_EXECUTION_REQUEST_ID_FIELD_NUMBER: builtins.int
+    STATUS_FIELD_NUMBER: builtins.int
     @property
     def id(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
     timestamp: builtins.int
@@ -324,6 +326,8 @@ class PlaybookTaskExecutionLog(google.protobuf.message.Message):
     def created_by(self) -> google.protobuf.wrappers_pb2.StringValue: ...
     @property
     def execution_global_variable_set(self) -> google.protobuf.struct_pb2.Struct: ...
+    proxy_execution_request_id: protos.playbooks.playbook_commons_pb2.PlaybookExecutionStatusType.ValueType
+    status: protos.playbooks.playbook_commons_pb2.PlaybookExecutionStatusType.ValueType
     def __init__(
         self,
         *,
@@ -335,9 +339,11 @@ class PlaybookTaskExecutionLog(google.protobuf.message.Message):
         time_range: protos.base_pb2.TimeRange | None = ...,
         created_by: google.protobuf.wrappers_pb2.StringValue | None = ...,
         execution_global_variable_set: google.protobuf.struct_pb2.Struct | None = ...,
+        proxy_execution_request_id: protos.playbooks.playbook_commons_pb2.PlaybookExecutionStatusType.ValueType = ...,
+        status: protos.playbooks.playbook_commons_pb2.PlaybookExecutionStatusType.ValueType = ...,
     ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["created_by", b"created_by", "execution_global_variable_set", b"execution_global_variable_set", "id", b"id", "interpretation", b"interpretation", "result", b"result", "task", b"task", "time_range", b"time_range"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["created_by", b"created_by", "execution_global_variable_set", b"execution_global_variable_set", "id", b"id", "interpretation", b"interpretation", "result", b"result", "task", b"task", "time_range", b"time_range", "timestamp", b"timestamp"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["created_by", b"created_by", "execution_global_variable_set", b"execution_global_variable_set", "id", b"id", "interpretation", b"interpretation", "proxy_execution_request_id", b"proxy_execution_request_id", "result", b"result", "status", b"status", "task", b"task", "time_range", b"time_range", "timestamp", b"timestamp"]) -> None: ...
 
 global___PlaybookTaskExecutionLog = PlaybookTaskExecutionLog
 
