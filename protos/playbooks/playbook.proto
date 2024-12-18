@@ -114,7 +114,7 @@ message PlaybookTaskExecutionLog {
   TimeRange time_range = 6;
   google.protobuf.StringValue created_by = 7;
   google.protobuf.Struct execution_global_variable_set = 8;
-  PlaybookExecutionStatusType proxy_execution_request_id = 9;
+  google.protobuf.StringValue proxy_execution_request_id = 9;
   PlaybookExecutionStatusType status = 10;
 }
 
