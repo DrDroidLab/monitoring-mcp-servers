@@ -245,6 +245,12 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['verify_certs'] = True
                 if conn_key.key.value.lower() == 'false':
                     credentials_dict['verify_certs'] = False
+    elif connector_type == Source.GITHUB:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.GITHUB_TOKEN:
+                credentials_dict['api_key'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.GITHUB_ORG:
+                credentials_dict['org'] = conn_key.key.value
     else:
         return None
     return credentials_dict
@@ -412,7 +418,6 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.REMOTE_SERVER_PEM,
             key=StringValue(value=credential_yaml['remote_pem'])
         ))
-    
     elif c_type == 'CLICKHOUSE':
         if 'host' not in credential_yaml:
             raise Exception(
@@ -421,19 +426,19 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         if 'port' not in credential_yaml:
             raise Exception(
                 f'Port not found in credential yaml for clickhouse in connector: {connector_name}')
-        
+
         if 'user' not in credential_yaml:
             raise Exception(
                 f'User not found in credential yaml for clickhouse in connector: {connector_name}')
-        
+
         if 'password' not in credential_yaml:
             raise Exception(
                 f'Password not found in credential yaml for clickhouse in connector: {connector_name}')
-        
+
         if 'interface' not in credential_yaml:
             raise Exception(
                 f'Interface not found in credential yaml for clickhouse in connector: {connector_name}')
-        
+
         c_source = Source.CLICKHOUSE
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.CLICKHOUSE_HOST,
@@ -455,7 +460,6 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.CLICKHOUSE_PORT,
             key=StringValue(value=credential_yaml['port'])
         ))
-        
     elif c_type == 'OPEN_SEARCH':
         if 'host' not in credential_yaml or 'port' not in credential_yaml or 'protocol' not in credential_yaml or 'username' not in credential_yaml or 'password' not in credential_yaml:
             raise Exception(
@@ -495,6 +499,20 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.MONGODB_CONNECTION_STRING,
             key=StringValue(value=credential_yaml['connection_string'])
+        ))
+    elif c_type == 'GITHUB':
+        if 'token' not in credential_yaml:
+            raise Exception(f'token not found in credential yaml for github source in connector: {connector_name}')
+        if 'org' not in credential_yaml:
+            raise Exception(f'org not found in credential yaml for github source in connector: {connector_name}')
+        c_source = Source.GITHUB
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GITHUB_TOKEN,
+            key=StringValue(value=credential_yaml['token'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GITHUB_ORG,
+            key=StringValue(value=credential_yaml['org'])
         ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')

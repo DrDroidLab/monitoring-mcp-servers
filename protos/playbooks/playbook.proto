@@ -32,6 +32,8 @@ import "protos/playbooks/source_task_definitions/slack_task.proto";
 import "protos/playbooks/source_task_definitions/big_query_task.proto";
 import "protos/playbooks/source_task_definitions/mongodb_task.proto";
 import "protos/playbooks/source_task_definitions/open_search_task.proto";
+import "protos/playbooks/source_task_definitions/jenkins_task.proto";
+import "protos/playbooks/source_task_definitions/github_task.proto";
 
 
 // Playbook Task Protos
@@ -87,6 +89,8 @@ message PlaybookTask {
     BigQuery big_query = 121;
     MongoDB mongodb = 123;
     OpenSearch open_search = 124;
+    Jenkins jenkins = 125;
+    Github github = 126;
   }
 }
 

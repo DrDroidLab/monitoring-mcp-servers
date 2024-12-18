@@ -1,3 +1,4 @@
+from integrations.source_metadata_extractors.github_metadata_extractor import GithubSourceMetadataExtractor
 from protos.base_pb2 import Source
 from integrations.source_metadata_extractors.azure_metadata_extractor import AzureConnectorMetadataExtractor
 from integrations.source_metadata_extractors.clickhouse_metadata_extractor import ClickhouseSourceMetadataExtractor
@@ -39,3 +40,4 @@ source_metadata_extractor_facade.register(Source.EKS, EksSourceMetadataExtractor
 source_metadata_extractor_facade.register(Source.AZURE, AzureConnectorMetadataExtractor)
 source_metadata_extractor_facade.register(Source.ELASTIC_SEARCH, ElasticSearchSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.OPEN_SEARCH, OpenSearchSourceMetadataExtractor)
+source_metadata_extractor_facade.register(Source.GITHUB, GithubSourceMetadataExtractor)

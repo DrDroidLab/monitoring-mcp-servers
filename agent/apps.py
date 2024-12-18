@@ -2,9 +2,6 @@ import requests
 from django.apps import AppConfig
 
 from agent import settings
-from protos.connectors.connector_pb2 import Connector
-from utils.credentilal_utils import credential_yaml_to_connector_proto
-from utils.proto_utils import proto_to_dict
 from utils.yaml_utils import load_yaml
 
 
@@ -24,7 +21,8 @@ class AgentConfig(AppConfig):
         drd_cloud_host = settings.DRD_CLOUD_API_HOST
         drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
 
-        response = requests.get(f'{drd_cloud_host}/connectors/proxy/ready',
+        # Establish reachability with DRD Cloud
+        response = requests.get(f'{drd_cloud_host}/connectors/proxy/ping',
                                 headers={'Authorization': f'Bearer {drd_cloud_api_token}'})
 
         if response.status_code != 200:

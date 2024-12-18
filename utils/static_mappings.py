@@ -273,6 +273,12 @@ integrations_connector_type_connector_keys_map = {
         [
             SourceKeyType.OPEN_SEARCH_HOST,
         ]
+    ],
+    Source.GITHUB: [
+        [
+            SourceKeyType.GITHUB_TOKEN,
+            SourceKeyType.GITHUB_ORG,
+        ]
     ]
 }
 integrations_connector_type_display_name_map = {
@@ -331,4 +337,5 @@ model_type_display_name_maps = {
     SourceModelType.AZURE_WORKSPACE: "Azure Log Analytics Workspace",
     SourceModelType.SSH_SERVER: "SSH Server",
     SourceModelType.OPEN_SEARCH_INDEX: "Open Search Index",
+    SourceModelType.GITHUB_REPOSITORY: "Repository",
 }

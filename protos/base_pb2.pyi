@@ -218,6 +218,8 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     OPEN_SEARCH: _Source.ValueType  # 60
     LINEAR: _Source.ValueType  # 61
     JENKINS: _Source.ValueType  # 62
+    GITHUB_ACTIONS: _Source.ValueType  # 63
+    CUSTOM_STRATEGIES: _Source.ValueType  # 64
 
 class Source(_Source, metaclass=_SourceEnumTypeWrapper): ...
 
@@ -283,6 +285,8 @@ MONGODB: Source.ValueType  # 59
 OPEN_SEARCH: Source.ValueType  # 60
 LINEAR: Source.ValueType  # 61
 JENKINS: Source.ValueType  # 62
+GITHUB_ACTIONS: Source.ValueType  # 63
+CUSTOM_STRATEGIES: Source.ValueType  # 64
 global___Source = Source
 
 class _SourceKeyType:
@@ -313,6 +317,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     AWS_REGION: _SourceKeyType.ValueType  # 20
     AWS_ASSUMED_ROLE_ARN: _SourceKeyType.ValueType  # 23
     EKS_ROLE_ARN: _SourceKeyType.ValueType  # 40
+    AWS_DRD_CLOUD_ROLE_ARN: _SourceKeyType.ValueType  # 93
     GOOGLE_CHAT_BOT_OAUTH_TOKEN: _SourceKeyType.ValueType  # 16
     GOOGLE_CHAT_BOT_SPACES: _SourceKeyType.ValueType  # 17
     GRAFANA_HOST: _SourceKeyType.ValueType  # 21
@@ -339,6 +344,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     AGENT_PROXY_HOST: _SourceKeyType.ValueType  # 43
     AGENT_PROXY_API_KEY: _SourceKeyType.ValueType  # 44
     GITHUB_TOKEN: _SourceKeyType.ValueType  # 45
+    GITHUB_ORG: _SourceKeyType.ValueType  # 105
     OPEN_AI_API_KEY: _SourceKeyType.ValueType  # 47
     REMOTE_SERVER_PEM: _SourceKeyType.ValueType  # 49
     REMOTE_SERVER_USER: _SourceKeyType.ValueType  # 50
@@ -389,6 +395,8 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     JENKINS_URL: _SourceKeyType.ValueType  # 100
     JENKINS_USERNAME: _SourceKeyType.ValueType  # 101
     JENKINS_API_TOKEN: _SourceKeyType.ValueType  # 102
+    GITHUB_ACTIONS_TOKEN: _SourceKeyType.ValueType  # 103
+    CUSTOM_STRATEGIES_ACCOUNT_ID: _SourceKeyType.ValueType  # 104
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -414,6 +422,7 @@ AWS_SECRET_KEY: SourceKeyType.ValueType  # 14
 AWS_REGION: SourceKeyType.ValueType  # 20
 AWS_ASSUMED_ROLE_ARN: SourceKeyType.ValueType  # 23
 EKS_ROLE_ARN: SourceKeyType.ValueType  # 40
+AWS_DRD_CLOUD_ROLE_ARN: SourceKeyType.ValueType  # 93
 GOOGLE_CHAT_BOT_OAUTH_TOKEN: SourceKeyType.ValueType  # 16
 GOOGLE_CHAT_BOT_SPACES: SourceKeyType.ValueType  # 17
 GRAFANA_HOST: SourceKeyType.ValueType  # 21
@@ -440,6 +449,7 @@ OPS_GENIE_API_KEY: SourceKeyType.ValueType  # 42
 AGENT_PROXY_HOST: SourceKeyType.ValueType  # 43
 AGENT_PROXY_API_KEY: SourceKeyType.ValueType  # 44
 GITHUB_TOKEN: SourceKeyType.ValueType  # 45
+GITHUB_ORG: SourceKeyType.ValueType  # 105
 OPEN_AI_API_KEY: SourceKeyType.ValueType  # 47
 REMOTE_SERVER_PEM: SourceKeyType.ValueType  # 49
 REMOTE_SERVER_USER: SourceKeyType.ValueType  # 50
@@ -490,6 +500,8 @@ LINEAR_API_KEY: SourceKeyType.ValueType  # 99
 JENKINS_URL: SourceKeyType.ValueType  # 100
 JENKINS_USERNAME: SourceKeyType.ValueType  # 101
 JENKINS_API_TOKEN: SourceKeyType.ValueType  # 102
+GITHUB_ACTIONS_TOKEN: SourceKeyType.ValueType  # 103
+CUSTOM_STRATEGIES_ACCOUNT_ID: SourceKeyType.ValueType  # 104
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:
@@ -522,11 +534,15 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     CLOUDWATCH_METRIC: _SourceModelType.ValueType  # 201
     """Cloudwatch Models"""
     CLOUDWATCH_LOG_GROUP: _SourceModelType.ValueType  # 202
+    CLOUDWATCH_LOG_GROUP_QUERY: _SourceModelType.ValueType  # 203
+    CLOUDWATCH_ALARMS: _SourceModelType.ValueType  # 204
+    RDS_INSTANCES: _SourceModelType.ValueType  # 205
     GRAFANA_DATASOURCE: _SourceModelType.ValueType  # 301
     """Grafana Models"""
     GRAFANA_DASHBOARD: _SourceModelType.ValueType  # 302
     GRAFANA_TARGET_METRIC_PROMQL: _SourceModelType.ValueType  # 303
     GRAFANA_PROMETHEUS_DATASOURCE: _SourceModelType.ValueType  # 304
+    GRAFANA_ALERT_RULE: _SourceModelType.ValueType  # 305
     CLICKHOUSE_DATABASE: _SourceModelType.ValueType  # 401
     """Clickhouse Models"""
     SLACK_CHANNEL: _SourceModelType.ValueType  # 501
@@ -572,6 +588,10 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """Open Search Models"""
     ASANA_PROJECT: _SourceModelType.ValueType  # 2401
     """Asana Models"""
+    MODELS_ACTIVE: _SourceModelType.ValueType  # 2501
+    """Custom Strategies"""
+    GITHUB_REPOSITORY: _SourceModelType.ValueType  # 2601
+    """Github Models"""
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -599,11 +619,15 @@ DATADOG_QUERY: SourceModelType.ValueType  # 112
 CLOUDWATCH_METRIC: SourceModelType.ValueType  # 201
 """Cloudwatch Models"""
 CLOUDWATCH_LOG_GROUP: SourceModelType.ValueType  # 202
+CLOUDWATCH_LOG_GROUP_QUERY: SourceModelType.ValueType  # 203
+CLOUDWATCH_ALARMS: SourceModelType.ValueType  # 204
+RDS_INSTANCES: SourceModelType.ValueType  # 205
 GRAFANA_DATASOURCE: SourceModelType.ValueType  # 301
 """Grafana Models"""
 GRAFANA_DASHBOARD: SourceModelType.ValueType  # 302
 GRAFANA_TARGET_METRIC_PROMQL: SourceModelType.ValueType  # 303
 GRAFANA_PROMETHEUS_DATASOURCE: SourceModelType.ValueType  # 304
+GRAFANA_ALERT_RULE: SourceModelType.ValueType  # 305
 CLICKHOUSE_DATABASE: SourceModelType.ValueType  # 401
 """Clickhouse Models"""
 SLACK_CHANNEL: SourceModelType.ValueType  # 501
@@ -649,6 +673,10 @@ OPEN_SEARCH_INDEX: SourceModelType.ValueType  # 2301
 """Open Search Models"""
 ASANA_PROJECT: SourceModelType.ValueType  # 2401
 """Asana Models"""
+MODELS_ACTIVE: SourceModelType.ValueType  # 2501
+"""Custom Strategies"""
+GITHUB_REPOSITORY: SourceModelType.ValueType  # 2601
+"""Github Models"""
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final
