@@ -514,6 +514,31 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.GITHUB_ORG,
             key=StringValue(value=credential_yaml['org'])
         ))
+    elif c_type == 'POSTGRES':
+        if 'host' not in credential_yaml or 'user' not in credential_yaml or 'password' not in credential_yaml or 'database' not in credential_yaml:
+            raise Exception(
+                f'Host, user, password, or database not found in credential yaml for postgres source in connector: {connector_name}')
+        c_source = Source.POSTGRES
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTGRES_HOST,
+            key=StringValue(value=credential_yaml['host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTGRES_USER,
+            key=StringValue(value=credential_yaml['user'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTGRES_PASSWORD,
+            key=StringValue(value=credential_yaml['password'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTGRES_PORT,
+            key=StringValue(value=str(credential_yaml['port']))
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTGRES_DATABASE,
+            key=StringValue(value=credential_yaml['database'])
+        ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
