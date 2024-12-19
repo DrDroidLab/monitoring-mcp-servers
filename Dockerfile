@@ -37,13 +37,13 @@ RUN chown -R www-data:www-data /code
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY scripts/start-server.sh .
-RUN sed -i 's/\r$//g' start-server.sh
-RUN chmod +x start-server.sh
-
 COPY scripts/start-celery-worker.sh .
 RUN sed -i 's/\r$//g' start-celery-worker.sh
 RUN chmod +x start-celery-worker.sh
+
+COPY scripts/start-celery-beat.sh .
+RUN sed -i 's/\r$//g' start-celery-beat.sh
+RUN chmod +x start-celery-beat.sh
 
 
 EXPOSE 8080
