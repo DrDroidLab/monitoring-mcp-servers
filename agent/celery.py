@@ -14,9 +14,9 @@ app = Celery('agent')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.conf.beat_schedule = {
-    'agent-cloud-ping-job-every-60-seconds': {
+    'agent-cloud-ping-job-every-50-seconds': {
         'task': 'agent.tasks.send_ping_to_drd_cloud',
-        'schedule': 60.0,  # Run every 60 seconds
+        'schedule': 50.0,  # Run every 50 seconds
     },
     'playbook-task-fetch-job-every-10-seconds': {
         'task': 'playbooks_engine.tasks.fetch_playbook_execution_tasks',
