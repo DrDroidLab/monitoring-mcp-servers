@@ -1,25 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: drd-vpc-agent-server
+  name: drd-vpc-agent-celery-beat
   annotations:
     meta.helm.sh/release-name: "{{ .Release.name }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: drd-vpc-agent-server
+      app: drd-vpc-agent-celery-beat
   template:
     metadata:
       labels:
-        app: drd-vpc-agent-server
+        app: drd-vpc-agent-celery-beat
     spec:
       containers:
-        - name: server
+        - name: celery-beat
           image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
-          command: ["./start-server.sh"]
-          ports:
-            - containerPort: 8080
+          command: ["./start-celery-beat.sh"]
           env:
             - name: DJANGO_DEBUG
               value: "True"
@@ -37,8 +35,8 @@ spec:
             - name: credentials-volume
               mountPath: /code/credentials/secrets.yaml
               subPath: secrets.yaml
+
       volumes:
         - name: credentials-volume
           configMap:
             name: credentials-config
-
