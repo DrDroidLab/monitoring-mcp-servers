@@ -13,6 +13,17 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'agent.settings')
 app = Celery('agent')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+app.conf.beat_schedule = {
+    'agent-cloud-ping-job-every-1-seconds': {
+        'task': 'agent.tasks.send_ping_to_drd_cloud',
+        'schedule': 1.0,  # Run every 1 seconds
+    },
+    'playbook-task-fetch-job-every-10-seconds': {
+        'task': 'playbooks_engine.tasks.fetch_playbook_execution_tasks',
+        'schedule': 10.0,  # Run every 10 seconds
+    },
+}
+
 app.autodiscover_tasks()
 
 

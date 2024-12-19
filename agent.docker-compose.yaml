@@ -73,5 +73,30 @@ services:
     networks:
       - mynetwork
 
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: drd_agent
+    command: ./start-celery-beat.sh
+    environment:
+      - "DJANGO_DEBUG=True"
+      - "CELERY_BROKER_URL=redis://redis:6379/0"
+      - "CELERY_RESULT_BACKEND=redis://redis:6379/0"
+      - "REDIS_URL=redis://redis:6379/0"
+      - DRD_CLOUD_API_TOKEN=${DRD_CLOUD_API_TOKEN}
+      - DRD_CLOUD_API_HOST=${DRD_CLOUD_API_HOST}
+    depends_on:
+      - redis
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: docker.for.mac.localhost:24224
+        tag: "celery_beat"
+        fluentd-async: "true"
+    networks:
+      - mynetwork
+
 networks:
   mynetwork:
