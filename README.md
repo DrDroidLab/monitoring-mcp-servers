@@ -23,6 +23,7 @@ Currently, the agent supports the following metric sources in your VPC:
 * Datadog
 * Opensearch
 * MongoDB
+* Github
 
 ## Env vars
 
