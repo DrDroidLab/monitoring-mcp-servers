@@ -16,20 +16,7 @@ class GithubSourceMetadataExtractor(SourceMetadataExtractor):
         super().__init__(request_id, connector_name, Source.GITHUB)
 
     @log_function_call
-    def extract_repos(self, save_to_db=False):
-        model_data = {}
-        model_type = SourceModelType.GITHUB_REPOSITORY
-        repos = self.gh_processor.list_all_repos()
-        if not repos:
-            return model_data
-        for repo in repos:
-            model_data[repo['name']] = repo
-            if save_to_db:
-                self.create_or_update_model_metadata(model_type, repo['name'], repo)
-        return model_data
-
-    @log_function_call
-    def extract_metric_descriptors(self):
+    def extract_repos(self):
         model_type = SourceModelType.GITHUB_REPOSITORY
         model_data = {}
         gh_processor = GithubAPIProcessor(self.__api_key, self.org)

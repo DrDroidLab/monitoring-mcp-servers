@@ -73,7 +73,7 @@ def execute_connection_test_and_send(test_connection_request):
                 'error': str(e)
             }
 
-        response = requests.post(f'{drd_cloud_host}/playbooks-engine/proxy/execution/results',
+        response = requests.post(f'{drd_cloud_host}/connectors/proxy/connector/connection/results',
                                  headers={'Authorization': f'Bearer {drd_cloud_api_token}'},
                                  json={'results': [result]})
 
