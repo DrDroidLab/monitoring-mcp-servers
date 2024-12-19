@@ -14,6 +14,7 @@ from integrations.source_manangers.documentation_source_manager import Documenta
 from integrations.source_manangers.eks_source_manager import EksSourceManager
 from integrations.source_manangers.elastic_search_source_manager import ElasticSearchSourceManager
 from integrations.source_manangers.gcm_source_manager import GcmSourceManager
+from integrations.source_manangers.github_source_manager import GithubSourceManager
 from integrations.source_manangers.gke_source_manager import GkeSourceManager
 from integrations.source_manangers.grafana_loki_source_manager import GrafanaLokiSourceManager
 from integrations.source_manangers.grafana_source_manager import GrafanaSourceManager
@@ -105,3 +106,5 @@ source_facade.register(Source.SLACK, SlackSourceManager())
 source_facade.register(Source.DOCUMENTATION, DocumentationSourceManager())
 source_facade.register(Source.ROOTLY, RootlySourceManager())
 source_facade.register(Source.ZENDUTY, ZendutySourceManager())
+
+source_facade.register(Source.GITHUB, GithubSourceManager())

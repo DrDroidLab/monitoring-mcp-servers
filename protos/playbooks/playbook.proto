@@ -32,6 +32,8 @@ import "protos/playbooks/source_task_definitions/slack_task.proto";
 import "protos/playbooks/source_task_definitions/big_query_task.proto";
 import "protos/playbooks/source_task_definitions/mongodb_task.proto";
 import "protos/playbooks/source_task_definitions/open_search_task.proto";
+import "protos/playbooks/source_task_definitions/jenkins_task.proto";
+import "protos/playbooks/source_task_definitions/github_task.proto";
 
 
 // Playbook Task Protos
@@ -87,6 +89,8 @@ message PlaybookTask {
     BigQuery big_query = 121;
     MongoDB mongodb = 123;
     OpenSearch open_search = 124;
+    Jenkins jenkins = 125;
+    Github github = 126;
   }
 }
 
@@ -110,6 +114,8 @@ message PlaybookTaskExecutionLog {
   TimeRange time_range = 6;
   google.protobuf.StringValue created_by = 7;
   google.protobuf.Struct execution_global_variable_set = 8;
+  google.protobuf.StringValue proxy_execution_request_id = 9;
+  PlaybookExecutionStatusType status = 10;
 }
 
 // Playbook Step Protos
