@@ -22,5 +22,7 @@ def send_ping_to_drd_cloud():
     if response.status_code != 200:
         logger.error(f'Failed to connect to DRD Cloud at {current_epoch} with code: {response.status_code} '
                      f'and response {response.text}')
+        return False
     else:
         logger.info(f'Successfully connected to DRD Cloud at {current_epoch}')
+    return True

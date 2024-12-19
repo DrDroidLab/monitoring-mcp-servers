@@ -39,6 +39,7 @@ def fetch_playbook_execution_tasks():
         except Exception as e:
             logger.error(f'fetch_playbook_execution_tasks:: Error while scheduling task: {str(e)}')
             continue
+    return True
 
 
 @shared_task(max_retries=3, default_retry_delay=10)
@@ -73,5 +74,7 @@ def execute_task_and_send_result(playbook_task_execution_log):
             logger.error(f'execute_task_and_send_result:: Failed to send task result to Doctor Droid Cloud with code: '
                          f'{response.status_code} and response: {response.text}')
             return False
+        return True
     except Exception as e:
         logger.error(f'execute_task_and_send_result:: Error while executing task: {str(e)}')
+        return False

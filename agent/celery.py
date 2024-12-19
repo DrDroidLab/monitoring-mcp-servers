@@ -18,6 +18,10 @@ app.conf.beat_schedule = {
         'task': 'agent.tasks.send_ping_to_drd_cloud',
         'schedule': 50.0,  # Run every 50 seconds
     },
+    'connector-test-connection-job-every-10-seconds': {
+        'task': 'connectors.tasks.fetch_connector_connections_tests',
+        'schedule': 10.0,  # Run every 10 seconds
+    },
     'playbook-task-fetch-job-every-10-seconds': {
         'task': 'playbooks_engine.tasks.fetch_playbook_execution_tasks',
         'schedule': 10.0,  # Run every 10 seconds
