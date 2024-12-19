@@ -9,9 +9,6 @@ services:
       - mynetwork
 
   fluentd:
-    build:
-      context: ./fluentd
-      dockerfile: Dockerfile
     image: fluent/fluentd:v1.12-debian-1
     volumes:
       - ./fluentd/fluentd.conf:/fluentd/etc/fluent.conf
