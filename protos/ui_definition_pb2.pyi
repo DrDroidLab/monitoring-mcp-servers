@@ -39,6 +39,7 @@ class _FormFieldTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     STRING_ARRAY_FT: _FormFieldType.ValueType  # 10
     DATE_FT: _FormFieldType.ValueType  # 11
     CHECKBOX_FT: _FormFieldType.ValueType  # 12
+    CODE_EDITOR_FT: _FormFieldType.ValueType  # 13
 
 class FormFieldType(_FormFieldType, metaclass=_FormFieldTypeEnumTypeWrapper): ...
 
@@ -55,6 +56,7 @@ COMPOSITE_FT: FormFieldType.ValueType  # 9
 STRING_ARRAY_FT: FormFieldType.ValueType  # 10
 DATE_FT: FormFieldType.ValueType  # 11
 CHECKBOX_FT: FormFieldType.ValueType  # 12
+CODE_EDITOR_FT: FormFieldType.ValueType  # 13
 global___FormFieldType = FormFieldType
 
 @typing_extensions.final

@@ -129,7 +129,7 @@ class SourceManager:
             if not source:
                 raise Exception("Source not found in task")
             source_str = source.lower()
-            source_task = task_dict.get(source_str, None)
+            source_task = task_dict.get(source_str, {})
             if not source_task:
                 raise Exception(f"Source task not found in task: {source_str}")
 

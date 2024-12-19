@@ -18,6 +18,7 @@ enum FormFieldType {
   STRING_ARRAY_FT = 10;
   DATE_FT = 11;
   CHECKBOX_FT = 12;
+  CODE_EDITOR_FT = 13;
 }
 
 message FormField {
