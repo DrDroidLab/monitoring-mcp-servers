@@ -539,6 +539,23 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.POSTGRES_DATABASE,
             key=StringValue(value=credential_yaml['database'])
         ))
+    elif c_type == 'KUBERNETES':
+        if 'cluster_name' not in credential_yaml or 'cluster_api_server' not in credential_yaml or 'cluster_token' not in credential_yaml:
+            raise Exception(
+                f'Cluster Name, Api Server or Token, or database not found in credential yaml for kubernetes source in connector: {connector_name}')
+        c_source = Source.KUBERNETES
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.KUBERNETES_CLUSTER_NAME,
+            key=StringValue(value=credential_yaml['cluster_name'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.KUBERNETES_CLUSTER_API_SERVER,
+            key=StringValue(value=credential_yaml['cluster_api_server'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.KUBERNETES_CLUSTER_TOKEN,
+            key=StringValue(value=credential_yaml['cluster_token'])
+        ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
