@@ -55,6 +55,19 @@ DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-comp
 ```
 
 4. Install via Helm Charts
+   Pre configuration steps:
+   a. Copy and paste the token generated in step 2 in the values.yaml file under var : 'DRD_CLOUD_API_TOKEN'
+   Ensure the values are updated in:
+   i. helm/charts/celery_beat/values.yaml
+   <img width="939" alt="Screenshot 2024-12-20 at 14 03 25" src="https://github.com/user-attachments/assets/0d76245f-ac43-4bfc-a986-54300c826225" />
+
+
+   ii. helm/charts/celery_worker/values.yaml
+   <img width="939" alt="Screenshot 2024-12-20 at 14 03 25" src="https://github.com/user-attachments/assets/0d76245f-ac43-4bfc-a986-54300c826225" />
+
+   b. The secrets for the integrations to be installed are to be added in helm/configmap.yaml file.  
+   Refer to the image below for a sample:
+   <img width="934" alt="Screenshot 2024-12-20 at 14 02 43" src="https://github.com/user-attachments/assets/cadb2b0a-db0c-4128-bef7-fe2a6288b79b" />
 
 ```shell
 cd helm
