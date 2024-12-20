@@ -8,7 +8,8 @@ Read more [here](https://github.com/DrDroidLab/drd-vpc-agent).
 ## Documentation
 
 The Agent runs inside your VPC and acts as a reverse proxy to connect with your metric sources and send
-metrics and related data to doctor droid cloud platform.
+metrics and related data to doctor droid cloud platform. The agent is designed to be lightweight and easy to deploy 
+with only egress tcp calls to Doctor Droid Cloud Platform.
 
 Currently, the agent supports the following metric sources in your VPC:
 
@@ -37,13 +38,13 @@ Currently, the agent supports the following metric sources in your VPC:
 1. To get started create credentials/secret.yaml file with connections and corresponding credentials.
 Secret format for different connections can be referenced from credentials/credentials_template.yaml. 
 
-2. Identify the auth token needed for the authenticating http calls between doctor droid platform and agent by
-visiting [site](https://playbooks.drdroid.io/api-keys)
-Once auth token is available, you can set the env var as:
+2. Create an agent token needed for the authenticating http calls between doctor droid platform and agent by
+visiting [site](https://playbooks.drdroid.io/agent-tokens)
+Once auth token is available, you can set the env var as DRD_CLOUD_API_TOKEN=<API_TOKEN>
 
 3. Install via Docker-Compose
 ```shell
-DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f deploy.docker-compose.yaml up
+DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f agent.docker-compose.yaml up
 ```
 
 If you want to build this locally, then run this:
