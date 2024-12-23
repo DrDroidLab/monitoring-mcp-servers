@@ -401,23 +401,23 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key=StringValue(value=credential_yaml['connection_string'])
         ))
     elif c_type == 'BASH':
-        if 'remote_host' not in credential_yaml:
-            raise Exception(
-                f'remote_host not found in credential yaml for bash source in connector: {connector_name}')
-
         c_source = Source.BASH
-        c_keys.append(ConnectorKey(
-            key_type=SourceKeyType.REMOTE_SERVER_HOST,
-            key=StringValue(value=credential_yaml['remote_host'])
-        ))
-        c_keys.append(ConnectorKey(
-            key_type=SourceKeyType.REMOTE_SERVER_PASSWORD,
-            key=StringValue(value=credential_yaml['remote_password'])
-        ))
-        c_keys.append(ConnectorKey(
-            key_type=SourceKeyType.REMOTE_SERVER_PEM,
-            key=StringValue(value=credential_yaml['remote_pem'])
-        ))
+
+        if 'remote_host' in credential_yaml:
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.REMOTE_SERVER_HOST,
+                key=StringValue(value=credential_yaml['remote_host'])
+            ))
+        if 'remote_password' in credential_yaml:
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.REMOTE_SERVER_PASSWORD,
+                key=StringValue(value=credential_yaml['remote_password'])
+            ))
+        if 'remote_pem' in credential_yaml:
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.REMOTE_SERVER_PEM,
+                key=StringValue(value=credential_yaml['remote_pem'])
+            ))
     elif c_type == 'CLICKHOUSE':
         if 'host' not in credential_yaml:
             raise Exception(

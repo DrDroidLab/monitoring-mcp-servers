@@ -27,6 +27,7 @@ def fetch_playbook_execution_tasks():
                      f'Cloud: {response.json()}')
         return False
     playbook_task_executions = response.json().get('playbook_task_executions', [])
+    logger.info(f'fetch_playbook_execution_tasks:: Found {len(playbook_task_executions)} playbook task executions')
     for pet in playbook_task_executions:
         try:
             request_id = pet.get('proxy_execution_request_id', None)
