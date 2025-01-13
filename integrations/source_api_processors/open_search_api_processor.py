@@ -59,7 +59,25 @@ class OpenSearchApiProcessor(Processor):
                          f"index: {index}, doc id: {doc_id} for host: {self.base_url} with error: {e}")
             raise e
 
-    # index management APIs
+    # management APIs
+    def get_node_stats(self):
+        try:
+            result = self._make_request("GET", "_nodes/stats")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_node_stats:: Exception occurred while fetching node stats for "
+                         f"host: {self.base_url} with error: {e}")
+            raise e
+
+    def get_index_stats(self):
+        try:
+            result = self._make_request("GET", "_stats")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_index_stats:: Exception occurred while fetching indices stats "
+                         f"for host: {self.base_url} with error: {e}")
+            raise e
+
     def fetch_indices(self):
         try:
             indices = self._make_request("GET", "_alias")

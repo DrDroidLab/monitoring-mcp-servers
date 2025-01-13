@@ -18,15 +18,23 @@ message OpenSearch {
     google.protobuf.StringValue index = 1;
   }
 
+  message GetNodeStats {}
+
+  message GetIndexStats {}
+
   enum TaskType {
     UNKNOWN = 0;
     QUERY_LOGS = 1;
     DELETE_INDEX = 2;
+    GET_NODE_STATS = 3;
+    GET_INDEX_STATS = 4;
   }
 
   TaskType type = 1;
   oneof task {
     QueryLogs query_logs = 101;
     DeleteIndex delete_index = 102;
+    GetNodeStats get_node_stats = 103;
+    GetIndexStats get_index_stats = 104;
   }
 }
