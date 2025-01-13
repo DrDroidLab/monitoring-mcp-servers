@@ -6,11 +6,10 @@ from utils.logging_utils import log_function_call
 
 class OpenSearchSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, protocol: str, host: str, username: str, password: str, verify_certs: bool = False,
-                 port: str = None, account_id=None, connector_id=None):
+    def __init__(self, request_id: str, connector_name: str, protocol: str, host: str, username: str, password: str,
+                 verify_certs: bool = False, port: str = None):
         self.__os_api_processor = OpenSearchApiProcessor(protocol, host, username, password, verify_certs, port)
-
-        super().__init__(account_id, connector_id, Source.OPEN_SEARCH)
+        super().__init__(request_id, connector_name, Source.PAGER_DUTY)
 
     @log_function_call
     def extract_index(self, save_to_db=False):
