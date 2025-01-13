@@ -1,5 +1,6 @@
 import json
 
+from google.protobuf.internal.well_known_types import Struct
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
 from integrations.source_api_processors.open_search_api_processor import OpenSearchApiProcessor
@@ -7,10 +8,12 @@ from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType, Literal
-from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResultType, TableResult, PlaybookTaskResult, TextResult
+from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResultType, TableResult, PlaybookTaskResult, TextResult, \
+    ApiResponseResult
 from protos.playbooks.source_task_definitions.open_search_task_pb2 import OpenSearch
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
+from utils.proto_utils import dict_to_proto
 
 
 class OpenSearchSourceManager(SourceManager):
@@ -48,7 +51,7 @@ class OpenSearchSourceManager(SourceManager):
                 ]
             },
             OpenSearch.TaskType.DELETE_INDEX: {
-                'executor': self.delete_index,
+                'executor': self.execute_delete_index,
                 'model_types': [SourceModelType.OPEN_SEARCH_INDEX],
                 'result_type': PlaybookTaskResultType.LOGS,
                 'display_name': 'Delete OpenSearch Index (Use with caution)',
@@ -146,16 +149,17 @@ class OpenSearchSourceManager(SourceManager):
             raise Exception(f"OpenSearchSourceManager.execute_query_logs:: Error while executing OpenSearch task: "
                             f"{str(e)}")
 
-    def delete_index(self, time_range: TimeRange, os_task: OpenSearch,
-                     os_connector: ConnectorProto) -> PlaybookTaskResult:
+    def execute_delete_index(self, time_range: TimeRange, os_task: OpenSearch,
+                             os_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not os_connector:
-                raise ValueError("OpenSearchSourceManager.delete_index:: Task execution Failed:: "
+                raise ValueError("OpenSearchSourceManager.execute_delete_index:: Task execution Failed:: "
                                  "No OpenSearch source found")
 
             delete_index = os_task.delete_index
             if not delete_index.index or not delete_index.index.value:
-                raise ValueError("OpenSearchSourceManager.delete_index:: Task execution Failed:: No index found")
+                raise ValueError(
+                    "OpenSearchSourceManager.execute_delete_index:: Task execution Failed:: No index found")
 
             index = delete_index.index.value
             os_client = self.get_connector_processor(os_connector)
@@ -167,4 +171,39 @@ class OpenSearchSourceManager(SourceManager):
             return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                 value=f"Failed to delete Index {index}")), source=self.source)
         except Exception as e:
-            raise Exception(f"OpenSearchSourceManager.delete_index:: Error while executing OpenSearch task: {str(e)}")
+            raise Exception(
+                f"OpenSearchSourceManager.execute_delete_index:: Error while executing OpenSearch task: {str(e)}")
+
+    def execute_get_node_stats(self, time_range: TimeRange, os_task: OpenSearch,
+                               os_connector: ConnectorProto) -> PlaybookTaskResult:
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_node_stats:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_node_stats()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_node_stats:: Error while executing OpenSearch task: {str(e)}")
+
+    def execute_get_index_stats(self, time_range: TimeRange, os_task: OpenSearch,
+                                os_connector: ConnectorProto) -> PlaybookTaskResult:
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_index_stats:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_index_stats()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_index_stats:: Error while executing OpenSearch task: {str(e)}")
