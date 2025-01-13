@@ -64,6 +64,22 @@ class OpenSearchSourceManager(SourceManager):
                               form_field_type=FormFieldType.TYPING_DROPDOWN_FT),
                 ]
             },
+            OpenSearch.TaskType.GET_NODE_STATS: {
+                'executor': self.execute_get_node_stats,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Node Stats',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_INDEX_STATS: {
+                'executor': self.execute_get_index_stats,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Indices Stats',
+                'category': 'Metrics',
+                'form_fields': []
+            },
         }
 
     def get_connector_processor(self, os_connector, **kwargs):
