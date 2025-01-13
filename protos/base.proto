@@ -177,6 +177,9 @@ enum Source {
   JENKINS = 62;
   GITHUB_ACTIONS = 63;
   CUSTOM_STRATEGIES = 64;
+  ARGOCD = 65;
+  DRD_ALERT_WEBHOOK = 66;
+  ROLLBAR = 67;
 }
 
 enum SourceKeyType {
@@ -321,6 +324,11 @@ enum SourceKeyType {
   GITHUB_ACTIONS_TOKEN = 103;
 
   CUSTOM_STRATEGIES_ACCOUNT_ID = 104;
+
+  ARGOCD_SERVER = 106;
+  ARGOCD_TOKEN = 107;
+
+  ROLLBAR_ACCESS_TOKEN = 108;
 }
 
 enum SourceModelType {

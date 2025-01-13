@@ -461,7 +461,7 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key=StringValue(value=credential_yaml['port'])
         ))
     elif c_type == 'OPEN_SEARCH':
-        if 'host' not in credential_yaml or 'port' not in credential_yaml or 'protocol' not in credential_yaml or 'username' not in credential_yaml or 'password' not in credential_yaml:
+        if 'host' not in credential_yaml or 'protocol' not in credential_yaml or 'username' not in credential_yaml or 'password' not in credential_yaml:
             raise Exception(
                 f'Host, port, protocol, username or password not found in credential yaml for open search source in connector: {connector_name}')
 
