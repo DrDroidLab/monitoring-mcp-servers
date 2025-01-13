@@ -1,6 +1,6 @@
 import json
 
-from google.protobuf.internal.well_known_types import Struct
+from google.protobuf.struct_pb2 import Struct
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
 from integrations.source_api_processors.open_search_api_processor import OpenSearchApiProcessor
