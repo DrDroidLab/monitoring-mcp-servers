@@ -259,14 +259,27 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.OPEN_SEARCH_PROTOCOL,
             SourceKeyType.OPEN_SEARCH_HOST,
             SourceKeyType.OPEN_SEARCH_PORT,
+            SourceKeyType.KeyType.OPEN_SEARCH_USERNAME,
+            SourceKeyType.KeyType.OPEN_SEARCH_PASSWORD,
+            SourceKeyType.KeyType.SSL_VERIFY,
+        ],
+        [
+            SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            SourceKeyType.OPEN_SEARCH_HOST,
             SourceKeyType.OPEN_SEARCH_USERNAME,
             SourceKeyType.OPEN_SEARCH_PASSWORD,
-            SourceKeyType.SSL_VERIFY
+            SourceKeyType.SSL_VERIFY,
         ],
         [
             SourceKeyType.OPEN_SEARCH_PROTOCOL,
             SourceKeyType.OPEN_SEARCH_HOST,
             SourceKeyType.OPEN_SEARCH_PORT,
+            SourceKeyType.OPEN_SEARCH_USERNAME,
+            SourceKeyType.OPEN_SEARCH_PASSWORD,
+        ],
+        [
+            SourceKeyType.OPEN_SEARCH_PROTOCOL,
+            SourceKeyType.OPEN_SEARCH_HOST,
             SourceKeyType.OPEN_SEARCH_USERNAME,
             SourceKeyType.OPEN_SEARCH_PASSWORD,
         ],

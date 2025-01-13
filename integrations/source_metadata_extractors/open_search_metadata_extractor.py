@@ -6,9 +6,9 @@ from utils.logging_utils import log_function_call
 
 class OpenSearchSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, protocol: str, host: str, port: str, username: str, password: str, verify_certs: bool = False,
-                 account_id=None, connector_id=None):
-        self.__os_api_processor = OpenSearchApiProcessor(protocol, host, port, username, password, verify_certs)
+    def __init__(self, protocol: str, host: str, username: str, password: str, verify_certs: bool = False,
+                 port: str = None, account_id=None, connector_id=None):
+        self.__os_api_processor = OpenSearchApiProcessor(protocol, host, username, password, verify_certs, port)
 
         super().__init__(account_id, connector_id, Source.OPEN_SEARCH)
 

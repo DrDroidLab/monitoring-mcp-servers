@@ -29,10 +29,12 @@ class OpenSearch(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UNKNOWN: OpenSearch._TaskType.ValueType  # 0
         QUERY_LOGS: OpenSearch._TaskType.ValueType  # 1
+        DELETE_INDEX: OpenSearch._TaskType.ValueType  # 2
 
     class TaskType(_TaskType, metaclass=_TaskTypeEnumTypeWrapper): ...
     UNKNOWN: OpenSearch.TaskType.ValueType  # 0
     QUERY_LOGS: OpenSearch.TaskType.ValueType  # 1
+    DELETE_INDEX: OpenSearch.TaskType.ValueType  # 2
 
     @typing_extensions.final
     class QueryLogs(google.protobuf.message.Message):
@@ -69,19 +71,38 @@ class OpenSearch(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["index", b"index", "limit", b"limit", "offset", b"offset", "query_dsl", b"query_dsl", "sort_desc", b"sort_desc", "timestamp_field", b"timestamp_field"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["index", b"index", "limit", b"limit", "offset", b"offset", "query_dsl", b"query_dsl", "sort_desc", b"sort_desc", "timestamp_field", b"timestamp_field"]) -> None: ...
 
+    @typing_extensions.final
+    class DeleteIndex(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        INDEX_FIELD_NUMBER: builtins.int
+        @property
+        def index(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        def __init__(
+            self,
+            *,
+            index: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["index", b"index"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["index", b"index"]) -> None: ...
+
     TYPE_FIELD_NUMBER: builtins.int
     QUERY_LOGS_FIELD_NUMBER: builtins.int
+    DELETE_INDEX_FIELD_NUMBER: builtins.int
     type: global___OpenSearch.TaskType.ValueType
     @property
     def query_logs(self) -> global___OpenSearch.QueryLogs: ...
+    @property
+    def delete_index(self) -> global___OpenSearch.DeleteIndex: ...
     def __init__(
         self,
         *,
         type: global___OpenSearch.TaskType.ValueType = ...,
         query_logs: global___OpenSearch.QueryLogs | None = ...,
+        delete_index: global___OpenSearch.DeleteIndex | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["query_logs", b"query_logs", "task", b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["query_logs", b"query_logs", "task", b"task", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["query_logs"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["delete_index", b"delete_index", "query_logs", b"query_logs", "task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["delete_index", b"delete_index", "query_logs", b"query_logs", "task", b"task", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["query_logs", "delete_index"] | None: ...
 
 global___OpenSearch = OpenSearch

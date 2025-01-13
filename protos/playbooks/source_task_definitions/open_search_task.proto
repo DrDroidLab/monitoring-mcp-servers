@@ -14,14 +14,19 @@ message OpenSearch {
     google.protobuf.StringValue timestamp_field = 6;
   }
 
+  message DeleteIndex {
+    google.protobuf.StringValue index = 1;
+  }
+
   enum TaskType {
     UNKNOWN = 0;
     QUERY_LOGS = 1;
+    DELETE_INDEX = 2;
   }
 
   TaskType type = 1;
-
   oneof task {
-    QueryLogs query_logs = 2;
+    QueryLogs query_logs = 101;
+    DeleteIndex delete_index = 102;
   }
 }
