@@ -471,10 +471,6 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key=StringValue(value=credential_yaml['host'])
         ))
         c_keys.append(ConnectorKey(
-            key_type=SourceKeyType.OPEN_SEARCH_PORT,
-            key=StringValue(value=credential_yaml['port'])
-        ))
-        c_keys.append(ConnectorKey(
             key_type=SourceKeyType.OPEN_SEARCH_PROTOCOL,
             key=StringValue(value=credential_yaml['protocol'])
         ))
@@ -486,6 +482,11 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.OPEN_SEARCH_PASSWORD,
             key=StringValue(value=credential_yaml['password'])
         ))
+        if credential_yaml.get('port', None):
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.OPEN_SEARCH_PORT,
+                key=StringValue(value=str(credential_yaml['port']))
+            ))
         if credential_yaml.get('verify_certs', None):
             c_keys.append(ConnectorKey(
                 key_type=SourceKeyType.SSL_VERIFY,
