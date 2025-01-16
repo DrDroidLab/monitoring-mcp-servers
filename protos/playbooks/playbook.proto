@@ -34,6 +34,11 @@ import "protos/playbooks/source_task_definitions/mongodb_task.proto";
 import "protos/playbooks/source_task_definitions/open_search_task.proto";
 import "protos/playbooks/source_task_definitions/jenkins_task.proto";
 import "protos/playbooks/source_task_definitions/github_task.proto";
+import "protos/playbooks/source_task_definitions/drd_proxy_agent_task.proto";
+import "protos/playbooks/source_task_definitions/sentry_task.proto";
+import "protos/playbooks/source_task_definitions/github_actions_task.proto";
+import "protos/playbooks/source_task_definitions/argocd_task.proto";
+import "protos/playbooks/source_task_definitions/jira_task.proto";
 
 
 // Playbook Task Protos
@@ -91,6 +96,12 @@ message PlaybookTask {
     OpenSearch open_search = 124;
     Jenkins jenkins = 125;
     Github github = 126;
+    Sentry sentry = 127;
+    GithubActions github_actions = 128;
+    ArgoCD argocd = 130;
+    Jira jira_cloud = 131;
+    Lambda lambda = 132;
+    DrdProxyAgent drd_proxy_agent = 133;
   }
 }
 

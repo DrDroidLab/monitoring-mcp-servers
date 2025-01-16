@@ -13,11 +13,10 @@ class BashProcessor(Processor):
     client = None
 
     def __init__(self, remote_host=None, remote_password=None, remote_pem=None, port=None):
-        if remote_host:
-            self.remote_user = remote_host.split("@")[0]
-            self.remote_host = remote_host.split("@")[1]
-        self.remote_password = remote_password
-        self.remote_pem = remote_pem.strip()
+        self.remote_user = remote_host.split("@")[0] if remote_host else None
+        self.remote_host = remote_host.split("@")[1] if remote_host else None
+        self.remote_password = remote_password if remote_password else None
+        self.remote_pem = remote_pem.strip() if remote_pem else None
         self.port = port if port else 22
 
     def get_connection(self):
@@ -68,9 +67,9 @@ class BashProcessor(Processor):
                 client_inputs['username'] = self.remote_user
             if self.remote_password:
                 client_inputs['password'] = self.remote_password
-            if self.port:
-                client_inputs['port'] = self.port
             if client_inputs:
+                if self.port:
+                    client_inputs['port'] = self.port
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 client.connect(**client_inputs)
             else:

@@ -342,7 +342,7 @@ integrations_connector_type_display_name_map = {
     Source.EKS: 'EKS KUBERNETES',
     Source.SQL_DATABASE_CONNECTION: 'SQL DATABASE CONNECTION',
     Source.OPEN_AI: 'OPEN AI',
-    Source.BASH: 'REMOTE SERVER',
+    Source.BASH: 'BASH COMMAND EXECUTOR',
     Source.GRAFANA_MIMIR: 'GRAFANA MIMIR',
     Source.AZURE: 'AZURE',
     Source.GKE: 'GKE KUBERNETES',
@@ -351,10 +351,12 @@ integrations_connector_type_display_name_map = {
     Source.GRAFANA_LOKI: 'GRAFANA LOKI',
     Source.KUBERNETES: 'KUBERNETES',
     Source.SMTP: 'EMAIL SERVER',
-    Source.ZENDUTY: 'ZENDUTY',
     Source.BIG_QUERY: 'BIG QUERY',
-    Source.MONGODB: 'MONGODB',
-    Source.OPEN_SEARCH: 'OPEN SEARCH',
+    Source.JENKINS: 'JENKINS',
+    Source.LINEAR: 'LINEAR',
+    Source.GITHUB_ACTIONS: 'GITHUB ACTIONS',
+    Source.ARGOCD: 'ARGOCD',
+    Source.ROLLBAR: 'ROLLBAR',
 }
 
 model_type_display_name_maps = {

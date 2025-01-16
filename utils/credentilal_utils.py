@@ -115,10 +115,11 @@ def generate_credentials_dict(connector_type, connector_keys):
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.REMOTE_SERVER_HOST:
                 ssh_servers = conn_key.key.value
-                ssh_servers = ssh_servers.replace(' ', '')
-                ssh_servers = ssh_servers.split(',')
-                ssh_servers = list(filter(None, ssh_servers))
-                credentials_dict['remote_host'] = ssh_servers[0]
+                if ssh_servers:
+                    ssh_servers = ssh_servers.replace(' ', '')
+                    ssh_servers = ssh_servers.split(',')
+                    ssh_servers = list(filter(None, ssh_servers))
+                    credentials_dict['remote_host'] = ssh_servers[0]
             elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PEM:
                 credentials_dict['remote_pem'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PASSWORD:
