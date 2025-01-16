@@ -22,9 +22,9 @@ app.conf.beat_schedule = {
         'task': 'connectors.tasks.fetch_connector_connections_tests',
         'schedule': 10.0,  # Run every 10 seconds
     },
-    'playbook-task-fetch-job-every-10-seconds': {
+    'playbook-task-fetch-job-every-1-seconds': {
         'task': 'playbooks_engine.tasks.fetch_playbook_execution_tasks',
-        'schedule': 10.0,  # Run every 10 seconds
+        'schedule': 1.0,  # Run every 1 seconds
     },
 }
 

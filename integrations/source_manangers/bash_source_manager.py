@@ -26,9 +26,11 @@ class BashSourceManager(SourceManager):
                 'form_fields': [
                     FormField(key_name=StringValue(value="remote_server"),
                               display_name=StringValue(value="Remote Server"),
-                              description=StringValue(value='Select Remote Server'),
+                              description=StringValue(value='Select Remote Server. If not selected, '
+                                                            'command will be executed on local machine.'),
                               data_type=LiteralType.STRING,
-                              form_field_type=FormFieldType.TYPING_DROPDOWN_FT),
+                              form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
+                              is_optional=True),
                     FormField(key_name=StringValue(value="command"),
                               display_name=StringValue(value="Command"),
                               data_type=LiteralType.STRING,

@@ -223,6 +223,7 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     ARGOCD: _Source.ValueType  # 65
     DRD_ALERT_WEBHOOK: _Source.ValueType  # 66
     ROLLBAR: _Source.ValueType  # 67
+    LAMBDA: _Source.ValueType  # 68
 
 class Source(_Source, metaclass=_SourceEnumTypeWrapper): ...
 
@@ -293,6 +294,7 @@ CUSTOM_STRATEGIES: Source.ValueType  # 64
 ARGOCD: Source.ValueType  # 65
 DRD_ALERT_WEBHOOK: Source.ValueType  # 66
 ROLLBAR: Source.ValueType  # 67
+LAMBDA: Source.ValueType  # 68
 global___Source = Source
 
 class _SourceKeyType:
@@ -388,6 +390,8 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ZENDUTY_API_KEY: _SourceKeyType.ValueType  # 83
     ROOTLY_API_KEY: _SourceKeyType.ValueType  # 84
     JIRA_CLOUD_API_KEY: _SourceKeyType.ValueType  # 85
+    JIRA_DOMAIN: _SourceKeyType.ValueType  # 109
+    JIRA_EMAIL: _SourceKeyType.ValueType  # 110
     ASANA_ACCESS_TOKEN: _SourceKeyType.ValueType  # 86
     CONFLUENCE_CLOUD_API_KEY: _SourceKeyType.ValueType  # 87
     NOTION_API_KEY: _SourceKeyType.ValueType  # 88
@@ -406,6 +410,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ARGOCD_SERVER: _SourceKeyType.ValueType  # 106
     ARGOCD_TOKEN: _SourceKeyType.ValueType  # 107
     ROLLBAR_ACCESS_TOKEN: _SourceKeyType.ValueType  # 108
+    REMOTE_SERVER_PORT: _SourceKeyType.ValueType  # 111
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -496,6 +501,8 @@ BIG_QUERY_SERVICE_ACCOUNT_JSON: SourceKeyType.ValueType  # 82
 ZENDUTY_API_KEY: SourceKeyType.ValueType  # 83
 ROOTLY_API_KEY: SourceKeyType.ValueType  # 84
 JIRA_CLOUD_API_KEY: SourceKeyType.ValueType  # 85
+JIRA_DOMAIN: SourceKeyType.ValueType  # 109
+JIRA_EMAIL: SourceKeyType.ValueType  # 110
 ASANA_ACCESS_TOKEN: SourceKeyType.ValueType  # 86
 CONFLUENCE_CLOUD_API_KEY: SourceKeyType.ValueType  # 87
 NOTION_API_KEY: SourceKeyType.ValueType  # 88
@@ -514,6 +521,7 @@ CUSTOM_STRATEGIES_ACCOUNT_ID: SourceKeyType.ValueType  # 104
 ARGOCD_SERVER: SourceKeyType.ValueType  # 106
 ARGOCD_TOKEN: SourceKeyType.ValueType  # 107
 ROLLBAR_ACCESS_TOKEN: SourceKeyType.ValueType  # 108
+REMOTE_SERVER_PORT: SourceKeyType.ValueType  # 111
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:

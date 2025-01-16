@@ -12,65 +12,66 @@ logger = logging.getLogger(__name__)
 class BashProcessor(Processor):
     client = None
 
-    def __init__(self, remote_host=None, remote_password=None, remote_pem=None):
-        if remote_host:
-            if remote_host.find("@") == -1:
-                self.remote_user = None
-                self.remote_host = remote_host
-            else:
-                self.remote_user = remote_host.split("@")[0]
-                self.remote_host = remote_host.split("@")[1]
-        self.remote_password = remote_password
+    def __init__(self, remote_host=None, remote_password=None, remote_pem=None, port=None):
+        self.remote_user = remote_host.split("@")[0] if remote_host else None
+        self.remote_host = remote_host.split("@")[1] if remote_host else None
+        self.remote_password = remote_password if remote_password else None
         self.remote_pem = remote_pem.strip() if remote_pem else None
+        self.port = port if port else 22
 
     def get_connection(self):
         try:
-            if self.remote_host and self.remote_user and self.remote_pem:
-                client = paramiko.SSHClient()
-                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client = paramiko.SSHClient()
+            error_string = ''
+            client_inputs = {}
+            if self.remote_pem:
                 try:
                     if self.remote_password:
                         key = paramiko.RSAKey.from_private_key(io.StringIO(self.remote_pem),
                                                                password=self.remote_password)
                     else:
                         key = paramiko.RSAKey.from_private_key(io.StringIO(self.remote_pem))
-                    client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                 except Exception as e:
+                    error_string += f"Error with RSA key type: {str(e)}\n"
                     try:
                         if self.remote_password:
                             key = paramiko.Ed25519Key.from_private_key(io.StringIO(self.remote_pem),
                                                                        password=self.remote_password)
                         else:
                             key = paramiko.Ed25519Key.from_private_key(io.StringIO(self.remote_pem))
-                        client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                     except Exception as e:
+                        error_string += f"Error with Ed25519 key type: {str(e)}\n"
                         try:
                             if self.remote_password:
                                 key = paramiko.ECDSAKey.from_private_key(
                                     io.StringIO(self.remote_pem), password=self.remote_password)
                             else:
                                 key = paramiko.ECDSAKey.from_private_key(io.StringIO(self.remote_pem))
-                            client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                         except Exception as e:
+                            error_string += f"Error with ECDSA key type: {str(e)}\n"
                             try:
                                 if self.remote_password:
                                     key = paramiko.DSSKey.from_private_key(
                                         io.StringIO(self.remote_pem), password=self.remote_password)
                                 else:
                                     key = paramiko.DSSKey.from_private_key(io.StringIO(self.remote_pem))
-                                client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                             except Exception as e:
-                                logger.error(f"Exception occurred while creating remote connection with error: {e}")
-                                raise e
-
-            elif self.remote_host and self.remote_password:
-                client = paramiko.SSHClient()
+                                error_string += f"Error with DSS key type: {str(e)}\n"
+                                logger.error(f"BashProcessor.get_connection:: Exception occurred while creating remote "
+                                             f"connection with all types of supported key types: {error_string}")
+                                raise Exception(f"Error with all types of supported key types: {error_string}")
+                client_inputs['pkey'] = key
+            if self.remote_host:
+                client_inputs['hostname'] = self.remote_host
+            if self.remote_user:
+                client_inputs['username'] = self.remote_user
+            if self.remote_password:
+                client_inputs['password'] = self.remote_password
+            if client_inputs:
+                if self.port:
+                    client_inputs['port'] = self.port
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                client.connect(hostname=self.remote_host, username=self.remote_user, password=self.remote_password)
-            elif self.remote_host and self.remote_user:
-                client = paramiko.SSHClient()
-                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                client.connect(hostname=self.remote_host, username=self.remote_user)
+                client.connect(**client_inputs)
             else:
                 client = None
             return client
@@ -102,6 +103,7 @@ class BashProcessor(Processor):
                 finally:
                     client.close()
             else:
+                logger.info("Executing bash command locally")
                 try:
                     result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE, universal_newlines=True)
@@ -133,6 +135,7 @@ class BashProcessor(Processor):
                 finally:
                     client.close()
             else:
+                logger.info("Executing bash command locally")
                 try:
                     result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,

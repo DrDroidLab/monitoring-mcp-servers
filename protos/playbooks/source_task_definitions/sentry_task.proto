@@ -1,0 +1,32 @@
+syntax = "proto3";
+package protos.playbooks;
+
+import "google/protobuf/wrappers.proto";
+
+message Sentry {
+  message FetchIssueInfo {
+    google.protobuf.StringValue issue_id = 1;
+  }
+
+  message FetchProjectEvents {
+    google.protobuf.StringValue project_slug = 1;
+  }
+
+  message FetchRecentErrors {
+    google.protobuf.StringValue project_slug = 1;
+  }
+
+  enum TaskType {
+    UNKNOWN = 0;
+    FETCH_ISSUE_INFO = 1;
+    FETCH_PROJECT_EVENTS = 2;
+    FETCH_RECENT_ERRORS = 3;
+  }
+
+  TaskType type = 1;
+  oneof task {
+    FetchIssueInfo fetch_issue_info = 2;
+    FetchProjectEvents fetch_project_events = 3;
+    FetchRecentErrors fetch_recent_errors = 4;
+  }
+}

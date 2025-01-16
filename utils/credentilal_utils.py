@@ -115,18 +115,17 @@ def generate_credentials_dict(connector_type, connector_keys):
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.REMOTE_SERVER_HOST:
                 ssh_servers = conn_key.key.value
-                ssh_servers = ssh_servers.replace(' ', '')
-                ssh_servers = ssh_servers.split(',')
-                ssh_servers = list(filter(None, ssh_servers))
-                credentials_dict['remote_host'] = ssh_servers[0]
+                if ssh_servers:
+                    ssh_servers = ssh_servers.replace(' ', '')
+                    ssh_servers = ssh_servers.split(',')
+                    ssh_servers = list(filter(None, ssh_servers))
+                    credentials_dict['remote_host'] = ssh_servers[0]
             elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PEM:
                 credentials_dict['remote_pem'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PASSWORD:
                 credentials_dict['remote_password'] = conn_key.key.value
-            if 'remote_pem' not in credentials_dict:
-                credentials_dict['remote_pem'] = None
-            if 'remote_password' not in credentials_dict:
-                credentials_dict['remote_password'] = None
+            elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PORT:
+                credentials_dict['port'] = conn_key.key.value
     elif connector_type == Source.AZURE:
         for conn_key in connector_keys:
             if conn_key.key_type == SourceKeyType.AZURE_CLIENT_ID:
@@ -402,22 +401,18 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         ))
     elif c_type == 'BASH':
         c_source = Source.BASH
-
         if 'remote_host' in credential_yaml:
-            c_keys.append(ConnectorKey(
-                key_type=SourceKeyType.REMOTE_SERVER_HOST,
-                key=StringValue(value=credential_yaml['remote_host'])
-            ))
+            c_keys.append(ConnectorKey(key_type=SourceKeyType.REMOTE_SERVER_HOST,
+                                       key=StringValue(value=credential_yaml['remote_host'])))
         if 'remote_password' in credential_yaml:
-            c_keys.append(ConnectorKey(
-                key_type=SourceKeyType.REMOTE_SERVER_PASSWORD,
-                key=StringValue(value=credential_yaml['remote_password'])
-            ))
+            c_keys.append(ConnectorKey(key_type=SourceKeyType.REMOTE_SERVER_PASSWORD,
+                                       key=StringValue(value=credential_yaml['remote_password'])))
         if 'remote_pem' in credential_yaml:
-            c_keys.append(ConnectorKey(
-                key_type=SourceKeyType.REMOTE_SERVER_PEM,
-                key=StringValue(value=credential_yaml['remote_pem'])
-            ))
+            c_keys.append(ConnectorKey(key_type=SourceKeyType.REMOTE_SERVER_PEM,
+                                       key=StringValue(value=credential_yaml['remote_pem'])))
+        if 'port' in credential_yaml:
+            c_keys.append(ConnectorKey(key_type=SourceKeyType.REMOTE_SERVER_PORT,
+                                       key=StringValue(value=credential_yaml['port'])))
     elif c_type == 'CLICKHOUSE':
         if 'host' not in credential_yaml:
             raise Exception(
