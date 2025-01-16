@@ -25,6 +25,7 @@ class BashProcessor(Processor):
 
     def get_connection(self):
         try:
+            error_string = ''
             if self.remote_host and self.remote_user and self.remote_pem:
                 client = paramiko.SSHClient()
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -36,6 +37,7 @@ class BashProcessor(Processor):
                         key = paramiko.RSAKey.from_private_key(io.StringIO(self.remote_pem))
                     client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                 except Exception as e:
+                    error_string += f"Error with RSA key type: {str(e)}\n"
                     try:
                         if self.remote_password:
                             key = paramiko.Ed25519Key.from_private_key(io.StringIO(self.remote_pem),
@@ -44,6 +46,7 @@ class BashProcessor(Processor):
                             key = paramiko.Ed25519Key.from_private_key(io.StringIO(self.remote_pem))
                         client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                     except Exception as e:
+                        error_string += f"Error with Ed25519 key type: {str(e)}\n"
                         try:
                             if self.remote_password:
                                 key = paramiko.ECDSAKey.from_private_key(
@@ -52,6 +55,7 @@ class BashProcessor(Processor):
                                 key = paramiko.ECDSAKey.from_private_key(io.StringIO(self.remote_pem))
                             client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                         except Exception as e:
+                            error_string += f"Error with ECDSA key type: {str(e)}\n"
                             try:
                                 if self.remote_password:
                                     key = paramiko.DSSKey.from_private_key(
@@ -60,8 +64,10 @@ class BashProcessor(Processor):
                                     key = paramiko.DSSKey.from_private_key(io.StringIO(self.remote_pem))
                                 client.connect(hostname=self.remote_host, username=self.remote_user, pkey=key)
                             except Exception as e:
-                                logger.error(f"Exception occurred while creating remote connection with error: {e}")
-                                raise e
+                                error_string += f"Error with DSS key type: {str(e)}\n"
+                                logger.error(f"BashProcessor.get_connection:: Exception occurred while creating remote "
+                                             f"connection with all types of supported key types: {error_string}")
+                                raise Exception(f"Error with all types of supported key types: {error_string}")
 
             elif self.remote_host and self.remote_password:
                 client = paramiko.SSHClient()

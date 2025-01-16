@@ -24,7 +24,7 @@ app.conf.beat_schedule = {
     },
     'playbook-task-fetch-job-every-10-seconds': {
         'task': 'playbooks_engine.tasks.fetch_playbook_execution_tasks',
-        'schedule': 10.0,  # Run every 10 seconds
+        'schedule': 1.0,  # Run every 1 seconds
     },
 }
 
