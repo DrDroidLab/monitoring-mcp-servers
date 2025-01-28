@@ -53,32 +53,19 @@ class BashSourceManager(SourceManager):
         try:
             bash_command: Bash.Command = bash_task.command
             remote_server_str = bash_command.remote_server.value if bash_command.remote_server else None
-
-            command_str = bash_command.command.value
-            commands = command_str.split('\n')
+            command = bash_command.command.value
             try:
                 outputs = {}
                 ssh_client = self.get_connector_processor(remote_server_connector, remote_server_str=remote_server_str)
-                for command in commands:
-                    command_to_execute = command
-                    output = ssh_client.execute_command(command_to_execute)
-                    outputs[command] = output
-
+                output = ssh_client.execute_command(command)
+                outputs[command] = output
                 command_output_protos = []
-                for command, output in outputs.items():
-                    bash_command_result = BashCommandOutputResult.CommandOutput(
-                        command=StringValue(value=command),
-                        output=StringValue(value=output)
-                    )
-                    command_output_protos.append(bash_command_result)
-
-                return PlaybookTaskResult(
-                    source=self.source,
-                    type=PlaybookTaskResultType.BASH_COMMAND_OUTPUT,
-                    bash_command_output=BashCommandOutputResult(
-                        command_outputs=command_output_protos
-                    )
-                )
+                bash_command_result = BashCommandOutputResult.CommandOutput(command=StringValue(value=command),
+                                                                            output=StringValue(value=output))
+                command_output_protos.append(bash_command_result)
+                return PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.BASH_COMMAND_OUTPUT,
+                                          bash_command_output=BashCommandOutputResult(
+                                              command_outputs=command_output_protos))
             except Exception as e:
                 raise Exception(f"Error while executing Bash task: {e}")
         except Exception as e:
