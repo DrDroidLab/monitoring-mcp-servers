@@ -1,6 +1,9 @@
 import io
 import logging
+import os
 import subprocess
+import tempfile
+import time
 
 import paramiko
 
@@ -76,74 +79,133 @@ class BashProcessor(Processor):
                 client = None
             return client
         except Exception as e:
-            logger.error(f"Exception occurred while creating remote connection with error: {e}")
+            logger.error(f"BashProcessor.get_connection:: Exception occurred while creating remote connection with "
+                         f"error: {e}")
             raise e
 
     def test_connection(self):
         try:
             command = 'echo "Connection successful"'
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".sh") as script_file, \
+                    tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as output_file:
+                script_file.write(command.encode())  # Write script content
+                script_file_path = script_file.name  # Local temp script path
+                output_file_path = output_file.name  # Local temp output file path
+
+            remote_script_path = f"/tmp/{os.path.basename(script_file_path)}"
+            remote_output_path = f"/tmp/{os.path.basename(output_file_path)}"
+            exec_command = f"bash {remote_script_path} > {remote_output_path} 2>&1"
             client = self.get_connection()
             if client:
                 try:
-                    stdin, stdout, stderr = client.exec_command(command)
-                    output = stdout.read().decode('utf-8')
+                    sftp = client.open_sftp()
+                    sftp.put(script_file_path, remote_script_path)  # Upload script
+                    sftp.chmod(remote_script_path, 0o755)  # Make script executable
+                    stdin, stdout, stderr = client.exec_command(exec_command)
+                    # Wait for execution
+                    time.sleep(2)
+                    try:
+                        with sftp.open(remote_output_path, "r") as file:
+                            output = file.read().decode()
+                        sftp.remove(remote_script_path)
+                        sftp.remove(remote_output_path)
+                        sftp.close()
+                    except FileNotFoundError:
+                        logger.error("BashProcessor.test_connection:: Error: Output file not found. The script may "
+                                     "have failed.")
+                        raise Exception("BashProcessor.test_connection:: Error: Output file not found. The script may "
+                                        "have failed.")
                     if output.strip() == "Connection successful":
                         return True
                     else:
                         raise Exception("Connection failed")
                 except paramiko.AuthenticationException as e:
-                    logger.error(f"Authentication error: {str(e)}")
+                    logger.error(f"BashProcessor.test_connection:: Authentication error: {str(e)}")
                     raise e
                 except paramiko.SSHException as e:
-                    logger.error(f"SSH connection error: {str(e)}")
+                    logger.error(f"BashProcessor.test_connection:: SSH connection error: {str(e)}")
                     raise e
                 except Exception as e:
-                    logger.error(f"Error: {str(e)}")
+                    logger.error(f"BashProcessor.test_connection:: Error: {str(e)}")
                     raise e
                 finally:
                     client.close()
             else:
-                logger.info("Executing bash command locally")
                 try:
-                    result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE, universal_newlines=True)
-                    return True if result.stdout.strip() == "Connection successful" else False
+                    os.chmod(script_file_path, 0o755)
+                    with open(output_file_path, "w") as output_f:
+                        subprocess.run(["bash", script_file_path], stdout=output_f, stderr=output_f, check=True)
+                    with open(output_file_path, "r") as file:
+                        output = file.read()
+                    return output.strip() == "Connection successful"
                 except subprocess.CalledProcessError as e:
-                    logger.error(f"Error executing command{command}: {e}")
+                    logger.error(f"BashProcessor.test_connection:: Error executing command{command}: {e}")
                     raise e
         except Exception as e:
-            logger.error(f"Exception occurred while creating remote connection with error: {e}")
+            logger.error(f"BashProcessor.test_connection:: Exception occurred while creating remote connection with "
+                         f"error: {e}")
             raise e
 
     def execute_command(self, command):
         try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".sh") as script_file, \
+                    tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as output_file:
+                script_file.write(command.encode())  # Write script content
+                script_file_path = script_file.name  # Local temp script path
+                output_file_path = output_file.name  # Local temp output file path
+
+            remote_script_path = f"/tmp/{os.path.basename(script_file_path)}"
+            remote_output_path = f"/tmp/{os.path.basename(output_file_path)}"
+            exec_command = f"bash {remote_script_path} > {remote_output_path} 2>&1"
             client = self.get_connection()
             if client:
                 try:
-                    stdin, stdout, stderr = client.exec_command(command)
-                    output = stdout.read().decode('utf-8')
+                    sftp = client.open_sftp()
+                    sftp.put(script_file_path, remote_script_path)  # Upload script
+                    sftp.chmod(remote_script_path, 0o755)  # Make script executable
+
+                    stdin, stdout, stderr = client.exec_command(exec_command)
+                    # Wait for execution
+                    time.sleep(2)
+                    try:
+                        with sftp.open(remote_output_path, "r") as file:
+                            output = file.read().decode()
+                        sftp.remove(remote_script_path)
+                        sftp.remove(remote_output_path)
+                        sftp.close()
+                    except FileNotFoundError:
+                        logger.error("BashProcessor.execute_command:: Error: Output file not found. The script may "
+                                     "have failed.")
+                        raise Exception("BashProcessor.execute_command:: Error: Output file not found. The script may "
+                                        "have failed.")
                     return output.strip()
                 except paramiko.AuthenticationException as e:
-                    logger.error(f"Authentication error: {str(e)}")
+                    logger.error(f"BashProcessor.execute_command:: Authentication error: {str(e)}")
                     raise e
                 except paramiko.SSHException as e:
-                    logger.error(f"SSH connection error: {str(e)}")
+                    logger.error(f"BashProcessor.execute_command:: SSH connection error: {str(e)}")
                     raise e
                 except Exception as e:
-                    logger.error(f"Error: {str(e)}")
+                    logger.error(f"BashProcessor.execute_command:: Error: {str(e)}")
                     raise e
                 finally:
                     client.close()
+                    # Cleanup local temp files
+                    os.unlink(script_file_path)
+                    os.unlink(output_file_path)
+                    client.close()
             else:
-                logger.info("Executing bash command locally")
                 try:
-                    result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE,
-                                            universal_newlines=True)
-                    return result.stdout.strip()
+                    os.chmod(script_file_path, 0o755)
+                    with open(output_file_path, "w") as output_f:
+                        subprocess.run(["bash", script_file_path], stdout=output_f, stderr=output_f, check=True)
+                    with open(output_file_path, "r") as file:
+                        output = file.read()
+                    return output.strip()
                 except subprocess.CalledProcessError as e:
-                    logger.error(f"Error executing command{command}: {e}")
+                    logger.error(f"BashProcessor.execute_command:: Error executing command{command}: {e}")
                     raise e
         except Exception as e:
-            logger.error(f"Exception occurred while executing remote command with error: {e}")
+            logger.error(f"BashProcessor.execute_command:: Exception occurred while executing remote command with "
+                         f"error: {e}")
             raise e
