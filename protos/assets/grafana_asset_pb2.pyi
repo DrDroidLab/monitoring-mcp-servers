@@ -7,6 +7,7 @@ import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
+import google.protobuf.struct_pb2
 import google.protobuf.wrappers_pb2
 import protos.base_pb2
 import sys
@@ -201,6 +202,27 @@ class GrafanaDatasourceAssetModel(google.protobuf.message.Message):
 global___GrafanaDatasourceAssetModel = GrafanaDatasourceAssetModel
 
 @typing_extensions.final
+class GrafanaDashboardAssetModel(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    DASHBOARD_ID_FIELD_NUMBER: builtins.int
+    DASHBOARD_JSON_FIELD_NUMBER: builtins.int
+    @property
+    def dashboard_id(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
+    @property
+    def dashboard_json(self) -> google.protobuf.struct_pb2.Struct: ...
+    def __init__(
+        self,
+        *,
+        dashboard_id: google.protobuf.wrappers_pb2.UInt64Value | None = ...,
+        dashboard_json: google.protobuf.struct_pb2.Struct | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dashboard_id", b"dashboard_id", "dashboard_json", b"dashboard_json"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dashboard_id", b"dashboard_id", "dashboard_json", b"dashboard_json"]) -> None: ...
+
+global___GrafanaDashboardAssetModel = GrafanaDashboardAssetModel
+
+@typing_extensions.final
 class GrafanaTargetMetricPromQlAssetOptions(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
@@ -302,6 +324,41 @@ class GrafanaDatasourceAssetOptions(google.protobuf.message.Message):
 global___GrafanaDatasourceAssetOptions = GrafanaDatasourceAssetOptions
 
 @typing_extensions.final
+class GrafanaDashboardAssetOptions(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    @typing_extensions.final
+    class GrafanaDashboardOptions(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        DASHBOARD_UID_FIELD_NUMBER: builtins.int
+        DASHBOARD_TITLE_FIELD_NUMBER: builtins.int
+        @property
+        def dashboard_uid(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def dashboard_title(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        def __init__(
+            self,
+            *,
+            dashboard_uid: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            dashboard_title: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["dashboard_title", b"dashboard_title", "dashboard_uid", b"dashboard_uid"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["dashboard_title", b"dashboard_title", "dashboard_uid", b"dashboard_uid"]) -> None: ...
+
+    DASHBOARDS_FIELD_NUMBER: builtins.int
+    @property
+    def dashboards(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___GrafanaDashboardAssetOptions.GrafanaDashboardOptions]: ...
+    def __init__(
+        self,
+        *,
+        dashboards: collections.abc.Iterable[global___GrafanaDashboardAssetOptions.GrafanaDashboardOptions] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dashboards", b"dashboards"]) -> None: ...
+
+global___GrafanaDashboardAssetOptions = GrafanaDashboardAssetOptions
+
+@typing_extensions.final
 class GrafanaAssetModel(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
@@ -311,6 +368,7 @@ class GrafanaAssetModel(google.protobuf.message.Message):
     LAST_UPDATED_FIELD_NUMBER: builtins.int
     GRAFANA_TARGET_METRIC_PROMQL_FIELD_NUMBER: builtins.int
     GRAFANA_PROMETHEUS_DATASOURCE_FIELD_NUMBER: builtins.int
+    GRAFANA_DASHBOARD_FIELD_NUMBER: builtins.int
     @property
     def id(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
     connector_type: protos.base_pb2.Source.ValueType
@@ -320,6 +378,8 @@ class GrafanaAssetModel(google.protobuf.message.Message):
     def grafana_target_metric_promql(self) -> global___GrafanaTargetMetricPromQlAssetModel: ...
     @property
     def grafana_prometheus_datasource(self) -> global___GrafanaDatasourceAssetModel: ...
+    @property
+    def grafana_dashboard(self) -> global___GrafanaDashboardAssetModel: ...
     def __init__(
         self,
         *,
@@ -329,10 +389,11 @@ class GrafanaAssetModel(google.protobuf.message.Message):
         last_updated: builtins.int = ...,
         grafana_target_metric_promql: global___GrafanaTargetMetricPromQlAssetModel | None = ...,
         grafana_prometheus_datasource: global___GrafanaDatasourceAssetModel | None = ...,
+        grafana_dashboard: global___GrafanaDashboardAssetModel | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["asset", b"asset", "grafana_prometheus_datasource", b"grafana_prometheus_datasource", "grafana_target_metric_promql", b"grafana_target_metric_promql", "id", b"id"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["asset", b"asset", "connector_type", b"connector_type", "grafana_prometheus_datasource", b"grafana_prometheus_datasource", "grafana_target_metric_promql", b"grafana_target_metric_promql", "id", b"id", "last_updated", b"last_updated", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["asset", b"asset"]) -> typing_extensions.Literal["grafana_target_metric_promql", "grafana_prometheus_datasource"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["asset", b"asset", "grafana_dashboard", b"grafana_dashboard", "grafana_prometheus_datasource", b"grafana_prometheus_datasource", "grafana_target_metric_promql", b"grafana_target_metric_promql", "id", b"id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["asset", b"asset", "connector_type", b"connector_type", "grafana_dashboard", b"grafana_dashboard", "grafana_prometheus_datasource", b"grafana_prometheus_datasource", "grafana_target_metric_promql", b"grafana_target_metric_promql", "id", b"id", "last_updated", b"last_updated", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["asset", b"asset"]) -> typing_extensions.Literal["grafana_target_metric_promql", "grafana_prometheus_datasource", "grafana_dashboard"] | None: ...
 
 global___GrafanaAssetModel = GrafanaAssetModel
 
