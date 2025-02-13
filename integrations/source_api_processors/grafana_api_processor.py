@@ -3,6 +3,7 @@ import logging
 import requests
 
 from integrations.processor import Processor
+from protos.base_pb2 import TimeRange
 
 logger = logging.getLogger(__name__)
 
@@ -96,3 +97,34 @@ class GrafanaApiProcessor(Processor):
         except Exception as e:
             logger.error(f"Exception occurred while getting promql metric timeseries with error: {e}")
             raise e
+
+    def panel_query_datasource_api(self, tr: TimeRange, queries):
+        try:
+            if not queries or len(queries) == 0:
+                raise ValueError("No queries provided.")
+            
+            url = f"{self.__host}/api/ds/query"
+            
+            from_tr = int(tr.time_geq * 1000)
+            to_tr = int(tr.time_lt * 1000)
+            
+            payload = {
+                "queries": queries,
+                "from": str(from_tr),
+                "to": str(to_tr)
+            }
+            
+            response = requests.post(url, headers=self.headers, json=payload)
+            
+            if response.status_code == 429:
+                logger.info("Grafana query API responded with 429 (rate limited). Headers: %s", response.headers)
+                return None
+            elif response.status_code == 200:
+                return response.json()
+            else:
+                logger.error("Grafana query API error: status code %s, response: %s", response.status_code, response.text)
+                return response.json()
+        except Exception as e:
+            logger.error("Exception occurred while querying Grafana datasource: %s", e)
+            raise e
+        
