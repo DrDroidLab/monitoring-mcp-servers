@@ -2,7 +2,6 @@ syntax = "proto3";
 package protos.playbooks;
 
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/struct.proto";
 import "protos/playbooks/source_task_definitions/promql_task.proto";
 
 
@@ -24,7 +23,10 @@ message Grafana {
   }
 
   message QueryDashboardPanelMetricTask {
-    repeated google.protobuf.Struct queries = 1;
+    message Query {
+      google.protobuf.StringValue expr = 1;
+    } 
+    repeated Query queries = 1;
     google.protobuf.StringValue dashboard_id = 2;
     google.protobuf.StringValue panel_id = 3;
     google.protobuf.StringValue datasource_uid = 4;

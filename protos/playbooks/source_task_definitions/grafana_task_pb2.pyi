@@ -8,7 +8,6 @@ import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
-import google.protobuf.struct_pb2
 import google.protobuf.wrappers_pb2
 import protos.playbooks.source_task_definitions.promql_task_pb2
 import sys
@@ -112,12 +111,27 @@ class Grafana(google.protobuf.message.Message):
     class QueryDashboardPanelMetricTask(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
+        @typing_extensions.final
+        class Query(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+            EXPR_FIELD_NUMBER: builtins.int
+            @property
+            def expr(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+            def __init__(
+                self,
+                *,
+                expr: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["expr", b"expr"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["expr", b"expr"]) -> None: ...
+
         QUERIES_FIELD_NUMBER: builtins.int
         DASHBOARD_ID_FIELD_NUMBER: builtins.int
         PANEL_ID_FIELD_NUMBER: builtins.int
         DATASOURCE_UID_FIELD_NUMBER: builtins.int
         @property
-        def queries(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[google.protobuf.struct_pb2.Struct]: ...
+        def queries(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Grafana.QueryDashboardPanelMetricTask.Query]: ...
         @property
         def dashboard_id(self) -> google.protobuf.wrappers_pb2.StringValue: ...
         @property
@@ -127,7 +141,7 @@ class Grafana(google.protobuf.message.Message):
         def __init__(
             self,
             *,
-            queries: collections.abc.Iterable[google.protobuf.struct_pb2.Struct] | None = ...,
+            queries: collections.abc.Iterable[global___Grafana.QueryDashboardPanelMetricTask.Query] | None = ...,
             dashboard_id: google.protobuf.wrappers_pb2.StringValue | None = ...,
             panel_id: google.protobuf.wrappers_pb2.StringValue | None = ...,
             datasource_uid: google.protobuf.wrappers_pb2.StringValue | None = ...,
