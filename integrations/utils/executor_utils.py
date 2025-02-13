@@ -19,7 +19,7 @@ def apply_result_transformer(result_dict, lambda_function: Lambda.Function) -> D
 
 
 def resolve_global_variables(form_fields: [FormField], global_variable_set: Struct,
-                             source_type_task_def: Dict) -> (Dict, Dict):
+                             source_task_type_def: Dict) -> (Dict, Dict):
     all_string_fields = [ff.key_name.value for ff in form_fields if ff.data_type == LiteralType.STRING]
     all_string_array_fields = [ff.key_name.value for ff in form_fields if ff.data_type == LiteralType.STRING_ARRAY]
     all_composite_fields = {}
@@ -29,28 +29,24 @@ def resolve_global_variables(form_fields: [FormField], global_variable_set: Stru
 
     task_local_variable_map = {}
     for gk, gv in global_variable_set.items():
-        for tk, tv in source_type_task_def.items():
+        if gv is None:
+            raise Exception(f"Global variable {gk} is None")
+        for tk, tv in source_task_type_def.items():
+            if gk in tv:
+                task_local_variable_map[gk] = gv
             if tk in all_string_fields:
-                if gv is None:
-                    raise Exception(f"Global variable {gk} is None")
-                source_type_task_def[tk] = tv.replace(gk, gv)
-                if gk in tv:
-                    task_local_variable_map[gk] = gv
+                source_task_type_def[tk] = tv.replace(gk, gv)
             elif tk in all_string_array_fields:
-                for item in source_type_task_def[tk]:
-                    if gv is None:
-                        raise Exception(f"Global variable {gk} is None")
-                    source_type_task_def[tk] = item.replace(gk, gv) if isinstance(tv, str) else item
-                if gk in tv:
-                    task_local_variable_map[gk] = gv
+                resolved_items = []
+                for item in source_task_type_def[tk]:
+                    resolved_items.append(item.replace(gk, gv)) if isinstance(tv, str) else resolved_items.append(item)
+                source_task_type_def[tk] = resolved_items
             elif tk in all_composite_fields:
                 composite_fields = all_composite_fields[tk]
-                for item in source_type_task_def[tk]:
+                for item in source_task_type_def[tk]:
                     for cf in composite_fields:
                         if cf.data_type == LiteralType.STRING:
                             if gv is None:
                                 raise Exception(f"Global variable {gk} is None")
-                            item[cf.key_name.value] = item[cf.key_name.value].replace(gk, gv) if isinstance(tv, str) else item
-                if gk in tv:
-                    task_local_variable_map[gk] = gv
-    return source_type_task_def, task_local_variable_map
+                            item[cf.key_name.value] = item[cf.key_name.value].replace(gk, gv)
+    return source_task_type_def, task_local_variable_map
