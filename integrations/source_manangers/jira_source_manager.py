@@ -28,7 +28,6 @@ class JiraSourceManager(SourceManager):
         self.task_type_callable_map = {
             Jira.TaskType.CREATE_TICKET: {
                 'executor': self.create_ticket,
-                'asset_descriptor': self.jira_project_asset_descriptor,
                 'model_types': [SourceModelType.JIRA_PROJECT],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Create JIRA Ticket',
@@ -61,7 +60,7 @@ class JiraSourceManager(SourceManager):
                         description=StringValue(value='Select issue type'),
                         data_type=LiteralType.STRING,
                         valid_values=[
-                            Literal(literal_type=LiteralType.STRING, string=StringValue(value="Task"))
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Task"))
                         ],
                         form_field_type=FormFieldType.DROPDOWN_FT
                     ),
@@ -71,11 +70,11 @@ class JiraSourceManager(SourceManager):
                         description=StringValue(value='Select priority'),
                         data_type=LiteralType.STRING,
                         valid_values=[
-                            Literal(literal_type=LiteralType.STRING, string=StringValue(value="Lowest")),
-                            Literal(literal_type=LiteralType.STRING, string=StringValue(value="Low")),
-                            Literal(literal_type=LiteralType.STRING, string=StringValue(value="Medium")),
-                            Literal(literal_type=LiteralType.STRING, string=StringValue(value="High")),
-                            Literal(literal_type=LiteralType.STRING, string=StringValue(value="Highest"))
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Lowest")),
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Low")),
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Medium")),
+                            Literal(type=LiteralType.STRING, string=StringValue(value="High")),
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Highest"))
                         ],
                         form_field_type=FormFieldType.DROPDOWN_FT,
                         is_optional=True,
@@ -91,7 +90,6 @@ class JiraSourceManager(SourceManager):
             },
             Jira.TaskType.ASSIGN_TICKET: {
                 'executor': self.assign_ticket,
-                'asset_descriptor': self.jira_user_asset_descriptor,
                 'model_types': [SourceModelType.JIRA_USER],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Assign JIRA Ticket',
@@ -147,7 +145,6 @@ class JiraSourceManager(SourceManager):
             },
             Jira.TaskType.SEARCH_TICKETS: {
                 'executor': self.search_tickets,
-                'asset_descriptor': self.jira_project_asset_descriptor,
                 'model_types': [SourceModelType.JIRA_PROJECT],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Search JIRA Tickets',

@@ -34,4 +34,5 @@ message FormField {
   google.protobuf.UInt64Value max_length_allowed = 10;
   bool is_date_time_field = 11;
   FormFieldType form_field_type = 12;
+  bool disabled = 13;
 }

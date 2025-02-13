@@ -84,7 +84,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.QUERY_DASHBOARD_PANEL_METRIC: {
                 'executor': self.execute_query_dashboard_panel_metric_execution,
-                'asset_descriptor': self.query_dashboard_panel_metric_asset_descriptor,
                 'model_types': [SourceModelType.GRAFANA_DASHBOARD],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Query any of your dashboard panels from Grafana',
@@ -112,7 +111,7 @@ class GrafanaSourceManager(SourceManager):
                               data_type=LiteralType.STRING_ARRAY,
                               form_field_type=FormFieldType.MULTILINE_FT,
                               disabled=True,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value="[]"))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value="[]"))),
                     
                 ]
             },

@@ -32,7 +32,6 @@ class GithubSourceManager(SourceManager):
         self.task_type_callable_map = {
             Github.TaskType.FETCH_RELATED_COMMITS: {
                 'executor': self.fetch_related_commits,
-                'asset_descriptor': self.github_repository_asset_descriptor,
                 'model_types': [SourceModelType.GITHUB_REPOSITORY],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Fetch Related Commits for a function',
@@ -54,12 +53,11 @@ class GithubSourceManager(SourceManager):
                               display_name=StringValue(value="Enter Branch name. Defaults to main"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='main'))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='main'))),
                 ]
             },
             Github.TaskType.FETCH_FILE: {
                 'executor': self.fetch_file,
-                'asset_descriptor': self.github_repository_asset_descriptor,
                 'model_types': [SourceModelType.GITHUB_REPOSITORY],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Fetch Files',
@@ -77,7 +75,6 @@ class GithubSourceManager(SourceManager):
             },
             Github.TaskType.UPDATE_FILE: {
                 'executor': self.update_file,
-                'asset_descriptor': self.github_repository_asset_descriptor,
                 'model_types': [SourceModelType.GITHUB_REPOSITORY, SourceModelType.GITHUB_MEMBER],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Update Files',
@@ -115,13 +112,12 @@ class GithubSourceManager(SourceManager):
                               display_name=StringValue(value="Enter Branch name. Defaults to main"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='main')),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='main')),
                               is_optional=True),
                 ]
             },
             Github.TaskType.FETCH_RECENT_COMMITS: {
                 'executor': self.fetch_recent_commits,
-                'asset_descriptor': self.github_repository_asset_descriptor,
                 'model_types': [SourceModelType.GITHUB_REPOSITORY],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Fetch Recent Commits for a branch',
@@ -135,7 +131,7 @@ class GithubSourceManager(SourceManager):
                               display_name=StringValue(value="Enter Branch Name. Defaults to main"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='main'))),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='main'))),
                     FormField(key_name=StringValue(value="author"),
                               display_name=StringValue(value="Commit Author (optional)"),
                               data_type=LiteralType.STRING,
@@ -145,7 +141,6 @@ class GithubSourceManager(SourceManager):
             },
             Github.TaskType.FETCH_RECENT_MERGES: {
                 'executor': self.fetch_recent_merges,
-                'asset_descriptor': self.github_repository_asset_descriptor,
                 'model_types': [SourceModelType.GITHUB_REPOSITORY],
                 'result_type': PlaybookTaskResultType.API_RESPONSE,
                 'display_name': 'Fetch Recent Merges for a branch',
@@ -159,7 +154,7 @@ class GithubSourceManager(SourceManager):
                               display_name=StringValue(value="Enter Branch Name. Defaults to main"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value='main')))
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value='main')))
                 ]
             },
         }
