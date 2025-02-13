@@ -612,6 +612,12 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """Custom Strategies"""
     GITHUB_REPOSITORY: _SourceModelType.ValueType  # 2601
     """Github Models"""
+    GITHUB_MEMBER: _SourceModelType.ValueType  # 2602
+    JIRA_PROJECT: _SourceModelType.ValueType  # 2701
+    """Jira Models"""
+    JIRA_USER: _SourceModelType.ValueType  # 2702
+    ARGOCD_APPS: _SourceModelType.ValueType  # 2801
+    """ArgoCd Models"""
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -697,6 +703,12 @@ MODELS_ACTIVE: SourceModelType.ValueType  # 2501
 """Custom Strategies"""
 GITHUB_REPOSITORY: SourceModelType.ValueType  # 2601
 """Github Models"""
+GITHUB_MEMBER: SourceModelType.ValueType  # 2602
+JIRA_PROJECT: SourceModelType.ValueType  # 2701
+"""Jira Models"""
+JIRA_USER: SourceModelType.ValueType  # 2702
+ARGOCD_APPS: SourceModelType.ValueType  # 2801
+"""ArgoCd Models"""
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final

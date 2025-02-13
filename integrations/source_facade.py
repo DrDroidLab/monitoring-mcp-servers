@@ -30,6 +30,8 @@ from integrations.source_manangers.slack_source_manager import SlackSourceManage
 from integrations.source_manangers.smtp_source_manager import SMTPSourceManager
 from integrations.source_manangers.sql_database_connection_source_manager import SqlDatabaseConnectionSourceManager
 from integrations.source_manangers.zenduty_source_manager import ZendutySourceManager
+from integrations.source_manangers.argocd_source_manager import ArgoCDSourceManager
+from integrations.source_manangers.jira_source_manager import JiraSourceManager
 
 from protos.base_pb2 import Source
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
@@ -108,3 +110,5 @@ source_facade.register(Source.ROOTLY, RootlySourceManager())
 source_facade.register(Source.ZENDUTY, ZendutySourceManager())
 
 source_facade.register(Source.GITHUB, GithubSourceManager())
+source_facade.register(Source.ARGOCD, ArgoCDSourceManager())
+source_facade.register(Source.JIRA_CLOUD, JiraSourceManager())
