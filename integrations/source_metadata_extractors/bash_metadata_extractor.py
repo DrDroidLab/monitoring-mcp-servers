@@ -19,13 +19,20 @@ class BashSourceMetadataExtractor(SourceMetadataExtractor):
     @log_function_call
     def extract_ssh_server(self):
         if self.ssh_server:
-            model_data = {self.ssh_server: None}
+            if '@' in self.ssh_server:
+                self.ssh_server = self.ssh_server.split('@')[1]
+            model_data = {self.ssh_server: {}}
             model_type = SourceModelType.SSH_SERVER
             self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
     def extract_ssh_user(self):
         if self.ssh_user:
-            model_data = {self.ssh_user: None}
+            model_data = {self.ssh_user: {}}
+            model_type = SourceModelType.SSH_USER
+            self.create_or_update_model_metadata(model_type, model_data)
+        elif '@' in self.ssh_server:
+            self.ssh_user = self.ssh_server.split('@')[0]
+            model_data = {self.ssh_user: {}}
             model_type = SourceModelType.SSH_USER
             self.create_or_update_model_metadata(model_type, model_data)
