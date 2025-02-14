@@ -15,9 +15,14 @@ logger = logging.getLogger(__name__)
 class BashProcessor(Processor):
     client = None
 
-    def __init__(self, remote_host=None, remote_password=None, remote_pem=None, port=None):
-        self.remote_user = remote_host.split("@")[0] if remote_host else None
-        self.remote_host = remote_host.split("@")[1] if remote_host else None
+    def __init__(self, remote_host=None, remote_password=None, remote_pem=None, port=None, remote_user=None):
+        if remote_user:
+            self.remote_user = remote_user
+        if '@' in remote_host:
+            self.remote_user = remote_host.split("@")[0] if remote_host else None
+            self.remote_host = remote_host.split("@")[1] if remote_host else None
+        else:
+            self.remote_host = remote_host if remote_host else None
         self.remote_password = remote_password if remote_password else None
         self.remote_pem = remote_pem.strip() if remote_pem else None
         self.port = port if port else 22

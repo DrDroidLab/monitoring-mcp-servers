@@ -134,12 +134,9 @@ class SourceManager:
                 task_connector_source = task.task_connector_sources[0]
                 if not task_connector_source.name or not task_connector_source.name.value:
                     raise Exception("Connector name not found in task")
-
                 connector_name = task_connector_source.name.value
                 active_connector = self.get_active_connectors(connector_name)
-
                 source_connector_proto = active_connector
-
             resolved_task, resolved_source_task, task_local_variable_map = self.get_resolved_task(global_variable_set,
                                                                                                   task)
             try:
@@ -147,13 +144,11 @@ class SourceManager:
                 task_type = resolved_source_task.type
                 playbook_task_result: PlaybookTaskResult = self.task_type_callable_map[task_type]['executor'](
                     time_range, resolved_source_task, source_connector_proto)
-
                 # Set task local variables in playbook_task_result to be stored in database
                 task_local_variable_map_proto = dict_to_proto(task_local_variable_map,
                                                               Struct) if task_local_variable_map else Struct()
                 playbook_task_result.task_local_variable_set.CopyFrom(task_local_variable_map_proto)
                 playbook_task_result.status = PlaybookExecutionStatusType.FINISHED
-
                 # Apply result transformer
                 playbook_task_result = self.apply_task_result_transformer(resolved_task, playbook_task_result)
                 return playbook_task_result

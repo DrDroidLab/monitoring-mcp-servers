@@ -120,6 +120,8 @@ def generate_credentials_dict(connector_type, connector_keys):
                     ssh_servers = ssh_servers.split(',')
                     ssh_servers = list(filter(None, ssh_servers))
                     credentials_dict['remote_host'] = ssh_servers[0]
+            elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_USER:
+                credentials_dict['remote_user'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PEM:
                 credentials_dict['remote_pem'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.REMOTE_SERVER_PASSWORD:
@@ -250,6 +252,20 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['api_key'] = conn_key.key.value
             if conn_key.key_type == SourceKeyType.GITHUB_ORG:
                 credentials_dict['org'] = conn_key.key.value
+    elif connector_type == Source.ARGOCD:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.ARGOCD_SERVER:
+                credentials_dict['argocd_server'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.ARGOCD_TOKEN:
+                credentials_dict['argocd_token'] = conn_key.key.value
+    elif connector_type == Source.JIRA_CLOUD:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.JIRA_DOMAIN:
+                credentials_dict['jira_domain'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.JIRA_CLOUD_API_KEY:
+                credentials_dict['jira_cloud_api_key'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.JIRA_EMAIL:
+                credentials_dict['jira_email'] = conn_key.key.value
     else:
         return None
     return credentials_dict
@@ -401,6 +417,9 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         ))
     elif c_type == 'BASH':
         c_source = Source.BASH
+        if 'remote_user' in credential_yaml:
+            c_keys.append(ConnectorKey(key_type=SourceKeyType.REMOTE_SERVER_USER,
+                                       key=StringValue(value=credential_yaml['remote_user'])))
         if 'remote_host' in credential_yaml:
             c_keys.append(ConnectorKey(key_type=SourceKeyType.REMOTE_SERVER_HOST,
                                        key=StringValue(value=credential_yaml['remote_host'])))
@@ -551,6 +570,36 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.KUBERNETES_CLUSTER_TOKEN,
             key=StringValue(value=credential_yaml['cluster_token'])
+        ))
+    elif c_type == 'ARGOCD':
+        if 'server' not in credential_yaml or 'token' not in credential_yaml:
+            raise Exception(f'Api Server or Token not found in credential yaml for ArgoCd source in '
+                            f'connector: {connector_name}')
+        c_source = Source.ARGOCD
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.ARGOCD_SERVER,
+            key=StringValue(value=credential_yaml['server'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.ARGOCD_TOKEN,
+            key=StringValue(value=credential_yaml['token'])
+        ))
+    elif c_type == 'JIRA_CLOUD':
+        if 'jira_cloud_api_key' not in credential_yaml or 'jira_domain' not in credential_yaml or 'jira_email' not in credential_yaml:
+            raise Exception(f'Api key or domain or email not found in credential yaml for JIRA Cloud source in '
+                            f'connector: {connector_name}')
+        c_source = Source.JIRA_CLOUD
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.JIRA_DOMAIN,
+            key=StringValue(value=credential_yaml['jira_domain'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.JIRA_CLOUD_API_KEY,
+            key=StringValue(value=credential_yaml['jira_cloud_api_key'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.JIRA_EMAIL,
+            key=StringValue(value=credential_yaml['jira_email'])
         ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')

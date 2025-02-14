@@ -132,6 +132,7 @@ integrations_connector_type_connector_keys_map = {
     ],
     Source.BASH: [
         [
+            SourceKeyType.REMOTE_SERVER_USER,
             SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PEM,
             SourceKeyType.REMOTE_SERVER_PASSWORD,
@@ -141,17 +142,41 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PEM,
             SourceKeyType.REMOTE_SERVER_PASSWORD,
+            SourceKeyType.REMOTE_SERVER_PORT,
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_USER,
+            SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PEM,
+            SourceKeyType.REMOTE_SERVER_PASSWORD,
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PEM,
+            SourceKeyType.REMOTE_SERVER_PASSWORD,
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_USER,
+            SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PEM,
+            SourceKeyType.REMOTE_SERVER_PORT,
         ],
         [
             SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PEM,
             SourceKeyType.REMOTE_SERVER_PORT,
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_USER,
+            SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PEM
         ],
         [
             SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PEM
         ],
         [
+            SourceKeyType.REMOTE_SERVER_USER,
             SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PASSWORD,
             SourceKeyType.REMOTE_SERVER_PORT,
@@ -159,11 +184,31 @@ integrations_connector_type_connector_keys_map = {
         ],
         [
             SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PASSWORD,
+            SourceKeyType.REMOTE_SERVER_PORT,
+
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_USER,
+            SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PASSWORD
         ],
         [
             SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PASSWORD
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_USER,
+            SourceKeyType.REMOTE_SERVER_HOST,
             SourceKeyType.REMOTE_SERVER_PORT,
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_HOST,
+            SourceKeyType.REMOTE_SERVER_PORT,
+        ],
+        [
+            SourceKeyType.REMOTE_SERVER_USER,
+            SourceKeyType.REMOTE_SERVER_HOST,
         ],
         [
             SourceKeyType.REMOTE_SERVER_HOST,
@@ -172,8 +217,7 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.REMOTE_SERVER_PORT,
 
         ],
-        [
-        ]
+        []
     ],
     Source.AZURE: [
         [

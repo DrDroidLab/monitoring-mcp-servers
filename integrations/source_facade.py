@@ -18,7 +18,6 @@ from integrations.source_manangers.github_source_manager import GithubSourceMana
 from integrations.source_manangers.gke_source_manager import GkeSourceManager
 from integrations.source_manangers.grafana_loki_source_manager import GrafanaLokiSourceManager
 from integrations.source_manangers.grafana_source_manager import GrafanaSourceManager
-from integrations.source_manangers.grafana_vpc_source_manager import GrafanaVpcSourceManager
 from integrations.source_manangers.kubernetes_source_manager import KubernetesSourceManager
 from integrations.source_manangers.mimir_source_manager import MimirSourceManager
 from integrations.source_manangers.mongodb_source_manager import MongoDBSourceManager
@@ -30,6 +29,8 @@ from integrations.source_manangers.slack_source_manager import SlackSourceManage
 from integrations.source_manangers.smtp_source_manager import SMTPSourceManager
 from integrations.source_manangers.sql_database_connection_source_manager import SqlDatabaseConnectionSourceManager
 from integrations.source_manangers.zenduty_source_manager import ZendutySourceManager
+from integrations.source_manangers.argocd_source_manager import ArgoCDSourceManager
+from integrations.source_manangers.jira_source_manager import JiraSourceManager
 
 from protos.base_pb2 import Source
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
@@ -82,7 +83,6 @@ source_facade.register(Source.EKS, EksSourceManager())
 source_facade.register(Source.DATADOG, DatadogSourceManager())
 source_facade.register(Source.NEW_RELIC, NewRelicSourceManager())
 source_facade.register(Source.GRAFANA, GrafanaSourceManager())
-source_facade.register(Source.GRAFANA_VPC, GrafanaVpcSourceManager())
 source_facade.register(Source.GRAFANA_MIMIR, MimirSourceManager())
 source_facade.register(Source.AZURE, AzureSourceManager())
 source_facade.register(Source.GKE, GkeSourceManager())
@@ -108,3 +108,5 @@ source_facade.register(Source.ROOTLY, RootlySourceManager())
 source_facade.register(Source.ZENDUTY, ZendutySourceManager())
 
 source_facade.register(Source.GITHUB, GithubSourceManager())
+source_facade.register(Source.ARGOCD, ArgoCDSourceManager())
+source_facade.register(Source.JIRA_CLOUD, JiraSourceManager())

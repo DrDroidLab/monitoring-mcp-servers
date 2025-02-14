@@ -229,6 +229,7 @@ enum SourceKeyType {
   GCM_PRIVATE_KEY = 30;
   GCM_CLIENT_EMAIL = 31;
   GCM_TOKEN_URI = 32;
+  GCM_SERVICE_ACCOUNT_JSON = 112;
 
   POSTGRES_HOST = 33;
   POSTGRES_USER = 34;
@@ -256,6 +257,7 @@ enum SourceKeyType {
   REMOTE_SERVER_USER = 50;
   REMOTE_SERVER_HOST = 51;
   REMOTE_SERVER_PASSWORD = 52;
+  REMOTE_SERVER_PORT = 111;
 
   MIMIR_HOST = 53;
   X_SCOPE_ORG_ID = 54;
@@ -332,8 +334,6 @@ enum SourceKeyType {
   ARGOCD_TOKEN = 107;
 
   ROLLBAR_ACCESS_TOKEN = 108;
-
-  REMOTE_SERVER_PORT = 111;
 }
 
 enum SourceModelType {
@@ -395,9 +395,11 @@ enum SourceModelType {
 
   //Azure Models
   AZURE_WORKSPACE = 1001;
+  AZURE_RESOURCE = 1002;
 
   //Remote Server Models
   SSH_SERVER = 1100;
+  SSH_USER = 1101;
 
   //Mimir Server Models
   GRAFANA_MIMIR_PROMQL = 1201;
@@ -445,4 +447,12 @@ enum SourceModelType {
 
   //Github Models
   GITHUB_REPOSITORY = 2601;
+  GITHUB_MEMBER = 2602;
+
+  // Jira Models
+  JIRA_PROJECT = 2701;
+  JIRA_USER = 2702;
+
+  // ArgoCd Models
+  ARGOCD_APPS = 2801;
 }

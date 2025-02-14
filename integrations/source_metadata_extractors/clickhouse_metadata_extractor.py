@@ -13,7 +13,6 @@ class ClickhouseSourceMetadataExtractor(SourceMetadataExtractor):
     def __init__(self, request_id: str, connector_name: str, interface: str, host: str, port: str, user: str,
                  password: str):
         self.__ch_db_processor = ClickhouseDBProcessor(interface, host, port, user, password)
-
         super().__init__(request_id, connector_name, Source.CLICKHOUSE)
 
     @log_function_call
@@ -33,7 +32,7 @@ class ClickhouseSourceMetadataExtractor(SourceMetadataExtractor):
             if db_table_details_map:
                 for db_name, table_details in db_table_details_map.items():
                     model_data[db_name] = table_details
-                    self.create_or_update_model_metadata(model_type, db_name, table_details)
+            self.create_or_update_model_metadata(model_type, model_data)
         except Exception as e:
             logger.error(f"Exception occurred while fetching clickhouse tables with error: {e}")
         return model_data

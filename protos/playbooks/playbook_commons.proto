@@ -65,6 +65,8 @@ message TableResult {
   google.protobuf.UInt64Value limit = 3;
   google.protobuf.UInt64Value offset = 4;
   repeated TableRow rows = 5;
+  google.protobuf.BoolValue searchable = 6;
+
 }
 
 message ApiResponseResult {

@@ -45,6 +45,10 @@ class BashSourceManager(SourceManager):
             generated_credentials = generate_credentials_dict(bash_connector.type, bash_connector.keys)
         if kwargs.get('remote_server_str', None):
             remote_server_str = kwargs.get('remote_server_str')
+            generated_remote_server_str = generated_credentials['remote_host']
+            if '@' in generated_remote_server_str:
+                if '@' not in remote_server_str:
+                    remote_server_str = f"{generated_remote_server_str.split('@')[0]}@{remote_server_str}"
             generated_credentials['remote_host'] = remote_server_str
         return BashProcessor(**generated_credentials)
 

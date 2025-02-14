@@ -14,8 +14,8 @@ def populate_connector_metadata(request_id, connector_name, connector_type, conn
     try:
         extractor_class = source_metadata_extractor_facade.get_connector_metadata_extractor_class(connector_type)
     except Exception as e:
-        logger.error(f"Exception occurred while fetching extractor class for connector: {connector_name}, "
-                     f"with error: {e}")
+        logger.warning(f"Exception occurred while fetching extractor class for connector: {connector_name}, "
+                       f"with error: {e}")
         return False
     extractor = extractor_class(request_id=request_id, connector_name=connector_name, **connector_credentials_dict)
     extractor_methods = [method for method in dir(extractor) if

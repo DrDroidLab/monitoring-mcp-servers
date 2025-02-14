@@ -2,6 +2,7 @@ syntax = "proto3";
 package protos.connectors;
 
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
 import "protos/base.proto";
 
 message GrafanaTargetMetricPromQlAssetModel {
@@ -48,6 +49,11 @@ message GrafanaDatasourceAssetModel {
   google.protobuf.BoolValue datasource_isDefault = 13;
 }
 
+message GrafanaDashboardAssetModel {
+  google.protobuf.UInt64Value dashboard_id = 1;
+  google.protobuf.Struct dashboard_json = 2;
+}
+
 message GrafanaTargetMetricPromQlAssetOptions {
   message GrafanaDashboardOptions {
     message GrafanaPanelOptions {
@@ -71,6 +77,14 @@ message GrafanaDatasourceAssetOptions {
   repeated GrafanaDatasourceOptions prometheus_datasources = 1;
 }
 
+message GrafanaDashboardAssetOptions {
+  message GrafanaDashboardOptions {
+    google.protobuf.StringValue dashboard_uid = 1;
+    google.protobuf.StringValue dashboard_title = 2;
+  }
+  repeated GrafanaDashboardOptions dashboards = 1;
+}
+
 message GrafanaAssetModel {
   google.protobuf.UInt64Value id = 1;
   Source connector_type = 2;
@@ -79,6 +93,7 @@ message GrafanaAssetModel {
   oneof asset {
     GrafanaTargetMetricPromQlAssetModel grafana_target_metric_promql = 5;
     GrafanaDatasourceAssetModel grafana_prometheus_datasource = 6;
+    GrafanaDashboardAssetModel grafana_dashboard = 8;
   }
 }
 
