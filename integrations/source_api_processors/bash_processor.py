@@ -16,9 +16,8 @@ class BashProcessor(Processor):
     client = None
 
     def __init__(self, remote_host=None, remote_password=None, remote_pem=None, port=None, remote_user=None):
-        if remote_user:
-            self.remote_user = remote_user
-        if '@' in remote_host:
+        self.remote_user = remote_user if remote_user else None
+        if remote_host and '@' in remote_host:
             self.remote_user = remote_host.split("@")[0] if remote_host else None
             self.remote_host = remote_host.split("@")[1] if remote_host else None
         else:
