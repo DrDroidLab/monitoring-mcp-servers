@@ -339,6 +339,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     GCM_PRIVATE_KEY: _SourceKeyType.ValueType  # 30
     GCM_CLIENT_EMAIL: _SourceKeyType.ValueType  # 31
     GCM_TOKEN_URI: _SourceKeyType.ValueType  # 32
+    GCM_SERVICE_ACCOUNT_JSON: _SourceKeyType.ValueType  # 112
     POSTGRES_HOST: _SourceKeyType.ValueType  # 33
     POSTGRES_USER: _SourceKeyType.ValueType  # 34
     POSTGRES_PASSWORD: _SourceKeyType.ValueType  # 35
@@ -358,6 +359,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     REMOTE_SERVER_USER: _SourceKeyType.ValueType  # 50
     REMOTE_SERVER_HOST: _SourceKeyType.ValueType  # 51
     REMOTE_SERVER_PASSWORD: _SourceKeyType.ValueType  # 52
+    REMOTE_SERVER_PORT: _SourceKeyType.ValueType  # 111
     MIMIR_HOST: _SourceKeyType.ValueType  # 53
     X_SCOPE_ORG_ID: _SourceKeyType.ValueType  # 54
     SSL_VERIFY: _SourceKeyType.ValueType  # 55
@@ -410,7 +412,6 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ARGOCD_SERVER: _SourceKeyType.ValueType  # 106
     ARGOCD_TOKEN: _SourceKeyType.ValueType  # 107
     ROLLBAR_ACCESS_TOKEN: _SourceKeyType.ValueType  # 108
-    REMOTE_SERVER_PORT: _SourceKeyType.ValueType  # 111
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -450,6 +451,7 @@ GCM_PROJECT_ID: SourceKeyType.ValueType  # 29
 GCM_PRIVATE_KEY: SourceKeyType.ValueType  # 30
 GCM_CLIENT_EMAIL: SourceKeyType.ValueType  # 31
 GCM_TOKEN_URI: SourceKeyType.ValueType  # 32
+GCM_SERVICE_ACCOUNT_JSON: SourceKeyType.ValueType  # 112
 POSTGRES_HOST: SourceKeyType.ValueType  # 33
 POSTGRES_USER: SourceKeyType.ValueType  # 34
 POSTGRES_PASSWORD: SourceKeyType.ValueType  # 35
@@ -469,6 +471,7 @@ REMOTE_SERVER_PEM: SourceKeyType.ValueType  # 49
 REMOTE_SERVER_USER: SourceKeyType.ValueType  # 50
 REMOTE_SERVER_HOST: SourceKeyType.ValueType  # 51
 REMOTE_SERVER_PASSWORD: SourceKeyType.ValueType  # 52
+REMOTE_SERVER_PORT: SourceKeyType.ValueType  # 111
 MIMIR_HOST: SourceKeyType.ValueType  # 53
 X_SCOPE_ORG_ID: SourceKeyType.ValueType  # 54
 SSL_VERIFY: SourceKeyType.ValueType  # 55
@@ -521,7 +524,6 @@ CUSTOM_STRATEGIES_ACCOUNT_ID: SourceKeyType.ValueType  # 104
 ARGOCD_SERVER: SourceKeyType.ValueType  # 106
 ARGOCD_TOKEN: SourceKeyType.ValueType  # 107
 ROLLBAR_ACCESS_TOKEN: SourceKeyType.ValueType  # 108
-REMOTE_SERVER_PORT: SourceKeyType.ValueType  # 111
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:
