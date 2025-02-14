@@ -18,7 +18,6 @@ from integrations.source_manangers.github_source_manager import GithubSourceMana
 from integrations.source_manangers.gke_source_manager import GkeSourceManager
 from integrations.source_manangers.grafana_loki_source_manager import GrafanaLokiSourceManager
 from integrations.source_manangers.grafana_source_manager import GrafanaSourceManager
-from integrations.source_manangers.grafana_vpc_source_manager import GrafanaVpcSourceManager
 from integrations.source_manangers.kubernetes_source_manager import KubernetesSourceManager
 from integrations.source_manangers.mimir_source_manager import MimirSourceManager
 from integrations.source_manangers.mongodb_source_manager import MongoDBSourceManager
@@ -84,7 +83,6 @@ source_facade.register(Source.EKS, EksSourceManager())
 source_facade.register(Source.DATADOG, DatadogSourceManager())
 source_facade.register(Source.NEW_RELIC, NewRelicSourceManager())
 source_facade.register(Source.GRAFANA, GrafanaSourceManager())
-source_facade.register(Source.GRAFANA_VPC, GrafanaVpcSourceManager())
 source_facade.register(Source.GRAFANA_MIMIR, MimirSourceManager())
 source_facade.register(Source.AZURE, AzureSourceManager())
 source_facade.register(Source.GKE, GkeSourceManager())

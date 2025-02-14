@@ -12,7 +12,6 @@ class DatadogSourceMetadataExtractor(SourceMetadataExtractor):
 
     def __init__(self, request_id: str, connector_name: str, dd_app_key, dd_api_key, dd_api_domain='datadoghq.com'):
         self.__dd_api_processor = DatadogApiProcessor(dd_app_key, dd_api_key, dd_api_domain)
-
         super().__init__(request_id, connector_name, Source.DATADOG)
 
     @log_function_call

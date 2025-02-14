@@ -371,8 +371,9 @@ class GithubAPIProcessor(Processor):
                                  f"details for branch: {branch} in {self.org}/{repo} with status_code: "
                                  f"{response.status_code} and response: {response.text}")
         except Exception as e:
-            logger.error(f"GithubAPIProcessor.get_branch_commits:: Exception occurred while fetching github commit issue "
-                         f"details for branch: {branch} in {self.org}/{repo} with error: {e}")
+            logger.error(
+                f"GithubAPIProcessor.get_branch_commits:: Exception occurred while fetching github commit issue "
+                f"details for branch: {branch} in {self.org}/{repo} with error: {e}")
         return None
 
     def get_recent_merges(self, repo, branch='main'):
@@ -392,9 +393,10 @@ class GithubAPIProcessor(Processor):
                         recent_merges = sorted(recent_merges, key=lambda x: x.get('merged_at', 0), reverse=True)
                     return recent_merges
                 else:
-                    logger.error(f"GithubAPIProcessor.get_recent_merges:: Error occurred while fetching github PR merges "
-                                 f"details for branch: {branch} in {self.org}/{repo} with status_code: "
-                                 f"{response.status_code} and response: {response.text}")
+                    logger.error(
+                        f"GithubAPIProcessor.get_recent_merges:: Error occurred while fetching github PR merges "
+                        f"details for branch: {branch} in {self.org}/{repo} with status_code: "
+                        f"{response.status_code} and response: {response.text}")
         except Exception as e:
             logger.error(f"GithubAPIProcessor.get_recent_merges:: Exception occurred while fetching github PR merges "
                          f"details for branch: {branch} in {self.org}/{repo} with error: {e}")
@@ -418,9 +420,10 @@ class GithubAPIProcessor(Processor):
                             page += 1
                             continue
                     else:
-                        logger.error(f"GithubAPIProcessor.list_all_members:: Error occurred while fetching github members "
-                                     f"in {self.org} with status_code: {response.status_code} and response: "
-                                     f"{response.text}")
+                        logger.error(
+                            f"GithubAPIProcessor.list_all_members:: Error occurred while fetching github members "
+                            f"in {self.org} with status_code: {response.status_code} and response: "
+                            f"{response.text}")
                 break
             return all_members
         except Exception as e:

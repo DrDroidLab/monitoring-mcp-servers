@@ -18,6 +18,11 @@ import "protos/assets/bash_asset.proto";
 import "protos/assets/gke_asset.proto";
 import "protos/assets/elastic_search_asset.proto";
 import "protos/assets/gcm_asset.proto";
+import "protos/assets/open_search_asset.proto";
+import "protos/assets/asana_asset.proto";
+import "protos/assets/github_asset.proto";
+import "protos/assets/jira_asset.proto";
+import "protos/assets/argocd_asset.proto";
 
 
 message AccountConnectorAssets {
@@ -36,5 +41,11 @@ message AccountConnectorAssets {
     GkeAssets gke = 111;
     ElasticSearchAssets elastic_search = 112;
     GcmAssets gcm = 113;
+    DatadogAssets datadog_oauth = 15;
+    OpenSearchAssets open_search = 16;
+    AsanaAssets asana = 17;
+    GithubAssets github = 18;
+    JiraAssets jira_cloud = 19;
+    ArgoCDAssets argocd = 20;
   }
 }

@@ -5,6 +5,7 @@ from integrations.processor import Processor
 
 logger = logging.getLogger(__name__)
 
+
 class ArgoCDAPIProcessor(Processor):
     def __init__(self, argocd_server, argocd_token):
         self.__token = argocd_token
@@ -13,9 +14,7 @@ class ArgoCDAPIProcessor(Processor):
     def test_connection(self):
         try:
             url = f'{self.__server}/api/v1/projects'
-            headers = {
-                'Authorization': f'Bearer {self.__token}'
-            }
+            headers = {'Authorization': f'Bearer {self.__token}'}
             response = requests.request("GET", url, headers=headers, verify=False)
             if response.status_code == 200:
                 return True
@@ -28,55 +27,43 @@ class ArgoCDAPIProcessor(Processor):
     def get_deployment_info(self):
         try:
             url = f'{self.__server}/api/v1/applications'
-            headers = {
-                'Authorization': f'Bearer {self.__token}'
-            }
+            headers = {'Authorization': f'Bearer {self.__token}'}
             response = requests.request("GET", url, headers=headers, verify=False)
             if response.status_code == 200:
                 return response.json()
             else:
                 raise Exception(f"Error occurred while fetching deployment info from argocd "
-                             f"with status_code: {response.status_code} and response: {response.text}")
+                                f"with status_code: {response.status_code} and response: {response.text}")
         except Exception as e:
             logger.error(f"Exception occurred while fetching deployment info from ArgoCD with error: {e}")
             raise e
-        
+
     def get_application_details(self, app_name):
         try:
             url = f'{self.__server}/api/v1/applications/{app_name}'
-            headers = {
-                'Authorization': f'Bearer {self.__token}'
-            }
+            headers = {'Authorization': f'Bearer {self.__token}'}
             response = requests.request("GET", url, headers=headers, verify=False)
-            
             if response.status_code == 200:
                 return response.json()
             else:
                 raise Exception(f"Error occurred while fetching application details from argocd "
-                             f"with status_code: {response.status_code} and response: {response.text}")
+                                f"with status_code: {response.status_code} and response: {response.text}")
         except Exception as e:
             logger.error(f"Exception occurred while fetching application details from ArgoCD with error: {e}")
             raise e
-          
+
     def disable_auto_sync(self, app_name):
         try:
             url = f'{self.__server}/api/v1/applications/{app_name}'
-            headers = {
-                'Authorization': f'Bearer {self.__token}'
-            }
-            
-            payload = {
-                "patch": "[{\"op\": \"remove\", \"path\": \"/spec/syncPolicy/automated\"}]",
-                "patchType": "json"
-            }
-            
+            headers = {'Authorization': f'Bearer {self.__token}'}
+            payload = {"patch": "[{\"op\": \"remove\", \"path\": \"/spec/syncPolicy/automated\"}]", "patchType": "json"}
+
             response = requests.patch(url, headers=headers, json=payload, verify=False)
-                        
             if response.status_code == 200:
                 return response.json()
             else:
                 raise Exception(f"Error occurred while disabling auto-sync for {app_name} from argocd "
-                             f"with status_code: {response.status_code} and response: {response.text}")
+                                f"with status_code: {response.status_code} and response: {response.text}")
         except Exception as e:
             logger.error(f"Exception occurred while disabling auto-sync for {app_name} from ArgoCD with error: {e}")
             raise e
@@ -87,26 +74,16 @@ class ArgoCDAPIProcessor(Processor):
         """
         try:
             url = f'{self.__server}/api/v1/applications/{app_name}/rollback'
-            headers = {
-                'Authorization': f'Bearer {self.__token}',
-                'Content-Type': 'application/json'
-            }
-            
-            payload = {
-                "id": deployment_id,
-                "revision": target_revision
-            }
-                                    
+            headers = {'Authorization': f'Bearer {self.__token}', 'Content-Type': 'application/json'}
+            payload = {"id": deployment_id, "revision": target_revision}
             response = requests.post(url, headers=headers, json=payload, verify=False)
-                                    
             if response.status_code in (200, 204):
-                logger.info(
-                    f"Successfully updated target revision to '{target_revision}' for application '{app_name}'.")
+                logger.info(f"Successfully updated target revision to '{target_revision}' for "
+                            f"application '{app_name}'.")
             else:
                 raise Exception(f"Error occurred while updating target revision in ArgoCD "
                                 f"with status_code: {response.status_code} and response: {response.text}")
         except Exception as e:
-            logger.error(
-                f"Exception occurred while updating target revision for application '{app_name}' with error: {e}")
+            logger.error(f"Exception occurred while updating target revision for application '{app_name}' "
+                         f"with error: {e}")
             raise e
-        

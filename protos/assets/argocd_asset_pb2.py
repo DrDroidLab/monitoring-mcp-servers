@@ -15,7 +15,7 @@ from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb
 from protos import base_pb2 as protos_dot_base__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n protos/assets/argocd_asset.proto\x12\x11protos.connectors\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"&\n\x16\x41rgoCDAppsAssetOptions\x12\x0c\n\x04\x61pps\x18\x01 \x03(\t\"B\n\x14\x41rgoCDAppsAssetModel\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"\xea\x01\n\x10\x41rgoCDAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12>\n\x0b\x61rgocd_apps\x18\x65 \x01(\x0b\x32\'.protos.connectors.ArgoCDAppsAssetModelH\x00\x42\x07\n\x05\x61sset\"C\n\x0c\x41rgoCDAssets\x12\x33\n\x06\x61ssets\x18\x01 \x03(\x0b\x32#.protos.connectors.ArgoCDAssetModelb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n protos/assets/argocd_asset.proto\x12\x11protos.connectors\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x11protos/base.proto\"&\n\x16\x41rgoCDAppsAssetOptions\x12\x0c\n\x04\x61pps\x18\x01 \x03(\t\"n\n\x14\x41rgoCDAppsAssetModel\x12*\n\x04name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12*\n\x04path\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"\xea\x01\n\x10\x41rgoCDAssetModel\x12(\n\x02id\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12&\n\x0e\x63onnector_type\x18\x02 \x01(\x0e\x32\x0e.protos.Source\x12%\n\x04type\x18\x03 \x01(\x0e\x32\x17.protos.SourceModelType\x12\x14\n\x0clast_updated\x18\x04 \x01(\x10\x12>\n\x0b\x61rgocd_apps\x18\x65 \x01(\x0b\x32\'.protos.connectors.ArgoCDAppsAssetModelH\x00\x42\x07\n\x05\x61sset\"C\n\x0c\x41rgoCDAssets\x12\x33\n\x06\x61ssets\x18\x01 \x03(\x0b\x32#.protos.connectors.ArgoCDAssetModelb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.assets.argocd_asset_pb2', globals())
@@ -25,9 +25,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _ARGOCDAPPSASSETOPTIONS._serialized_start=106
   _ARGOCDAPPSASSETOPTIONS._serialized_end=144
   _ARGOCDAPPSASSETMODEL._serialized_start=146
-  _ARGOCDAPPSASSETMODEL._serialized_end=212
-  _ARGOCDASSETMODEL._serialized_start=215
-  _ARGOCDASSETMODEL._serialized_end=449
-  _ARGOCDASSETS._serialized_start=451
-  _ARGOCDASSETS._serialized_end=518
+  _ARGOCDAPPSASSETMODEL._serialized_end=256
+  _ARGOCDASSETMODEL._serialized_start=259
+  _ARGOCDASSETMODEL._serialized_end=493
+  _ARGOCDASSETS._serialized_start=495
+  _ARGOCDASSETS._serialized_end=562
 # @@protoc_insertion_point(module_scope)

@@ -8,7 +8,7 @@ from protos.literal_pb2 import LiteralType, Literal
 from protos.playbooks.source_task_definitions.jira_task_pb2 import Jira
 
 from google.protobuf.wrappers_pb2 import StringValue
-from protos.base_pb2 import TimeRange, Source, SourceModelType
+from protos.base_pb2 import Source, SourceModelType
 
 from utils.credentilal_utils import generate_credentials_dict
 from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, PlaybookTaskResultType, ApiResponseResult, \
@@ -166,23 +166,18 @@ class JiraSourceManager(SourceManager):
         try:
             if not jira_connector or not jira_connector.keys:
                 raise Exception("Invalid JIRA connector: Missing required credentials")
-
             credentials = generate_credentials_dict(jira_connector.type, jira_connector.keys)
-
             required_keys = ['jira_cloud_api_key', 'jira_domain', 'jira_email']
             missing_keys = [key for key in required_keys if key not in credentials]
-
             if missing_keys:
                 raise Exception(f"Missing required JIRA credentials: {', '.join(missing_keys)}")
-
             return JiraApiProcessor(**credentials)
-
         except Exception as e:
             logger.error(f"Error creating JIRA processor: {str(e)}")
             raise
 
     def get_users(self, time_range: TimeRange, jira_task: Jira,
-                      jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                  jira_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
@@ -235,7 +230,7 @@ class JiraSourceManager(SourceManager):
             )
 
     def assign_ticket(self, time_range: TimeRange, jira_task: Jira,
-                        jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                      jira_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
@@ -404,71 +399,45 @@ class JiraSourceManager(SourceManager):
             )
 
     def get_ticket(self, time_range: TimeRange, jira_task: Jira,
-                      jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                   jira_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
                 raise ValueError("No JIRA source found")
-
             task = jira_task.get_ticket
-
             # Extract and validate fields
             ticket_key = task.ticket_key.value
-
             # Validate required fields
             if not ticket_key:
                 missing_fields = []
                 if not ticket_key: missing_fields.append("ticket_key")
                 error_msg = f"Missing required fields: {', '.join(missing_fields)}"
                 logger.error(error_msg)
-                return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.TEXT,
-                    text=TextResult(output=StringValue(value=error_msg)),
-                    source=self.source
-                )
-
+                return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                          text=TextResult(output=StringValue(value=error_msg)), source=self.source)
             # Get JIRA processor
             jira_processor = self.get_connector_processor(jira_connector)
-
             # Log attempt to get ticket
             logger.info(f"Attempting to get JIRA ticket {ticket_key}")
-
             # Get the ticket
             result = jira_processor.get_ticket(ticket_key)
-
             if not result:
                 error_msg = "JIRA API returned no result when fetching ticket"
                 logger.error(error_msg)
-                return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.TEXT,
-                    text=TextResult(output=StringValue(value=error_msg)),
-                    source=self.source
-                )
-
+                return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                          text=TextResult(output=StringValue(value=error_msg)), source=self.source)
             # Convert result to Struct for API response
-            response_dict = {
-                'ticket': result
-            }
-
+            response_dict = {'ticket': result}
             logger.info(f"Successfully fetched JIRA ticket {ticket_key}")
-
             response_struct = dict_to_proto(response_dict, Struct)
             jira_output = ApiResponseResult(response_body=response_struct)
-
-            return PlaybookTaskResult(
-                type=PlaybookTaskResultType.API_RESPONSE,
-                source=self.source,
-                api_response=jira_output
-            )
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, source=self.source,
+                                      api_response=jira_output)
         except Exception as e:
             error_msg = f"Exception occurred while fetching JIRA ticket: {str(e)}"
             logger.error(error_msg, exc_info=True)
-
-            return PlaybookTaskResult(
-                type=PlaybookTaskResultType.TEXT,
-                text=TextResult(output=StringValue(value=error_msg)),
-                source=self.source
-            )
+            return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                      text=TextResult(output=StringValue(value=error_msg)), source=self.source)
 
     def search_tickets(self, time_range: TimeRange, jira_task: Jira,
                        jira_connector: ConnectorProto) -> PlaybookTaskResult:
@@ -476,33 +445,23 @@ class JiraSourceManager(SourceManager):
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
                 raise ValueError("No JIRA source found")
-
             task = jira_task.search_tickets
-
             # Extract and validate fields
             query = task.query.value
-
             # Validate required fields
             if not query:
                 missing_fields = []
                 if not query: missing_fields.append("query")
                 error_msg = f"Missing required fields: {', '.join(missing_fields)}"
                 logger.error(error_msg)
-                return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.TEXT,
-                    text=TextResult(output=StringValue(value=error_msg)),
-                    source=self.source
-                )
-
+                return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                          text=TextResult(output=StringValue(value=error_msg)), source=self.source)
             # Get JIRA processor
             jira_processor = self.get_connector_processor(jira_connector)
-
             # Log attempt to search tickets
             logger.info(f"Attempting to search JIRA tickets with query: {query}")
-
             # Search for tickets
             result = jira_processor.search_tickets(query)
-
             if not result:
                 error_msg = "JIRA API returned no result when searching tickets"
                 logger.error(error_msg)
@@ -511,28 +470,13 @@ class JiraSourceManager(SourceManager):
                     text=TextResult(output=StringValue(value=error_msg)),
                     source=self.source
                 )
-
-            # Convert result to Struct for API response
-            response_dict = {
-                'tickets': result
-            }
-
-            logger.info(f"Successfully searched JIRA tickets")
-
+            response_dict = {'tickets': result}
             response_struct = dict_to_proto(response_dict, Struct)
             jira_output = ApiResponseResult(response_body=response_struct)
-
-            return PlaybookTaskResult(
-                type=PlaybookTaskResultType.API_RESPONSE,
-                source=self.source,
-                api_response=jira_output
-            )
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, source=self.source,
+                                      api_response=jira_output)
         except Exception as e:
             error_msg = f"Exception occurred while searching JIRA tickets: {str(e)}"
             logger.error(error_msg, exc_info=True)
-
-            return PlaybookTaskResult(
-                type=PlaybookTaskResultType.TEXT,
-                text=TextResult(output=StringValue(value=error_msg)),
-                source=self.source
-            )
+            return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                      text=TextResult(output=StringValue(value=error_msg)), source=self.source)

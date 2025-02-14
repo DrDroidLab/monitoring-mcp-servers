@@ -222,6 +222,7 @@ class TableResult(google.protobuf.message.Message):
     LIMIT_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     ROWS_FIELD_NUMBER: builtins.int
+    SEARCHABLE_FIELD_NUMBER: builtins.int
     @property
     def raw_query(self) -> google.protobuf.wrappers_pb2.StringValue: ...
     @property
@@ -232,6 +233,8 @@ class TableResult(google.protobuf.message.Message):
     def offset(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
     @property
     def rows(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TableResult.TableRow]: ...
+    @property
+    def searchable(self) -> google.protobuf.wrappers_pb2.BoolValue: ...
     def __init__(
         self,
         *,
@@ -240,9 +243,10 @@ class TableResult(google.protobuf.message.Message):
         limit: google.protobuf.wrappers_pb2.UInt64Value | None = ...,
         offset: google.protobuf.wrappers_pb2.UInt64Value | None = ...,
         rows: collections.abc.Iterable[global___TableResult.TableRow] | None = ...,
+        searchable: google.protobuf.wrappers_pb2.BoolValue | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["limit", b"limit", "offset", b"offset", "raw_query", b"raw_query", "total_count", b"total_count"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["limit", b"limit", "offset", b"offset", "raw_query", b"raw_query", "rows", b"rows", "total_count", b"total_count"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["limit", b"limit", "offset", b"offset", "raw_query", b"raw_query", "searchable", b"searchable", "total_count", b"total_count"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["limit", b"limit", "offset", b"offset", "raw_query", b"raw_query", "rows", b"rows", "searchable", b"searchable", "total_count", b"total_count"]) -> None: ...
 
 global___TableResult = TableResult
 

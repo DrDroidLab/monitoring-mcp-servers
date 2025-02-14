@@ -256,10 +256,11 @@ class GithubSourceManager(SourceManager):
             task = github_task.fetch_recent_commits
             repo = task.repo.value
             branch = task.branch.value
-            time_since=format_to_github_timestamp(time_range.time_geq)
-            time_until=format_to_github_timestamp(time_range.time_lt)
+            time_since = format_to_github_timestamp(time_range.time_geq)
+            time_until = format_to_github_timestamp(time_range.time_lt)
             author = task.author.value if task.author.value else None
-            recent_commits = self.get_connector_processor(github_connector).get_branch_commits(repo, branch, time_since, time_until, author)
+            recent_commits = self.get_connector_processor(github_connector).get_branch_commits(repo, branch, time_since,
+                                                                                               time_until, author)
             response_struct = dict_to_proto({"recent_commits": recent_commits}, Struct)
             commit_output = ApiResponseResult(response_body=response_struct)
             return PlaybookTaskResult(

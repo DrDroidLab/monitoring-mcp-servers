@@ -16,12 +16,14 @@ from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import dict_to_proto, proto_to_dict
 
+
 class GrafanaSourceManager(SourceManager):
 
     def __init__(self):
         self.source = Source.GRAFANA
         self.task_proto = Grafana
         self.task_type_callable_map = {
+            # TODO(MG): Only kept for backward compatibility (NOT USED). Remove this
             Grafana.TaskType.PROMQL_METRIC_EXECUTION: {
                 'executor': self.execute_promql_metric_execution,
                 'model_types': [SourceModelType.GRAFANA_TARGET_METRIC_PROMQL],
@@ -112,7 +114,7 @@ class GrafanaSourceManager(SourceManager):
                               form_field_type=FormFieldType.MULTILINE_FT,
                               disabled=True,
                               default_value=Literal(type=LiteralType.STRING, string=StringValue(value="[]"))),
-                    
+
                 ]
             },
         }
@@ -148,7 +150,6 @@ class GrafanaSourceManager(SourceManager):
             start_time_str = current_start_time.isoformat() + "Z"
             end_time_str = current_end_time.isoformat() + "Z"
             period = 300
-
             print(
                 f"Playbook Task Downstream Request: Type -> Grafana, Datasource_Uid -> {datasource_uid}, "
                 f"Promql_Metric_Query -> {promql_metric_query}, Start_Time -> {start_time_str}, "
@@ -237,13 +238,10 @@ class GrafanaSourceManager(SourceManager):
         try:
             if not grafana_connector:
                 raise Exception("Task execution Failed:: No Grafana source found")
-
             task = grafana_task.prometheus_datasource_metric_execution
             datasource_uid = task.datasource_uid.value
             promql_metric_query = task.promql_expression.value
-
             grafana_api_processor = self.get_connector_processor(grafana_connector)
-
             queries = [
                 {
                     "expr": promql_metric_query,
@@ -251,20 +249,15 @@ class GrafanaSourceManager(SourceManager):
                     "refId": "A"
                 }
             ]
-
             print(
                 f"Playbook Task Downstream Request: Type -> Grafana, Datasource_Uid -> {datasource_uid}, "
                 f"Promql_Metric_Query -> {promql_metric_query}, Offset -> 0", flush=True)
-
             response = grafana_api_processor.panel_query_datasource_api(tr=time_range, queries=queries)
-
             if not response:
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                     value=f"No data returned from Grafana for query: {queries}")), source=self.source)
-            
             response_struct = dict_to_proto(response, Struct)
             output = ApiResponseResult(response_body=response_struct)
-
             task_result = PlaybookTaskResult(
                 source=self.source,
                 type=PlaybookTaskResultType.API_RESPONSE,
@@ -292,27 +285,17 @@ class GrafanaSourceManager(SourceManager):
                 }
                 for idx, q in enumerate(task.queries)
             ]
-
             grafana_api_processor = self.get_connector_processor(grafana_connector)
-
-            print(
-                f"Playbook Task Downstream Request: Type -> Grafana, Dashboard ID -> {dashboard_id}, Panel ID -> {panel_id}"
-                f"Queries -> {queries}, Offset -> 0", flush=True)
-
+            print(f"Playbook Task Downstream Request: Type -> Grafana, Dashboard ID -> {dashboard_id}, Panel ID -> "
+                  f"{panel_id} Queries -> {queries}, Offset -> 0", flush=True)
             response = grafana_api_processor.panel_query_datasource_api(tr=time_range, queries=queries)
-            
             if not response:
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                     value=f"No data returned from Grafana for query: {queries}")), source=self.source)
-
-            
             response_struct = dict_to_proto(response, Struct)
             output = ApiResponseResult(response_body=response_struct)
-
-            task_result = PlaybookTaskResult(
-                source=self.source,
-                type=PlaybookTaskResultType.API_RESPONSE,
-                api_response=output)
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
             return task_result
         except Exception as e:
             raise Exception(f"Error while executing Grafana task: {e}")

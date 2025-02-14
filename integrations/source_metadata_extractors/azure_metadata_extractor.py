@@ -31,3 +31,22 @@ class AzureConnectorMetadataExtractor(SourceMetadataExtractor):
             model_data[workspace_id] = w
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
+
+    @log_function_call
+    def extract_resources(self):
+        model_type = SourceModelType.AZURE_RESOURCE
+        try:
+            resources = self.__client.fetch_resources()
+        except Exception as e:
+            logger.error(f'Error fetching azure resources: {e}')
+            return
+        if not resources:
+            return
+
+        model_data = {}
+        for r in resources:
+            # resource_id = r.get('id', '')
+            name = r.get('name', '')
+            model_data[name] = r
+        if model_data:
+            self.create_or_update_model_metadata(model_type, model_data)

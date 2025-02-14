@@ -4,7 +4,8 @@ from datetime import timedelta
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.loganalytics import LogAnalyticsManagementClient
-from azure.monitor.query import LogsQueryClient
+from azure.monitor.query import LogsQueryClient, MetricsQueryClient
+from azure.mgmt.resource import ResourceManagementClient
 
 from integrations.processor import Processor
 
@@ -82,6 +83,48 @@ class AzureApiProcessor(Processor):
             return [workspace.as_dict() for workspace in workspaces]
         except Exception as e:
             logger.error(f"Failed to fetch workspaces with error: {e}")
+            return None
+
+    def fetch_resources(self):
+        try:
+            credentials = self.get_credentials()
+            if not credentials:
+                logger.error("Azure Connection Error:: Failed to get credentials")
+                return None
+            resource_client = ResourceManagementClient(credentials, self.__subscription_id)
+            metrics_client = MetricsQueryClient(credentials)
+            resources = resource_client.resources.list()
+            if not resources:
+                logger.error("Azure Connection Error:: No Resources Found")
+                return None
+
+            # Only include resources that actually produce metrics
+            metric_producing_types = [
+                "Microsoft.Compute/virtualMachines",
+                "Microsoft.ContainerService/managedClusters",
+                "Microsoft.Network/loadBalancers",
+                "Microsoft.Network/applicationGateways",
+                "Microsoft.Storage/storageAccounts",
+                "Microsoft.Sql/servers/databases",
+                "Microsoft.Web/sites",
+                "Microsoft.Insights/components"
+            ]
+            valid_resources = []
+            for resource in resources:
+                if resource.type in metric_producing_types:
+                    resource_dict = resource.as_dict()
+                    resource_id = resource.id
+                    try:
+                        metric_names = metrics_client.list_metric_definitions(resource_id)
+                        metric_names = [metric.name for metric in metric_names]
+                    except Exception as e:
+                        logger.error(f"Failed to fetch azure  metrics for resource {resource_id} with error: {e}")
+                        metric_names = []
+                    resource_dict["available_metrics"] = {"metric_names": metric_names}
+                    valid_resources.append(resource_dict)
+            return valid_resources
+        except Exception as e:
+            logger.error(f"Failed to fetch azure resources with error: {e}")
             return None
 
     def query_log_analytics(self, workspace_id, query, timespan=timedelta(hours=4)):

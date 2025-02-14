@@ -21,11 +21,8 @@ class JiraApiProcessor(Processor):
     def _auth_headers(self):
         credentials = f"{self.__username}:{self.__api_token}"
         encoded_credentials = b64encode(credentials.encode('utf-8')).decode('utf-8')
-        return {
-            "Authorization": f"Basic {encoded_credentials}",
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
+        return {"Authorization": f"Basic {encoded_credentials}", "Content-Type": "application/json",
+                "Accept": "application/json"}
 
     def test_connection(self, timeout=None):
         """Test JIRA connection by fetching current user"""
@@ -63,13 +60,11 @@ class JiraApiProcessor(Processor):
         try:
             url = f"{self.base_url}/project"
             response = requests.get(url, headers=self._auth_headers)
-
             if response.status_code == 200:
                 return response.json()
             else:
                 logger.error(f"Error fetching JIRA projects: {response.status_code} - {response.text}")
                 return None
-
         except Exception as e:
             logger.error(f"Exception occurred while fetching JIRA projects: {e}")
             raise e
@@ -84,7 +79,6 @@ class JiraApiProcessor(Processor):
             else:
                 logger.error(f"Error fetching JIRA users: {response.status_code} - {response.text}")
                 return None
-
         except Exception as e:
             logger.error(f"Exception occurred while fetching JIRA users: {e}")
             raise e
@@ -96,13 +90,11 @@ class JiraApiProcessor(Processor):
         try:
             url = f"{self.base_url}/issue/{ticket_key}"
             response = requests.get(url, headers=self._auth_headers)
-
             if response.status_code == 200:
                 return response.json()
             else:
                 logger.error(f"Error fetching JIRA ticket: {response.status_code} - {response.text}")
                 return None
-
         except Exception as e:
             logger.error(f"Exception occurred while fetching JIRA ticket: {e}")
             raise e
@@ -114,7 +106,6 @@ class JiraApiProcessor(Processor):
         """
         try:
             url = f"{self.base_url}/issue"
-
             # Construct the base JIRA fields
             fields = {
                 "project": {"key": project_key},
@@ -136,7 +127,6 @@ class JiraApiProcessor(Processor):
                 },
                 "issuetype": {"name": issue_type}
             }
-
             # Clean and validate labels if provided
             if labels:
                 if isinstance(labels, str):
@@ -152,20 +142,15 @@ class JiraApiProcessor(Processor):
             # Only add priority if explicitly provided and not None
             if priority:
                 fields["priority"] = {"name": priority}
-
             payload = {"fields": fields}
-
             logger.debug(f"Creating JIRA ticket with payload: {payload}")
             response = requests.post(url, headers=self._auth_headers, json=payload)
-
             if response.status_code in (200, 201):
                 return response.json()
-
             # If we get a 400 error, let's be more specific in error handling
             if response.status_code == 400:
                 error_json = response.json()
                 error_details = error_json.get('errors', {})
-
                 # Handle specific error cases
                 if 'priority' in error_details:
                     logger.warning("Priority field not supported, retrying without priority")
@@ -175,17 +160,15 @@ class JiraApiProcessor(Processor):
                     response = requests.post(url, headers=self._auth_headers, json=payload)
                     if response.status_code in (200, 201):
                         return response.json()
-
                 # Log the specific error for debugging
                 logger.error(f"JIRA API error details: {error_details}")
-
             logger.error(f"Error creating JIRA ticket: {response.status_code} - {response.text}")
             return None
 
         except Exception as e:
             logger.error(f"Exception occurred while creating JIRA ticket: {e}")
             raise e
-    
+
     def assign_ticket(self, ticket_key, assignee):
         """
         Assign a JIRA ticket to the given user
@@ -193,15 +176,12 @@ class JiraApiProcessor(Processor):
         try:
             url = f"{self.base_url}/issue/{ticket_key}/assignee"
             payload = {"accountId": assignee}
-
             response = requests.put(url, headers=self._auth_headers, json=payload)
-
             if response.status_code == 204:
                 return True
             else:
                 logger.error(f"Error assigning JIRA ticket: {response.status_code} - {response.text}")
                 return False
-
         except Exception as e:
             logger.error(f"Exception occurred while assigning JIRA ticket: {e}")
             raise e
@@ -211,13 +191,11 @@ class JiraApiProcessor(Processor):
         try:
             url = f"{self.base_url}/project/{project_key}"
             response = requests.get(url, headers=self._auth_headers)
-
             if response.status_code == 200:
                 return response.json()
             else:
                 logger.error(f"Error fetching project metadata: {response.status_code} - {response.text}")
                 return None
-
         except Exception as e:
             logger.error(f"Exception occurred while fetching project metadata: {e}")
             raise e
@@ -230,15 +208,12 @@ class JiraApiProcessor(Processor):
                 "jql": query,
                 "maxResults": max_results
             }
-
             response = requests.post(url, headers=self._auth_headers, data=json.dumps(payload))
-
             if response.status_code == 200:
                 return response.json()
             else:
                 logger.error(f"Error searching JIRA tickets: {response.status_code} - {response.text}")
                 return None
-
         except Exception as e:
             logger.error(f"Exception occurred while searching JIRA tickets: {e}")
             raise e

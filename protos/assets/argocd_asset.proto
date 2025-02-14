@@ -4,13 +4,13 @@ package protos.connectors;
 import "google/protobuf/wrappers.proto";
 import "protos/base.proto";
 
-
 message ArgoCDAppsAssetOptions {
   repeated string apps = 1; // Names of apps, calling it apps to maintain code uniformity
 }
 
 message ArgoCDAppsAssetModel {
-  google.protobuf.StringValue name = 1; // Name is directly at this level
+  google.protobuf.StringValue name = 1;
+  google.protobuf.StringValue path = 2;
 }
 
 message ArgoCDAssetModel{
@@ -24,5 +24,5 @@ message ArgoCDAssetModel{
 }
 
 message ArgoCDAssets {
-  repeated ArgoCDAssetModel assets = 1; 
+  repeated ArgoCDAssetModel assets = 1;
 }

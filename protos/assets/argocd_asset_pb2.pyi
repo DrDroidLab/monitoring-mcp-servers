@@ -40,16 +40,19 @@ class ArgoCDAppsAssetModel(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     NAME_FIELD_NUMBER: builtins.int
+    PATH_FIELD_NUMBER: builtins.int
     @property
-    def name(self) -> google.protobuf.wrappers_pb2.StringValue:
-        """Name is directly at this level"""
+    def name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+    @property
+    def path(self) -> google.protobuf.wrappers_pb2.StringValue: ...
     def __init__(
         self,
         *,
         name: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        path: google.protobuf.wrappers_pb2.StringValue | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["name", b"name"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["name", b"name"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["name", b"name", "path", b"path"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["name", b"name", "path", b"path"]) -> None: ...
 
 global___ArgoCDAppsAssetModel = ArgoCDAppsAssetModel
 

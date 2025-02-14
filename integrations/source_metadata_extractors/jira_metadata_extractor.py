@@ -10,12 +10,13 @@ logger = logging.getLogger(__name__)
 
 class JiraSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, jira_cloud_api_key, jira_domain, jira_email, account_id=None, connector_id=None):
+    def __init__(self, request_id: str, connector_name: str, jira_cloud_api_key: str, jira_domain: str,
+                 jira_email: str):
         self.jira_processor = JiraApiProcessor(jira_cloud_api_key, jira_domain, jira_email)
-        super().__init__(account_id, connector_id, Source.JIRA_CLOUD)
+        super().__init__(request_id, connector_name, Source.JIRA_CLOUD)
 
     @log_function_call
-    def extract_projects(self, save_to_db=False):
+    def extract_projects(self):
         model_data = {}
         model_type = SourceModelType.JIRA_PROJECT
         try:
@@ -24,14 +25,13 @@ class JiraSourceMetadataExtractor(SourceMetadataExtractor):
                 return model_data
             for project in projects:
                 model_data[project['key']] = project
-                if save_to_db:
-                    self.create_or_update_model_metadata(model_type, project['key'], project)
         except Exception as e:
             logger.error(f'Error extracting Jira projects: {e}')
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
-    def extract_users(self, save_to_db=False):
+    def extract_users(self):
         model_data = {}
         model_type = SourceModelType.JIRA_USER
         try:
@@ -41,8 +41,7 @@ class JiraSourceMetadataExtractor(SourceMetadataExtractor):
             for user in users:
                 if 'accountType' in user and user['accountType'] == 'atlassian':
                     model_data[user['accountId']] = user
-                    if save_to_db:
-                        self.create_or_update_model_metadata(model_type, user['accountId'], user)
         except Exception as e:
             logger.error(f'Error extracting Jira users: {e}')
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)

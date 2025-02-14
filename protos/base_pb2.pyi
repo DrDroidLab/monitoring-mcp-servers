@@ -578,6 +578,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """Sql Database Connection Models"""
     AZURE_WORKSPACE: _SourceModelType.ValueType  # 1001
     """Azure Models"""
+    AZURE_RESOURCE: _SourceModelType.ValueType  # 1002
     SSH_SERVER: _SourceModelType.ValueType  # 1100
     """Remote Server Models"""
     GRAFANA_MIMIR_PROMQL: _SourceModelType.ValueType  # 1201
@@ -669,6 +670,7 @@ SQL_DATABASE_CONNECTION_RAW_QUERY: SourceModelType.ValueType  # 901
 """Sql Database Connection Models"""
 AZURE_WORKSPACE: SourceModelType.ValueType  # 1001
 """Azure Models"""
+AZURE_RESOURCE: SourceModelType.ValueType  # 1002
 SSH_SERVER: SourceModelType.ValueType  # 1100
 """Remote Server Models"""
 GRAFANA_MIMIR_PROMQL: SourceModelType.ValueType  # 1201

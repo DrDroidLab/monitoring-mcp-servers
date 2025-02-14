@@ -395,6 +395,7 @@ enum SourceModelType {
 
   //Azure Models
   AZURE_WORKSPACE = 1001;
+  AZURE_RESOURCE = 1002;
 
   //Remote Server Models
   SSH_SERVER = 1100;
