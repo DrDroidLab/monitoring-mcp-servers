@@ -399,6 +399,7 @@ enum SourceModelType {
 
   //Remote Server Models
   SSH_SERVER = 1100;
+  SSH_USER = 1101;
 
   //Mimir Server Models
   GRAFANA_MIMIR_PROMQL = 1201;

@@ -1,3 +1,4 @@
+from integrations.source_metadata_extractors.bash_metadata_extractor import BashSourceMetadataExtractor
 from integrations.source_metadata_extractors.github_metadata_extractor import GithubSourceMetadataExtractor
 from protos.base_pb2 import Source
 from integrations.source_metadata_extractors.azure_metadata_extractor import AzureConnectorMetadataExtractor
@@ -45,3 +46,4 @@ source_metadata_extractor_facade.register(Source.OPEN_SEARCH, OpenSearchSourceMe
 source_metadata_extractor_facade.register(Source.GITHUB, GithubSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.JIRA_CLOUD, JiraSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.ARGOCD, ArgoCDSourceMetadataExtractor)
+source_metadata_extractor_facade.register(Source.BASH, BashSourceMetadataExtractor)

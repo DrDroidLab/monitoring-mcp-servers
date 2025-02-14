@@ -583,6 +583,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     AZURE_RESOURCE: _SourceModelType.ValueType  # 1002
     SSH_SERVER: _SourceModelType.ValueType  # 1100
     """Remote Server Models"""
+    SSH_USER: _SourceModelType.ValueType  # 1101
     GRAFANA_MIMIR_PROMQL: _SourceModelType.ValueType  # 1201
     """Mimir Server Models"""
     GKE_CLUSTER: _SourceModelType.ValueType  # 1301
@@ -675,6 +676,7 @@ AZURE_WORKSPACE: SourceModelType.ValueType  # 1001
 AZURE_RESOURCE: SourceModelType.ValueType  # 1002
 SSH_SERVER: SourceModelType.ValueType  # 1100
 """Remote Server Models"""
+SSH_USER: SourceModelType.ValueType  # 1101
 GRAFANA_MIMIR_PROMQL: SourceModelType.ValueType  # 1201
 """Mimir Server Models"""
 GKE_CLUSTER: SourceModelType.ValueType  # 1301
