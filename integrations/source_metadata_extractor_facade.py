@@ -36,7 +36,7 @@ source_metadata_extractor_facade.register(Source.DATADOG, DatadogSourceMetadataE
 source_metadata_extractor_facade.register(Source.DATADOG_OAUTH, DatadogSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.CLOUDWATCH, CloudwatchSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.NEW_RELIC, NewrelicSourceMetadataExtractor)
-source_metadata_extractor_facade.register(Source.GRAFANA, GrafanaSourceMetadataExtractor)
+# source_metadata_extractor_facade.register(Source.GRAFANA, GrafanaSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.GKE, GkeSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.CLICKHOUSE, ClickhouseSourceMetadataExtractor)
 source_metadata_extractor_facade.register(Source.EKS, EksSourceMetadataExtractor)
