@@ -18,6 +18,16 @@ def apply_result_transformer(result_dict, lambda_function: Lambda.Function) -> D
     return transformer_result
 
 
+def resolve_value(value, gk, gv):
+    """Replace occurrences of gk with gv in a value. If the value is a dict,
+    replace in each string value in the dict."""
+    if isinstance(value, str):
+        return value.replace(gk, gv)
+    elif isinstance(value, dict):
+        return {k: (v.replace(gk, gv) if isinstance(v, str) else v) for k, v in value.items()}
+    else:
+        return value
+
 def resolve_global_variables(form_fields: [FormField], global_variable_set: Struct,
                              source_task_type_def: Dict) -> (Dict, Dict):
     all_string_fields = [ff.key_name.value for ff in form_fields if ff.data_type == LiteralType.STRING]
@@ -39,7 +49,7 @@ def resolve_global_variables(form_fields: [FormField], global_variable_set: Stru
             elif tk in all_string_array_fields:
                 resolved_items = []
                 for item in source_task_type_def[tk]:
-                    resolved_items.append(item.replace(gk, gv)) if isinstance(tv, str) else resolved_items.append(item)
+                    resolved_items.append(resolve_value(item, gk, gv))
                 source_task_type_def[tk] = resolved_items
             elif tk in all_composite_fields:
                 composite_fields = all_composite_fields[tk]
