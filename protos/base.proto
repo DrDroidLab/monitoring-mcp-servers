@@ -325,6 +325,7 @@ enum SourceKeyType {
   JENKINS_URL = 100;
   JENKINS_USERNAME = 101;
   JENKINS_API_TOKEN = 102;
+  JENKINS_CRUMB = 113;
 
   GITHUB_ACTIONS_TOKEN = 103;
 
@@ -455,4 +456,7 @@ enum SourceModelType {
 
   // ArgoCd Models
   ARGOCD_APPS = 2801;
+
+  // jenkins Models
+  JENKINS_JOBS = 2901;
 }

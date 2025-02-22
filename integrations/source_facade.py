@@ -18,6 +18,7 @@ from integrations.source_manangers.github_source_manager import GithubSourceMana
 from integrations.source_manangers.gke_source_manager import GkeSourceManager
 from integrations.source_manangers.grafana_loki_source_manager import GrafanaLokiSourceManager
 from integrations.source_manangers.grafana_source_manager import GrafanaSourceManager
+from integrations.source_manangers.jenkins_source_manager import JenkinsSourceManager
 from integrations.source_manangers.kubernetes_source_manager import KubernetesSourceManager
 from integrations.source_manangers.mimir_source_manager import MimirSourceManager
 from integrations.source_manangers.mongodb_source_manager import MongoDBSourceManager
@@ -110,3 +111,4 @@ source_facade.register(Source.ZENDUTY, ZendutySourceManager())
 source_facade.register(Source.GITHUB, GithubSourceManager())
 source_facade.register(Source.ARGOCD, ArgoCDSourceManager())
 source_facade.register(Source.JIRA_CLOUD, JiraSourceManager())
+source_facade.register(Source.JENKINS, JenkinsSourceManager())

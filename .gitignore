@@ -176,3 +176,4 @@ media/images/*
 media/csv_files/*
 media/text_files/*
 env
+static/

@@ -3,8 +3,6 @@ version: "3.9"
 services:
   redis:
     image: "redis:alpine"
-    ports:
-      - "6379:6379"
     networks:
       - mynetwork
 
@@ -30,7 +28,6 @@ services:
       - "CELERY_RESULT_BACKEND=redis://redis:6379/0"
       - "REDIS_URL=redis://redis:6379/0"
       - DRD_CLOUD_API_TOKEN=${DRD_CLOUD_API_TOKEN}
-      - DRD_CLOUD_API_HOST=${DRD_CLOUD_API_HOST}
     depends_on:
       - redis
       - fluentd
@@ -55,7 +52,6 @@ services:
       - "CELERY_RESULT_BACKEND=redis://redis:6379/0"
       - "REDIS_URL=redis://redis:6379/0"
       - DRD_CLOUD_API_TOKEN=${DRD_CLOUD_API_TOKEN}
-      - DRD_CLOUD_API_HOST=${DRD_CLOUD_API_HOST}
     depends_on:
       - redis
       - fluentd

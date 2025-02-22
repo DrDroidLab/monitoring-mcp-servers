@@ -14,7 +14,6 @@ message AzureWorkspaceAssetOptions {
   repeated AzureWorkspaceAssetModel workspaces = 1;
 }
 
-
 message AzureAssetModel {
   google.protobuf.UInt64Value id = 1;
   Source connector_type = 2;

@@ -6,6 +6,7 @@ import builtins
 import google.protobuf.descriptor
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
+import google.protobuf.struct_pb2
 import google.protobuf.wrappers_pb2
 import sys
 import typing
@@ -29,10 +30,12 @@ class Jenkins(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UNKNOWN: Jenkins._TaskType.ValueType  # 0
         FETCH_LAST_BUILD_DETAILS: Jenkins._TaskType.ValueType  # 1
+        RUN_JOB: Jenkins._TaskType.ValueType  # 2
 
     class TaskType(_TaskType, metaclass=_TaskTypeEnumTypeWrapper): ...
     UNKNOWN: Jenkins.TaskType.ValueType  # 0
     FETCH_LAST_BUILD_DETAILS: Jenkins.TaskType.ValueType  # 1
+    RUN_JOB: Jenkins.TaskType.ValueType  # 2
 
     @typing_extensions.final
     class LastBuildDetails(google.protobuf.message.Message):
@@ -49,19 +52,46 @@ class Jenkins(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["job_name", b"job_name"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["job_name", b"job_name"]) -> None: ...
 
+    @typing_extensions.final
+    class RunJob(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        JOB_NAME_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        PARAMETER_JSON_FIELD_NUMBER: builtins.int
+        @property
+        def job_name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def parameters(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def parameter_json(self) -> google.protobuf.struct_pb2.Struct: ...
+        def __init__(
+            self,
+            *,
+            job_name: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            parameters: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            parameter_json: google.protobuf.struct_pb2.Struct | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["job_name", b"job_name", "parameter_json", b"parameter_json", "parameters", b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["job_name", b"job_name", "parameter_json", b"parameter_json", "parameters", b"parameters"]) -> None: ...
+
     TYPE_FIELD_NUMBER: builtins.int
     FETCH_LAST_BUILD_DETAILS_FIELD_NUMBER: builtins.int
+    RUN_JOB_FIELD_NUMBER: builtins.int
     type: global___Jenkins.TaskType.ValueType
     @property
     def fetch_last_build_details(self) -> global___Jenkins.LastBuildDetails: ...
+    @property
+    def run_job(self) -> global___Jenkins.RunJob: ...
     def __init__(
         self,
         *,
         type: global___Jenkins.TaskType.ValueType = ...,
         fetch_last_build_details: global___Jenkins.LastBuildDetails | None = ...,
+        run_job: global___Jenkins.RunJob | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["fetch_last_build_details", b"fetch_last_build_details", "task", b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fetch_last_build_details", b"fetch_last_build_details", "task", b"task", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["fetch_last_build_details"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fetch_last_build_details", b"fetch_last_build_details", "run_job", b"run_job", "task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fetch_last_build_details", b"fetch_last_build_details", "run_job", b"run_job", "task", b"task", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["fetch_last_build_details", "run_job"] | None: ...
 
 global___Jenkins = Jenkins

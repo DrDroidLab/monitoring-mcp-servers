@@ -183,15 +183,15 @@ LOGGING = {
         'level': 'INFO',
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': False,
-        },
-        # 'django.db.backends': {
-        #     'level': 'DEBUG',
+        # 'django': {
         #     'handlers': ['console'],
+        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        #     'propagate': False,
         # },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
     },
 }
 
@@ -201,8 +201,10 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8080', 'http://localhost', 'https://ap
 SITE_ID = 1
 
 DRD_CLOUD_API_TOKEN = env.str("DRD_CLOUD_API_TOKEN")
-DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST")
-DRD_AGENT_API_TOKEN = env.str("DRD_AGENT_API_TOKEN", "test-abc")
+DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST", default="https://agent-api.drdroid.io")
 
 SECRETS_FILE_PATH = BASE_DIR / 'credentials/secrets.yaml'
 LOADED_CONNECTIONS = load_yaml(SECRETS_FILE_PATH)
+
+# deprecated
+DRD_AGENT_API_TOKEN = env.str("DRD_AGENT_API_TOKEN", "test-abc")
