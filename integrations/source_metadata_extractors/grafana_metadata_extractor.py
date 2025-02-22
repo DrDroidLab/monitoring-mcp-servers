@@ -1,6 +1,5 @@
 import logging
 import re
-import time
 from copy import deepcopy
 
 from integrations.source_metadata_extractor import SourceMetadataExtractor
