@@ -83,8 +83,8 @@ class JenkinsAPIProcessor(Processor):
                 url = f"{self.config['url']}/job/{job_name}/buildWithParameters"
                 response = self._make_request_with_crumb('POST', url, data=parameters, timeout=timeout)
             else:
-                url = f"{self.config['url']}/job/{job_name}/build"
-                response = self._make_request_with_crumb('POST', url, timeout=timeout)
+                url = f"{self.config['url']}/job/{job_name}/build?delay=0sec"
+                response = self._make_request_with_crumb('POST', url, data='', timeout=timeout)
             if response.status_code == 201:
                 return True
             else:
