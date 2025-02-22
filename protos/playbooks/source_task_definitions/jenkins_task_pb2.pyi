@@ -6,6 +6,7 @@ import builtins
 import google.protobuf.descriptor
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
+import google.protobuf.struct_pb2
 import google.protobuf.wrappers_pb2
 import sys
 import typing
@@ -57,19 +58,22 @@ class Jenkins(google.protobuf.message.Message):
 
         JOB_NAME_FIELD_NUMBER: builtins.int
         PARAMETERS_FIELD_NUMBER: builtins.int
+        PARAMETER_JSON_FIELD_NUMBER: builtins.int
         @property
         def job_name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
         @property
-        def parameters(self) -> google.protobuf.wrappers_pb2.StringValue:
-            """JSON string containing parameters"""
+        def parameters(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def parameter_json(self) -> google.protobuf.struct_pb2.Struct: ...
         def __init__(
             self,
             *,
             job_name: google.protobuf.wrappers_pb2.StringValue | None = ...,
             parameters: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            parameter_json: google.protobuf.struct_pb2.Struct | None = ...,
         ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["job_name", b"job_name", "parameters", b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["job_name", b"job_name", "parameters", b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["job_name", b"job_name", "parameter_json", b"parameter_json", "parameters", b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["job_name", b"job_name", "parameter_json", b"parameter_json", "parameters", b"parameters"]) -> None: ...
 
     TYPE_FIELD_NUMBER: builtins.int
     FETCH_LAST_BUILD_DETAILS_FIELD_NUMBER: builtins.int
