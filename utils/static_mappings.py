@@ -361,7 +361,20 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.GITHUB_TOKEN,
             SourceKeyType.GITHUB_ORG,
         ]
-    ]
+    ],
+    Source.JENKINS: [
+        [
+            SourceKeyType.JENKINS_URL,
+            SourceKeyType.JENKINS_USERNAME,
+            SourceKeyType.JENKINS_API_TOKEN,
+            SourceKeyType.JENKINS_CRUMB
+        ],
+        [
+            SourceKeyType.JENKINS_URL,
+            SourceKeyType.JENKINS_USERNAME,
+            SourceKeyType.JENKINS_API_TOKEN
+        ],
+    ],
 }
 integrations_connector_type_display_name_map = {
     Source.SLACK: 'SLACK',
@@ -423,3 +436,52 @@ model_type_display_name_maps = {
     SourceModelType.OPEN_SEARCH_INDEX: "Open Search Index",
     SourceModelType.GITHUB_REPOSITORY: "Repository",
 }
+
+masked_keys_types = [SourceKeyType.DATADOG_APP_KEY,
+                     SourceKeyType.DATADOG_API_KEY,
+                     SourceKeyType.NEWRELIC_API_KEY,
+                     SourceKeyType.NEWRELIC_APP_ID,
+                     SourceKeyType.NEWRELIC_QUERY_KEY,
+                     SourceKeyType.SENTRY_API_KEY,
+                     SourceKeyType.HONEYBADGER_USERNAME,
+                     SourceKeyType.HONEYBADGER_PASSWORD,
+                     SourceKeyType.HONEYBADGER_PROJECT_ID,
+                     SourceKeyType.AWS_ACCESS_KEY,
+                     SourceKeyType.AWS_SECRET_KEY,
+                     SourceKeyType.AWS_ASSUMED_ROLE_ARN,
+                     SourceKeyType.AWS_DRD_CLOUD_ROLE_ARN,
+                     SourceKeyType.DATADOG_AUTH_TOKEN,
+                     SourceKeyType.AGENT_PROXY_API_KEY,
+                     SourceKeyType.GITHUB_TOKEN,
+                     SourceKeyType.GOOGLE_CHAT_BOT_OAUTH_TOKEN,
+                     SourceKeyType.SLACK_BOT_AUTH_TOKEN,
+                     SourceKeyType.AGENT_PROXY_HOST,
+                     SourceKeyType.CLICKHOUSE_USER,
+                     SourceKeyType.CLICKHOUSE_PASSWORD,
+                     SourceKeyType.GCM_PROJECT_ID,
+                     SourceKeyType.GCM_PRIVATE_KEY,
+                     SourceKeyType.GCM_CLIENT_EMAIL,
+                     SourceKeyType.PAGER_DUTY_API_KEY,
+                     SourceKeyType.POSTGRES_PASSWORD,
+                     SourceKeyType.POSTGRES_USER,
+                     SourceKeyType.GRAFANA_API_KEY,
+                     SourceKeyType.ZENDUTY_API_KEY,
+                     SourceKeyType.OPS_GENIE_API_KEY,
+                     SourceKeyType.JIRA_CLOUD_API_KEY,
+                     SourceKeyType.ASANA_ACCESS_TOKEN,
+                     SourceKeyType.CONFLUENCE_CLOUD_API_KEY,
+                     SourceKeyType.NOTION_API_KEY,
+                     SourceKeyType.MONGODB_CONNECTION_STRING,
+                     SourceKeyType.SQL_DATABASE_CONNECTION_STRING_URI,
+                     SourceKeyType.OPEN_SEARCH_PASSWORD,
+                     SourceKeyType.JENKINS_API_TOKEN,
+                     SourceKeyType.LINEAR_API_KEY,
+                     SourceKeyType.GITHUB_ACTIONS_TOKEN,
+                     SourceKeyType.SMTP_PASSWORD,
+                     SourceKeyType.ARGOCD_TOKEN,
+                     SourceKeyType.ROLLBAR_ACCESS_TOKEN,
+                     SourceKeyType.CUSTOM_STRATEGIES_ACCOUNT_ID,
+                     SourceKeyType.KUBERNETES_CLUSTER_TOKEN,
+                     SourceKeyType.KUBERNETES_CLUSTER_CERTIFICATE_AUTHORITY_DATA,
+                     SourceKeyType.REMOTE_SERVER_PEM
+                     ]

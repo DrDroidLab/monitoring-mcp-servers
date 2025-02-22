@@ -266,6 +266,18 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['jira_cloud_api_key'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.JIRA_EMAIL:
                 credentials_dict['jira_email'] = conn_key.key.value
+    elif connector_type == Source.JENKINS:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.JENKINS_URL:
+                credentials_dict['url'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.JENKINS_USERNAME:
+                credentials_dict['username'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.JENKINS_API_TOKEN:
+                credentials_dict['api_token'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.JENKINS_CRUMB:
+                credentials_dict['crumb'] = False
+                if conn_key.key.value.lower() == 'true':
+                    credentials_dict['crumb'] = True
     else:
         return None
     return credentials_dict
@@ -601,6 +613,28 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             key_type=SourceKeyType.JIRA_EMAIL,
             key=StringValue(value=credential_yaml['jira_email'])
         ))
+    elif c_type == 'JENKINS':
+        if 'url' not in credential_yaml or 'username' not in credential_yaml or 'api_token' not in credential_yaml:
+            raise Exception(f'Url, username or api_token not found in credential yaml for Jenkins source in '
+                            f'connector: {connector_name}')
+        c_source = Source.JENKINS
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.JENKINS_URL,
+            key=StringValue(value=credential_yaml['url'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.JENKINS_USERNAME,
+            key=StringValue(value=credential_yaml['username'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.JENKINS_API_TOKEN,
+            key=StringValue(value=credential_yaml['api_token'])
+        ))
+        if 'crumb' in credential_yaml:
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.JENKINS_CRUMB,
+                key=StringValue(value=credential_yaml['crumb'])
+            ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
