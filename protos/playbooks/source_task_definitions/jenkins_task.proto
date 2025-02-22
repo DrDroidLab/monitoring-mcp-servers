@@ -8,13 +8,20 @@ message Jenkins {
     google.protobuf.StringValue job_name = 1;
   }
 
+  message RunJob {
+    google.protobuf.StringValue job_name = 1;
+    google.protobuf.StringValue parameters = 2;  // JSON string containing parameters
+  }
+
   enum TaskType {
     UNKNOWN = 0;
     FETCH_LAST_BUILD_DETAILS = 1;
+    RUN_JOB = 2;
   }
 
   TaskType type = 1;
   oneof task {
     LastBuildDetails fetch_last_build_details = 2;
+    RunJob run_job = 3;
   }
 }

@@ -407,6 +407,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     JENKINS_URL: _SourceKeyType.ValueType  # 100
     JENKINS_USERNAME: _SourceKeyType.ValueType  # 101
     JENKINS_API_TOKEN: _SourceKeyType.ValueType  # 102
+    JENKINS_CRUMB: _SourceKeyType.ValueType  # 113
     GITHUB_ACTIONS_TOKEN: _SourceKeyType.ValueType  # 103
     CUSTOM_STRATEGIES_ACCOUNT_ID: _SourceKeyType.ValueType  # 104
     ARGOCD_SERVER: _SourceKeyType.ValueType  # 106
@@ -519,6 +520,7 @@ LINEAR_API_KEY: SourceKeyType.ValueType  # 99
 JENKINS_URL: SourceKeyType.ValueType  # 100
 JENKINS_USERNAME: SourceKeyType.ValueType  # 101
 JENKINS_API_TOKEN: SourceKeyType.ValueType  # 102
+JENKINS_CRUMB: SourceKeyType.ValueType  # 113
 GITHUB_ACTIONS_TOKEN: SourceKeyType.ValueType  # 103
 CUSTOM_STRATEGIES_ACCOUNT_ID: SourceKeyType.ValueType  # 104
 ARGOCD_SERVER: SourceKeyType.ValueType  # 106
@@ -622,6 +624,8 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     JIRA_USER: _SourceModelType.ValueType  # 2702
     ARGOCD_APPS: _SourceModelType.ValueType  # 2801
     """ArgoCd Models"""
+    JENKINS_JOBS: _SourceModelType.ValueType  # 2901
+    """jenkins Models"""
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -715,6 +719,8 @@ JIRA_PROJECT: SourceModelType.ValueType  # 2701
 JIRA_USER: SourceModelType.ValueType  # 2702
 ARGOCD_APPS: SourceModelType.ValueType  # 2801
 """ArgoCd Models"""
+JENKINS_JOBS: SourceModelType.ValueType  # 2901
+"""jenkins Models"""
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final
