@@ -51,7 +51,7 @@ Releasing soon (reach out to us if you need support for these or any other sourc
 3. Install via Docker-Compose: To run via docker-compose you will have to clone the github project locally and run this:
 
 ```shell
-DRD_CLOUD_API_TOKEN=<API_TOKEN> DRD_CLOUD_API_HOST=<API_SERVER_HOST> docker-compose -f agent.docker-compose.yaml up
+DRD_CLOUD_API_TOKEN=<API_TOKEN> docker-compose -f agent.docker-compose.yaml up
 ```
 
 4. Install via Helm Charts
