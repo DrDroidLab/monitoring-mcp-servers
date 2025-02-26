@@ -120,9 +120,7 @@ class JenkinsSourceManager(SourceManager):
             print("Playbook Task Downstream Request: Type -> {}, Account -> {}".format("Jenkins",
                                                                                        jenkins_connector.account_id.value),
                   job_name, flush=True)
-
             result = jenkins_processor.get_last_build(job_name)
-
             table_rows: [TableResult.TableRow] = []
             for r in list(result):
                 table_columns = []
@@ -132,11 +130,9 @@ class JenkinsSourceManager(SourceManager):
 
                 table_row = TableResult.TableRow(columns=table_columns)
                 table_rows.append(table_row)
-
             table = TableResult(raw_query=StringValue(value=f"Last Build details for ```{job_name}```"),
                                 total_count=UInt64Value(value=len(list(result))),
                                 rows=table_rows)
-
             return PlaybookTaskResult(type=PlaybookTaskResultType.TABLE, table=table, source=self.source)
         except Exception as e:
             raise Exception(f"Error while executing Jenkins task: {e}")

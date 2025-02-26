@@ -119,15 +119,19 @@ class JenkinsAPIProcessor(Processor):
             result = []
             if response.status_code == 200:
                 data = response.json()
-                build_time = data.get('timestamp')
-                number = data.get('number')
-                status = data.get('result')
+                build_time = data.get('timestamp', None)
+                number = data.get('number', None)
+                status = data.get('result', None)
                 actions = data.get('actions', [])
                 build_parameters = {}
                 for action in actions:
                     if 'parameters' in action:
-                        parameters = action['parameters']
-                        build_parameters = {param['name']: param['value'] for param in parameters}
+                        parameters = action.get('parameters', [])
+                        for param in parameters:
+                            if 'name' in param and 'value' in param:
+                                build_parameters[param['name']] = param['value']
+                            elif 'name' in param:
+                                build_parameters[param['name']] = None
                 logs = ""
                 logs_url = f"{self.config['url']}/job/{job_name}/{number}/consoleText"
                 logs_response = self._make_request_with_crumb('GET', logs_url, timeout=timeout)
@@ -136,6 +140,9 @@ class JenkinsAPIProcessor(Processor):
                 result.append({'Time': datetime.fromtimestamp(build_time / 1000.0).strftime('%Y-%m-%d %H:%M:%S'),
                                'Build #': number, 'Status': status,
                                'Parameters': json.dumps(build_parameters, indent=2), 'Logs': logs})
+            else:
+                logger.error(f"Failed to fetch Jenkins last build: {response.status_code}, {response.text}")
+                raise Exception(f"Failed to fetch Jenkins last build: {response.status_code}, {response.text}")
             return result
         except Exception as e:
             logger.error(f"Exception occurred while fetching Jenkins last build with error: {e}")
