@@ -152,6 +152,11 @@ class BashProcessor(Processor):
 
     def execute_command(self, command):
         try:
+            try:
+                self.test_connection()
+            except Exception as e:
+                logger.error(f"BashProcessor.execute_command:: Exception occurred while testing connection: {str(e)}")
+                raise Exception("Remote Server not reachable")
             with tempfile.NamedTemporaryFile(delete=False, suffix=".sh") as script_file, \
                     tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as output_file:
                 script_file.write(command.encode())  # Write script content
