@@ -635,6 +635,37 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key_type=SourceKeyType.JENKINS_CRUMB,
                 key=StringValue(value=credential_yaml['crumb'])
             ))
+    elif c_type == 'ELASTIC_SEARCH':
+        if 'host' not in credential_yaml or 'protocol' not in credential_yaml or 'api_key_id' not in credential_yaml or 'api_key' not in credential_yaml:
+            raise Exception(f'Host, protocol, api_key_id or api_key not found in credential yaml for elastic search '
+                            f'source in connector: {connector_name}')
+        c_source = Source.ELASTIC_SEARCH
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.ELASTIC_SEARCH_PROTOCOL,
+            key=StringValue(value=credential_yaml['protocol'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.ELASTIC_SEARCH_HOST,
+            key=StringValue(value=credential_yaml['host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.ELASTIC_SEARCH_API_KEY_ID,
+            key=StringValue(value=credential_yaml['api_key_id'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.ELASTIC_SEARCH_API_KEY,
+            key=StringValue(value=credential_yaml['api_key'])
+        ))
+        if 'port' in credential_yaml:
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.ELASTIC_SEARCH_PORT,
+                key=StringValue(value=str(credential_yaml['port']))
+            ))
+        if 'verify_certs' in credential_yaml:
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.SSL_VERIFY,
+                key=StringValue(value=credential_yaml['verify_certs'])
+            ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)

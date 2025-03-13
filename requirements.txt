@@ -142,3 +142,6 @@ websocket-client==1.8.0
 yarl==1.12.1
 zstandard==0.23.0
 pymongo[srv]==3.9
+pymysql==1.1.1
+mysql-connector-python==9.2.0
+mysqlclient==2.2.4
