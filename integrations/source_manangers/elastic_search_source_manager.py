@@ -6,7 +6,7 @@ from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType, Literal
 from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType
-from protos.playbooks.source_task_definitions.elastic_search_task_pb2 import ElasticSearch
+from protos.playbooks.source_task_definitions.elastic_search_task_pb2 import ElasticSearch as ElasticSearchProto
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
 
@@ -15,9 +15,9 @@ class ElasticSearchSourceManager(SourceManager):
 
     def __init__(self):
         self.source = Source.ELASTIC_SEARCH
-        self.task_proto = ElasticSearch
+        self.task_proto = ElasticSearchProto
         self.task_type_callable_map = {
-            ElasticSearch.TaskType.QUERY_LOGS: {
+            ElasticSearchProto.TaskType.QUERY_LOGS: {
                 'executor': self.execute_query_logs,
                 'model_types': [SourceModelType.ELASTIC_SEARCH_INDEX],
                 'result_type': PlaybookTaskResultType.LOGS,
@@ -51,7 +51,7 @@ class ElasticSearchSourceManager(SourceManager):
         generated_credentials = generate_credentials_dict(es_connector.type, es_connector.keys)
         return ElasticSearchApiProcessor(**generated_credentials)
 
-    def execute_query_logs(self, time_range: TimeRange, es_task: ElasticSearch,
+    def execute_query_logs(self, time_range: TimeRange, es_task: ElasticSearchProto,
                            es_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not es_connector:
