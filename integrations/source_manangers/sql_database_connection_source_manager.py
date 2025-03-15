@@ -66,26 +66,15 @@ class SqlDatabaseConnectionSourceManager(SourceManager):
             if query[-1] == ';':
                 query = query[:-1]
 
-            count_query = f"SELECT COUNT(*) FROM ({query}) AS subquery"
-            if order_by_column and 'order by' not in query.lower():
-                query = f"{query} ORDER BY {order_by_column} DESC"
-            if limit and offset and 'limit' not in query.lower():
-                query = f"{query} LIMIT {limit} OFFSET {offset}"
-            if not limit and 'limit' not in query.lower():
-                limit = 10
-                offset = 0
-                query = f"{query} LIMIT 2000 OFFSET 0"
-
             def query_db():
-                nonlocal count_result, query_result, exception
+                nonlocal query_result, exception
                 try:
                     sql_db_processor = self.get_connector_processor(sql_db_connector)
-                    count_result = sql_db_processor.get_query_result(count_query, timeout=timeout).fetchone()[0]
                     query_result = sql_db_processor.get_query_result(query, timeout=timeout)
                 except Exception as e:
                     exception = e
 
-            count_result = None
+            count_result = 0
             query_result = None
             exception = None
 

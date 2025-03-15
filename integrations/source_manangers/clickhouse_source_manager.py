@@ -71,26 +71,16 @@ class ClickhouseSourceManager(SourceManager):
 
             if query[-1] == ';':
                 query = query[:-1]
-            count_query = f"SELECT COUNT(*) FROM ({query}) AS subquery"
-            if order_by_column and 'order by' not in query.lower():
-                query = f"{query} ORDER BY {order_by_column} DESC"
-            if limit and offset and 'limit' not in query.lower():
-                query = f"{query} LIMIT {limit} OFFSET {offset}"
-            if not limit and 'limit' not in query.lower():
-                limit = 10
-                offset = 0
-                query = f"{query} LIMIT 2000 OFFSET 0"
 
             def query_db():
-                nonlocal count_result, result, exception
+                nonlocal result, exception
                 try:
                     clickhouse_db_processor = self.get_connector_processor(clickhouse_connector, database=database)
-                    count_result = clickhouse_db_processor.get_query_result(count_query, timeout=timeout)
                     result = clickhouse_db_processor.get_query_result(query, timeout=timeout)
                 except Exception as e:
                     exception = e
 
-            count_result = None
+            count_result = 0
             result = None
             exception = None
 
@@ -116,7 +106,7 @@ class ClickhouseSourceManager(SourceManager):
                     table_columns.append(table_column)
                 table_rows.append(TableResult.TableRow(columns=table_columns))
             table = TableResult(raw_query=StringValue(value=f'Execute ```{query}``` on {database}'),
-                                total_count=UInt64Value(value=int(count_result.result_set[0][0])),
+                                total_count=UInt64Value(value=int(count_result)),
                                 limit=UInt64Value(value=limit),
                                 offset=UInt64Value(value=offset),
                                 rows=table_rows)
