@@ -74,7 +74,7 @@ class SqlDatabaseConnectionSourceManager(SourceManager):
                 except Exception as e:
                     exception = e
 
-            count_result = None
+            count_result = 0
             query_result = None
             exception = None
 
