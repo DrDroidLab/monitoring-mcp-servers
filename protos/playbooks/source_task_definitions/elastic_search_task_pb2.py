@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nBprotos/playbooks/source_task_definitions/elastic_search_task.proto\x12\x10protos.playbooks\x1a\x1egoogle/protobuf/wrappers.proto\"\xeb\x03\n\rElasticSearch\x12\x36\n\x04type\x18\x01 \x01(\x0e\x32(.protos.playbooks.ElasticSearch.TaskType\x12?\n\nquery_logs\x18\x02 \x01(\x0b\x32).protos.playbooks.ElasticSearch.QueryLogsH\x00\x1a\xaf\x02\n\tQueryLogs\x12+\n\x05index\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x32\n\x0clucene_query\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12+\n\x05limit\x18\x03 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12,\n\x06offset\x18\x04 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12/\n\tsort_desc\x18\x05 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x35\n\x0ftimestamp_field\x18\x06 \x01(\x0b\x32\x1c.google.protobuf.StringValue\"\'\n\x08TaskType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0e\n\nQUERY_LOGS\x10\x01\x42\x06\n\x04taskb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nBprotos/playbooks/source_task_definitions/elastic_search_task.proto\x12\x10protos.playbooks\x1a\x1egoogle/protobuf/wrappers.proto\"\xaf\x07\n\rElasticSearch\x12\x36\n\x04type\x18\x01 \x01(\x0e\x32(.protos.playbooks.ElasticSearch.TaskType\x12?\n\nquery_logs\x18\x02 \x01(\x0b\x32).protos.playbooks.ElasticSearch.QueryLogsH\x00\x12M\n\x14\x63heck_cluster_health\x18\x03 \x01(\x0b\x32-.protos.playbooks.ElasticSearch.ClusterHealthH\x00\x12?\n\nnode_stats\x18\x04 \x01(\x0b\x32).protos.playbooks.ElasticSearch.NodeStatsH\x00\x12\x41\n\x0b\x63\x61t_indices\x18\x05 \x01(\x0b\x32*.protos.playbooks.ElasticSearch.CatIndicesH\x00\x12U\n\x16\x63\x61t_thread_pool_search\x18\x06 \x01(\x0b\x32\x33.protos.playbooks.ElasticSearch.CatThreadPoolSearchH\x00\x1a\xaf\x02\n\tQueryLogs\x12+\n\x05index\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x32\n\x0clucene_query\x18\x02 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12+\n\x05limit\x18\x03 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12,\n\x06offset\x18\x04 \x01(\x0b\x32\x1c.google.protobuf.UInt64Value\x12/\n\tsort_desc\x18\x05 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x35\n\x0ftimestamp_field\x18\x06 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x1a\x0f\n\rClusterHealth\x1a\x0b\n\tNodeStats\x1a\x0c\n\nCatIndices\x1a\x15\n\x13\x43\x61tThreadPoolSearch\"~\n\x08TaskType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0e\n\nQUERY_LOGS\x10\x01\x12\x18\n\x14\x43HECK_CLUSTER_HEALTH\x10\x02\x12\x0e\n\nNODE_STATS\x10\x03\x12\x0f\n\x0b\x43\x41T_INDICES\x10\x04\x12\x1a\n\x16\x43\x41T_THREAD_POOL_SEARCH\x10\x05\x42\x06\n\x04taskb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.playbooks.source_task_definitions.elastic_search_task_pb2', globals())
@@ -22,9 +22,17 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _ELASTICSEARCH._serialized_start=121
-  _ELASTICSEARCH._serialized_end=612
-  _ELASTICSEARCH_QUERYLOGS._serialized_start=260
-  _ELASTICSEARCH_QUERYLOGS._serialized_end=563
-  _ELASTICSEARCH_TASKTYPE._serialized_start=565
-  _ELASTICSEARCH_TASKTYPE._serialized_end=604
+  _ELASTICSEARCH._serialized_end=1064
+  _ELASTICSEARCH_QUERYLOGS._serialized_start=558
+  _ELASTICSEARCH_QUERYLOGS._serialized_end=861
+  _ELASTICSEARCH_CLUSTERHEALTH._serialized_start=863
+  _ELASTICSEARCH_CLUSTERHEALTH._serialized_end=878
+  _ELASTICSEARCH_NODESTATS._serialized_start=880
+  _ELASTICSEARCH_NODESTATS._serialized_end=891
+  _ELASTICSEARCH_CATINDICES._serialized_start=893
+  _ELASTICSEARCH_CATINDICES._serialized_end=905
+  _ELASTICSEARCH_CATTHREADPOOLSEARCH._serialized_start=907
+  _ELASTICSEARCH_CATTHREADPOOLSEARCH._serialized_end=928
+  _ELASTICSEARCH_TASKTYPE._serialized_start=930
+  _ELASTICSEARCH_TASKTYPE._serialized_end=1056
 # @@protoc_insertion_point(module_scope)

@@ -72,3 +72,73 @@ class ElasticSearchApiProcessor(Processor):
         except Exception as e:
             logger.error(f"Exception occurred while fetching elasticsearch data with error: {e}")
             raise e
+    def get_cluster_health(self):
+        try:
+            connection = self.get_connection()
+            result = connection.cluster.health()
+            connection.close()
+            
+            # Convert ObjectApiResponse to dict
+            if hasattr(result, 'body'):
+                # For Elasticsearch 8.x client
+                return result.body
+            elif hasattr(result, 'meta'):
+                # Alternative approach for some client versions
+                return dict(result)
+            else:
+                # Fallback for older client versions
+                return result
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching elasticsearch cluster health with error: {e}")
+            raise e
+            
+    def get_nodes_stats(self):
+        try:
+            connection = self.get_connection()
+            result = connection.nodes.stats()
+            connection.close()
+            
+            # Convert response to dict
+            if hasattr(result, 'body'):
+                return result.body
+            elif hasattr(result, 'meta'):
+                return dict(result)
+            else:
+                return result
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching elasticsearch nodes stats with error: {e}")
+            raise e
+
+    def get_cat_indices(self):
+        try:
+            connection = self.get_connection()
+            result = connection.cat.indices(v=True, format="json")
+            connection.close()
+            
+            # Convert response to dict
+            if hasattr(result, 'body'):
+                return result.body
+            elif hasattr(result, 'meta'):
+                return dict(result)
+            else:
+                return result
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching elasticsearch cat indices with error: {e}")
+            raise e
+
+    def get_cat_thread_pool_search(self):
+        try:
+            connection = self.get_connection()
+            result = connection.cat.thread_pool(thread_pool_patterns="search", v=True, format="json")
+            connection.close()
+            
+            # Convert response to dict
+            if hasattr(result, 'body'):
+                return result.body
+            elif hasattr(result, 'meta'):
+                return dict(result)
+            else:
+                return result
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching elasticsearch cat thread pool search with error: {e}")
+            raise e
