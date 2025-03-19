@@ -1,3 +1,4 @@
+import json
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
 
 from integrations.source_api_processors.elastic_search_api_processor import ElasticSearchApiProcessor
@@ -5,7 +6,7 @@ from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType, Literal
-from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType
+from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType, TextResult
 from protos.playbooks.source_task_definitions.elastic_search_task_pb2 import ElasticSearch as ElasticSearchProto
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
