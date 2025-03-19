@@ -18,10 +18,34 @@ message ElasticSearch {
   enum TaskType {
     UNKNOWN = 0;
     QUERY_LOGS = 1;
+    CHECK_CLUSTER_HEALTH = 2;
+    NODE_STATS = 3;
+    CAT_INDICES = 4;
+    CAT_THREAD_POOL_SEARCH = 5;
+  }
+
+  message ClusterHealth {
+    // No parameters needed for cluster health check
+  }
+
+  message NodeStats {
+    // No parameters needed for node stats
+  }
+
+  message CatIndices {
+    // No parameters needed for cat indices
+  }
+
+  message CatThreadPoolSearch {
+    // No parameters needed for cat thread pool search
   }
 
   TaskType type = 1;
   oneof task {
     QueryLogs query_logs = 2;
+    ClusterHealth check_cluster_health = 3;
+    NodeStats node_stats = 4;
+    CatIndices cat_indices = 5;
+    CatThreadPoolSearch cat_thread_pool_search = 6;
   }
 }

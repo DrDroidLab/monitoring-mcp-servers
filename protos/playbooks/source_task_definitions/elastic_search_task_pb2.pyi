@@ -29,10 +29,18 @@ class ElasticSearch(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UNKNOWN: ElasticSearch._TaskType.ValueType  # 0
         QUERY_LOGS: ElasticSearch._TaskType.ValueType  # 1
+        CHECK_CLUSTER_HEALTH: ElasticSearch._TaskType.ValueType  # 2
+        NODE_STATS: ElasticSearch._TaskType.ValueType  # 3
+        CAT_INDICES: ElasticSearch._TaskType.ValueType  # 4
+        CAT_THREAD_POOL_SEARCH: ElasticSearch._TaskType.ValueType  # 5
 
     class TaskType(_TaskType, metaclass=_TaskTypeEnumTypeWrapper): ...
     UNKNOWN: ElasticSearch.TaskType.ValueType  # 0
     QUERY_LOGS: ElasticSearch.TaskType.ValueType  # 1
+    CHECK_CLUSTER_HEALTH: ElasticSearch.TaskType.ValueType  # 2
+    NODE_STATS: ElasticSearch.TaskType.ValueType  # 3
+    CAT_INDICES: ElasticSearch.TaskType.ValueType  # 4
+    CAT_THREAD_POOL_SEARCH: ElasticSearch.TaskType.ValueType  # 5
 
     @typing_extensions.final
     class QueryLogs(google.protobuf.message.Message):
@@ -69,19 +77,75 @@ class ElasticSearch(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["index", b"index", "limit", b"limit", "lucene_query", b"lucene_query", "offset", b"offset", "sort_desc", b"sort_desc", "timestamp_field", b"timestamp_field"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["index", b"index", "limit", b"limit", "lucene_query", b"lucene_query", "offset", b"offset", "sort_desc", b"sort_desc", "timestamp_field", b"timestamp_field"]) -> None: ...
 
+    @typing_extensions.final
+    class ClusterHealth(google.protobuf.message.Message):
+        """No parameters needed for cluster health check"""
+
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        def __init__(
+            self,
+        ) -> None: ...
+
+    @typing_extensions.final
+    class NodeStats(google.protobuf.message.Message):
+        """No parameters needed for node stats"""
+
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        def __init__(
+            self,
+        ) -> None: ...
+
+    @typing_extensions.final
+    class CatIndices(google.protobuf.message.Message):
+        """No parameters needed for cat indices"""
+
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        def __init__(
+            self,
+        ) -> None: ...
+
+    @typing_extensions.final
+    class CatThreadPoolSearch(google.protobuf.message.Message):
+        """No parameters needed for cat thread pool search"""
+
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        def __init__(
+            self,
+        ) -> None: ...
+
     TYPE_FIELD_NUMBER: builtins.int
     QUERY_LOGS_FIELD_NUMBER: builtins.int
+    CHECK_CLUSTER_HEALTH_FIELD_NUMBER: builtins.int
+    NODE_STATS_FIELD_NUMBER: builtins.int
+    CAT_INDICES_FIELD_NUMBER: builtins.int
+    CAT_THREAD_POOL_SEARCH_FIELD_NUMBER: builtins.int
     type: global___ElasticSearch.TaskType.ValueType
     @property
     def query_logs(self) -> global___ElasticSearch.QueryLogs: ...
+    @property
+    def check_cluster_health(self) -> global___ElasticSearch.ClusterHealth: ...
+    @property
+    def node_stats(self) -> global___ElasticSearch.NodeStats: ...
+    @property
+    def cat_indices(self) -> global___ElasticSearch.CatIndices: ...
+    @property
+    def cat_thread_pool_search(self) -> global___ElasticSearch.CatThreadPoolSearch: ...
     def __init__(
         self,
         *,
         type: global___ElasticSearch.TaskType.ValueType = ...,
         query_logs: global___ElasticSearch.QueryLogs | None = ...,
+        check_cluster_health: global___ElasticSearch.ClusterHealth | None = ...,
+        node_stats: global___ElasticSearch.NodeStats | None = ...,
+        cat_indices: global___ElasticSearch.CatIndices | None = ...,
+        cat_thread_pool_search: global___ElasticSearch.CatThreadPoolSearch | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["query_logs", b"query_logs", "task", b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["query_logs", b"query_logs", "task", b"task", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["query_logs"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["cat_indices", b"cat_indices", "cat_thread_pool_search", b"cat_thread_pool_search", "check_cluster_health", b"check_cluster_health", "node_stats", b"node_stats", "query_logs", b"query_logs", "task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cat_indices", b"cat_indices", "cat_thread_pool_search", b"cat_thread_pool_search", "check_cluster_health", b"check_cluster_health", "node_stats", b"node_stats", "query_logs", b"query_logs", "task", b"task", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["query_logs", "check_cluster_health", "node_stats", "cat_indices", "cat_thread_pool_search"] | None: ...
 
 global___ElasticSearch = ElasticSearch
