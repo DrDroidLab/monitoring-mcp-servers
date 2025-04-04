@@ -79,6 +79,20 @@ class ElasticSearchSourceManager(SourceManager):
                 'category': 'Logs',
                 'form_fields': []
             },
+            ElasticSearchProto.TaskType.MONITORING_CLUSTER_STATS: {
+                'executor': self.execute_monitoring_cluster_stats,
+                'model_types': [SourceModelType.ELASTIC_SEARCH_INDEX],
+                'result_type': PlaybookTaskResultType.TIMESERIES,
+                'display_name': 'Get Elasticsearch Monitoring Cluster Stats',
+                'category': 'Logs',
+                'form_fields': [
+                    FormField(key_name=StringValue(value="widget_name"),
+                              display_name=StringValue(value="Widget Name"),
+                              description=StringValue(value='Enter Widget Name'),
+                              data_type=LiteralType.STRING,
+                              form_field_type=FormFieldType.TEXT_FT),
+                ]
+            },
         }
 
     def get_connector_processor(self, es_connector, **kwargs):
@@ -347,6 +361,12 @@ class ElasticSearchSourceManager(SourceManager):
         except Exception as e:
             raise Exception(f"Error while fetching ElasticSearch cat thread pool search: {e}")
 
+    def safe_delta(self, curr_bucket, prev_bucket, key):
+        curr_val = curr_bucket.get(key, {}).get("value")
+        prev_val = prev_bucket.get(key, {}).get("value")
+        if curr_val is None or prev_val is None:
+            return None
+        return curr_val - prev_val if curr_val >= prev_val else curr_val  # handle resets
 
     def execute_monitoring_cluster_stats(self, time_range: TimeRange, es_task: ElasticSearchProto,
                                        es_connector: ConnectorProto) -> PlaybookTaskResult:
