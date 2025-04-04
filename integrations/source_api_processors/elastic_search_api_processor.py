@@ -14,16 +14,16 @@ class ElasticSearchApiProcessor(Processor):
     _INTERVAL_THRESHOLDS = [
         (31536001, "1d"),   # > 1 year
         (2592001, "12h"),  # > 30 days
-        (604801, "6h"),    # > 7 days
-        (86401, "3h"),     # > 1 day
-        (43201, "1h"),     # > 12 hours
-        (21601, "30m"),    # > 6 hours
-        (3601, "5m"),      # > 1 hour
-        (1800, "2m"),      # >= 30 minutes
-        (1200, "1m"),      # >= 20 minutes
+        (604801, "1h"),    # > 7 days
+        (86401, "10m"),     # > 1 day
+        (43201, "5m"),     # > 12 hours
+        (21601, "5m"),    # > 6 hours
+        (3601, "30s"),      # > 1 hour
+        (1800, "30s"),      # >= 30 minutes
+        (1200, "10s"),      # >= 20 minutes
     ]
-    _DEFAULT_INTERVAL = "30s" # Interval for ranges < 20 minutes
-    
+    _DEFAULT_INTERVAL = "10s" # Interval for ranges < 20 minutes
+
     def __init__(self, protocol: str, host: str, port: str, api_key_id: str, api_key: str, verify_certs: bool = False):
         self.protocol = protocol
         self.host = host
@@ -200,7 +200,7 @@ class ElasticSearchApiProcessor(Processor):
                     "per_minute": {
                         "date_histogram": {
                         "field": "@timestamp",
-                        "fixed_interval": interval
+                        "fixed_interval": "30s"#interval
                         },
                         "aggs": {
                             "query_total": {
