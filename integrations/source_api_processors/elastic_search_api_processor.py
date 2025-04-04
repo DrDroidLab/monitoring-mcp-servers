@@ -10,6 +10,20 @@ logger = logging.getLogger(__name__)
 class ElasticSearchApiProcessor(Processor):
     client = None
 
+    # Thresholds in seconds (descending order) mapped to ES interval strings
+    _INTERVAL_THRESHOLDS = [
+        (31536001, "1d"),   # > 1 year
+        (2592001, "12h"),  # > 30 days
+        (604801, "6h"),    # > 7 days
+        (86401, "3h"),     # > 1 day
+        (43201, "1h"),     # > 12 hours
+        (21601, "30m"),    # > 6 hours
+        (3601, "5m"),      # > 1 hour
+        (1800, "2m"),      # >= 30 minutes
+        (1200, "1m"),      # >= 20 minutes
+    ]
+    _DEFAULT_INTERVAL = "30s" # Interval for ranges < 20 minutes
+    
     def __init__(self, protocol: str, host: str, port: str, api_key_id: str, api_key: str, verify_certs: bool = False):
         self.protocol = protocol
         self.host = host
@@ -141,4 +155,120 @@ class ElasticSearchApiProcessor(Processor):
                 return result
         except Exception as e:
             logger.error(f"Exception occurred while fetching elasticsearch cat thread pool search with error: {e}")
+            raise e
+        
+    def _calculate_histogram_interval(self, start_time, end_time):
+        """
+        Calculate the appropriate histogram interval based on the time range.
+        Uses standard intervals defined in _INTERVAL_THRESHOLDS.
+        
+        Args:
+            start_time (int): Start time in epoch seconds
+            end_time (int): End time in epoch seconds
+            
+        Returns:
+            str: Elasticsearch interval string (e.g., "30s", "1h", "1d")
+        """
+        time_range_seconds = end_time - start_time
+        
+        for threshold, interval in self._INTERVAL_THRESHOLDS:
+            if time_range_seconds >= threshold:
+                return interval
+                
+        return self._DEFAULT_INTERVAL
+
+    def fetch_monitoring_cluster_stats(self, start_time=None, end_time=None):
+        client = self.get_connection()
+        try:
+            # Calculate appropriate interval based on time range
+            interval = self._calculate_histogram_interval(start_time, end_time)
+            
+            result = client.search(
+                index=".monitoring-es-*",
+                body = {
+                "size": 0,
+                "query": {
+                    "range": {
+                        "@timestamp": {
+                            "gte": start_time,
+                            "lt": end_time,
+                            "format": "epoch_second"
+                        }
+                    }
+                },
+                "aggs": {
+                    "per_minute": {
+                        "date_histogram": {
+                        "field": "@timestamp",
+                        "fixed_interval": interval
+                        },
+                        "aggs": {
+                            "query_total": {
+                                "max": {
+                                    "field": "indices_stats._all.total.search.query_total"
+                                }
+                            },
+                            "search_rate": {
+                                "derivative": {
+                                    "buckets_path": "query_total",
+                                    "unit": "second",
+                                }
+                            },
+                            "index_total": {
+                                "max": {
+                                    "field": "indices_stats._all.total.indexing.index_total"
+                                }
+                            },
+                            "indexing_rate": {
+                                "derivative": {
+                                    "buckets_path": "index_total",
+                                    "unit": "second"
+                                }
+                            },
+                            "index_primary": {
+                                "max": {
+                                    "field": "indices_stats._all.primaries.indexing.index_total"
+                                }
+                            },
+                            "indexing_rate_primary": {
+                                "derivative": {
+                                    "buckets_path": "index_primary",
+                                    "unit": "second"
+                                }
+                            },
+                            "query_total_sum": {
+                                "sum": {
+                                    "field": "indices_stats._all.total.search.query_total"
+                                }
+                            },
+                            "query_time_sum": {
+                                "sum": {
+                                    "field": "indices_stats._all.total.search.query_time_in_millis"
+                                }
+                            },
+                            "index_primary_sum": {
+                                "sum": {
+                                    "field": "indices_stats._all.primaries.indexing.index_total"
+                                }
+                                },
+                            "index_time": {
+                                "sum": {
+                                "field": "elasticsearch.index.primaries.indexing.index_time_in_millis"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            )
+            client.close()
+            # Convert response to dict
+            if hasattr(result, 'body'):
+                return result.body
+            elif hasattr(result, 'meta'):
+                return dict(result)
+            else:
+                return result
+        except Exception as e:
+            logger.error(f"Error fetching monitoring data: {e}")
             raise e

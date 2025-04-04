@@ -1,12 +1,13 @@
 import json
-from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value
+from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value, DoubleValue
 
 from integrations.source_api_processors.elastic_search_api_processor import ElasticSearchApiProcessor
 from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, TimeRange, SourceModelType
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType, Literal
-from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType, TextResult
+from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, TableResult, PlaybookTaskResultType, TextResult, \
+    TimeseriesResult, LabelValuePair
 from protos.playbooks.source_task_definitions.elastic_search_task_pb2 import ElasticSearch as ElasticSearchProto
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
@@ -345,3 +346,187 @@ class ElasticSearchSourceManager(SourceManager):
                 )
         except Exception as e:
             raise Exception(f"Error while fetching ElasticSearch cat thread pool search: {e}")
+
+
+    def execute_monitoring_cluster_stats(self, time_range: TimeRange, es_task: ElasticSearchProto,
+                                       es_connector: ConnectorProto) -> PlaybookTaskResult:
+        try:
+            if not es_connector:
+                raise Exception("Task execution Failed:: No ElasticSearch source found")
+
+            widget_name = ""
+            if es_task.monitoring_cluster_stats.widget_name.value:
+                widget_name = es_task.monitoring_cluster_stats.widget_name.value.lower()
+
+            es_client = self.get_connector_processor(es_connector)
+            result = es_client.fetch_monitoring_cluster_stats(time_range.time_geq, time_range.time_lt)
+
+            search_rate_datapoints = []
+            search_latency_datapoints = []
+            indexing_rate_datapoints = []
+            indexing_latency_datapoints = []
+            indexing_rate_primary_datapoints = []
+
+            buckets = result.get('aggregations', {}).get('per_minute', {}).get('buckets', [])
+            if not buckets or len(buckets) < 2:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value="Not enough monitoring data to plot")),
+                    source=self.source
+                )
+
+            for i in range(1, len(buckets)):
+                
+                curr = buckets[i]
+                prev = buckets[i - 1]
+                ts = curr["key"]
+
+                def get_val(key):
+                    val = curr.get(key, {}).get("value")
+                    return val if val is not None else None
+
+                # Search Rate - derived directly from Elasticsearch via derivative agg
+                if get_val("search_rate") is not None:
+                    search_rate_val = float(get_val("search_rate")) / 30.0
+                    if search_rate_val is not None and (not widget_name or widget_name == "search rate"):
+                        search_rate_datapoints.append(
+                            TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                                timestamp=ts,
+                                value=DoubleValue(value=search_rate_val)
+                            )
+                        )
+                
+                # Compute deltas
+                dq_sum = self.safe_delta( curr, prev, "query_total_sum")
+                dqt = self.safe_delta(curr, prev, "query_time_sum")
+
+                # Search Latency = total time / total queries in the interval (ms)
+                if dq_sum and dqt is not None and (not widget_name or widget_name == "search latency"):
+                    search_latency = dqt / dq_sum if dq_sum > 0 else 0
+                    search_latency_datapoints.append(
+                        TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                            timestamp=curr["key"],
+                            value=DoubleValue(value=search_latency)
+                        )
+                    )
+                
+                # Indexing Rate Total- derived directly from Elasticsearch via derivative agg
+                if get_val("indexing_rate") is not None:
+                    indexing_rate_val = float(get_val("indexing_rate")) / 30.0
+                    if indexing_rate_val is not None and (not widget_name or widget_name == "indexing rate"):
+                        indexing_rate_datapoints.append(
+                            TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                                timestamp=ts,
+                                value=DoubleValue(value=indexing_rate_val)
+                            )
+                        )
+                
+                # Indexing Rate Total- derived directly from Elasticsearch via derivative agg
+                if get_val("indexing_rate_primary") is not None:
+                    indexing_rate_val = float(get_val("indexing_rate_primary")) / 30.0
+                    if indexing_rate_val is not None and (not widget_name or widget_name == "indexing rate"):
+                        indexing_rate_primary_datapoints.append(
+                            TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                                timestamp=ts,
+                                value=DoubleValue(value=indexing_rate_val)
+                            )
+                        )
+                # Indexing latency
+                di_sum = self.safe_delta(curr, prev, "index_primary_sum")
+                dit = self.safe_delta(curr, prev, "index_time")
+
+                if di_sum and dit is not None and (not widget_name or widget_name == "indexing latency"):
+                    indexing_latency = dit / di_sum if di_sum > 0 else 0
+                    indexing_latency_datapoints.append(
+                        TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                            timestamp=ts,
+                            value=DoubleValue(value=indexing_latency)
+                        )
+                    )
+
+            labeled_metric_timeseries_list = []
+
+            if not widget_name or widget_name == "search rate":
+                search_rate_datapoints.sort(key=lambda x: x.timestamp)
+                if search_rate_datapoints:
+                    labeled_metric_timeseries_list.append(
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Total Shards'))
+                            ],
+                            unit=StringValue(value='count/s'),
+                            datapoints=search_rate_datapoints
+                        )
+                    )
+
+            if not widget_name or widget_name == "search latency":
+                search_latency_datapoints.sort(key=lambda x: x.timestamp)
+                if search_latency_datapoints:
+                    labeled_metric_timeseries_list.append(
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Total Shards'))
+                            ],
+                            unit=StringValue(value='ms'),
+                            datapoints=search_latency_datapoints
+                        )
+                    )
+
+            if not widget_name or widget_name == "indexing rate":
+                # Add Total Shards metric
+                indexing_rate_datapoints.sort(key=lambda x: x.timestamp)
+                if indexing_rate_datapoints:
+                    labeled_metric_timeseries_list.append(
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Total Shards'))
+                            ],
+                            unit=StringValue(value='count/s'),
+                            datapoints=indexing_rate_datapoints
+                        )
+                    )
+                
+                # Add Primary Shards metric
+                indexing_rate_primary_datapoints.sort(key=lambda x: x.timestamp)
+                if indexing_rate_primary_datapoints:
+                    labeled_metric_timeseries_list.append(
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Primary Shards'))
+                            ],
+                            unit=StringValue(value='count/s'),
+                            datapoints=indexing_rate_primary_datapoints
+                        )
+                    )
+
+            if not widget_name or widget_name == "indexing latency":
+                indexing_latency_datapoints.sort(key=lambda x: x.timestamp)
+                if indexing_latency_datapoints:
+                    labeled_metric_timeseries_list.append(
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Primary Shards'))
+                            ],
+                            unit=StringValue(value='ms'),
+                            datapoints=indexing_latency_datapoints
+                        )
+                    )
+
+            metric_name = 'Elasticsearch Monitoring Metrics'
+            if widget_name:
+                metric_name = f'Elasticsearch {widget_name.title()}'
+
+            timeseries_result = TimeseriesResult(
+                metric_name=StringValue(value=metric_name),
+                metric_expression=StringValue(value='Search and Indexing metrics from Elasticsearch'),
+                labeled_metric_timeseries=labeled_metric_timeseries_list
+            )
+
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TIMESERIES,
+                source=self.source,
+                timeseries=timeseries_result
+            )
+
+        except Exception as e:
+            raise Exception(f"Error while fetching ElasticSearch monitoring cluster stats: {e}")
