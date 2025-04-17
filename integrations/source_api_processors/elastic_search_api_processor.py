@@ -189,7 +189,7 @@ class ElasticSearchApiProcessor(Processor):
                 "size": 0,
                 "query": {
                     "range": {
-                        "@timestamp": {
+                        "timestamp": {
                             "gte": start_time,
                             "lt": end_time,
                             "format": "epoch_second"
@@ -199,7 +199,7 @@ class ElasticSearchApiProcessor(Processor):
                 "aggs": {
                     "per_minute": {
                         "date_histogram": {
-                        "field": "@timestamp",
+                        "field": "timestamp",
                         "fixed_interval": "30s"#interval
                         },
                         "aggs": {
