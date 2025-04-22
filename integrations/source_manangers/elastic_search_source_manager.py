@@ -91,6 +91,13 @@ class ElasticSearchSourceManager(SourceManager):
                               description=StringValue(value='Enter Widget Name'),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT),
+                    FormField(key_name=StringValue(value="interval"),
+                              display_name=StringValue(value="Interval"),
+                              description=StringValue(value="Ex. 10s, 1m, 5m, 1h"),
+                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value="")),
+                              data_type=LiteralType.STRING,
+                              form_field_type=FormFieldType.TEXT_FT,
+                              is_optional=True),
                 ]
             },
         }
@@ -377,9 +384,10 @@ class ElasticSearchSourceManager(SourceManager):
             widget_name = ""
             if es_task.monitoring_cluster_stats.widget_name.value:
                 widget_name = es_task.monitoring_cluster_stats.widget_name.value.lower()
+            interval = es_task.monitoring_cluster_stats.interval.value
 
             es_client = self.get_connector_processor(es_connector)
-            result = es_client.fetch_monitoring_cluster_stats(time_range.time_geq, time_range.time_lt)
+            result = es_client.fetch_monitoring_cluster_stats(time_range.time_geq, time_range.time_lt, interval)
 
             search_rate_datapoints = []
             search_latency_datapoints = []
