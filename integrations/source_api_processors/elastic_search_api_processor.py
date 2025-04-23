@@ -177,11 +177,12 @@ class ElasticSearchApiProcessor(Processor):
                 
         return self._DEFAULT_INTERVAL
 
-    def fetch_monitoring_cluster_stats(self, start_time=None, end_time=None):
+    def fetch_monitoring_cluster_stats(self, start_time=None, end_time=None, interval=None):
         client = self.get_connection()
         try:
             # Calculate appropriate interval based on time range
-            interval = self._calculate_histogram_interval(start_time, end_time)
+            if not interval:
+                interval = self._calculate_histogram_interval(start_time, end_time)
             
             result = client.search(
                 index=".monitoring-es-*",

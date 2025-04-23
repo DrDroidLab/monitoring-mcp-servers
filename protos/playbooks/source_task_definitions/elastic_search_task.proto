@@ -43,6 +43,7 @@ message ElasticSearch {
 
   message MonitoringClusterStats {
     google.protobuf.StringValue widget_name = 1;
+    google.protobuf.StringValue interval = 2;
   }
 
   TaskType type = 1;
