@@ -350,11 +350,10 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             ))
 
         if credential_yaml.get('aws_assumed_role_arn', None):
-            pass
-        c_keys.append(ConnectorKey(
-            key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
-            key=StringValue(value=credential_yaml['aws_assumed_role_arn'])
-        ))
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
+                key=StringValue(value=credential_yaml['aws_assumed_role_arn'])
+            ))
     elif c_type == 'GRAFANA':
         if 'grafana_host' not in credential_yaml or 'grafana_api_key' not in credential_yaml:
             raise Exception(
