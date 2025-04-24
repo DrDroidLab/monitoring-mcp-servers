@@ -329,8 +329,7 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
 
         if (not 'aws_access_key' in credential_yaml or not 'aws_secret_key' in credential_yaml) and (
                 not 'aws_assumed_role_arn' in credential_yaml):
-            raise Exception(
-                f'No credentials found in credential yaml for eks source in connector: {connector_name}')
+            raise Exception(f'No credentials found in credential yaml for eks source in connector: {connector_name}')
 
         c_source = Source.EKS
 

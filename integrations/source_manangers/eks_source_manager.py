@@ -165,6 +165,28 @@ class EksSourceManager(SourceManager):
         else:
             return api_processor
 
+    def test_connector_processor(self, eks_connector, **kwargs):
+        generated_credentials = generate_credentials_dict(eks_connector.type, eks_connector.keys)
+        if 'region' in kwargs:
+            generated_credentials['region'] = kwargs.get('region')
+        try:
+            api_processor = EKSApiProcessor(**generated_credentials)
+            clusters = api_processor.eks_list_clusters()
+        except Exception as e:
+            raise Exception(f"Failed to get clusters from eks: {e}")
+        if not clusters:
+            raise Exception("No clusters found in the eks connection")
+        try:
+            cluster_name = clusters[0]
+            instance = api_processor.eks_get_api_instance(cluster_name=cluster_name, client='api')
+            eks_host = instance.api_client.configuration.host
+            token = instance.api_client.configuration.api_key.get('authorization')
+            ssl_ca_cert_path = instance.api_client.configuration.ssl_ca_cert
+            kubectl_processor = KubectlApiProcessor(api_server=eks_host, token=token, ssl_ca_cert_path=ssl_ca_cert_path)
+            return kubectl_processor.test_connection()
+        except Exception as e:
+            raise Exception(f"Failed to test eks: {e}")
+
     def get_pods(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto) -> PlaybookTaskResult:
         try:
             if not eks_connector:
