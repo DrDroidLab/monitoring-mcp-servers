@@ -347,7 +347,11 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key_type=SourceKeyType.AWS_SECRET_KEY,
                 key=StringValue(value=credential_yaml['aws_secret_key'])
             ))
-
+        if credential_yaml.get('k8_role_arn', None):
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.EKS_ROLE_ARN,
+                key=StringValue(value=credential_yaml['k8_role_arn'])
+            ))
         if credential_yaml.get('aws_assumed_role_arn', None):
             c_keys.append(ConnectorKey(
                 key_type=SourceKeyType.AWS_ASSUMED_ROLE_ARN,
