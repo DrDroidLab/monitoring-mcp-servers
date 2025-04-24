@@ -94,7 +94,7 @@ class ElasticSearchSourceManager(SourceManager):
                     FormField(key_name=StringValue(value="interval"),
                               display_name=StringValue(value="Interval"),
                               description=StringValue(value="Ex. 10s, 1m, 5m, 1h"),
-                              default_value=Literal(literal_type=LiteralType.STRING, string=StringValue(value="")),
+                              default_value=Literal(type=LiteralType.STRING, string=StringValue(value="")),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
                               is_optional=True),
