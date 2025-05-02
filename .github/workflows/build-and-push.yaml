@@ -75,9 +75,9 @@ jobs:
           IMAGE_TAG_BRANCH_ORIG: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}
           IMAGE_TAG_EPOCH_TIMESTAMP: ${{ needs.setup.outputs.EPOCH_TIMESTAMP }}
         run: |
-          echo "Building for repository: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent"
+          echo "Building for repository"
 
-          REPO_NAME="public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent"
+          REPO_NAME=${{ secrets.REPO_NAME }}
           DOCKER_BUILDKIT=1 docker build -f Dockerfile \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 \
@@ -90,6 +90,6 @@ jobs:
       - name: Push to ECR
         if: github.event_name == 'push'
         run: |
-          echo "Pushing to repository: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent"
-          REPO_NAME="public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent"
+          echo "Pushing to repository"
+          REPO_NAME=${{ secrets.REPO_NAME }}
           docker push ${REPO_NAME} --all-tags
