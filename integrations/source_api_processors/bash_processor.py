@@ -175,7 +175,7 @@ class BashProcessor(Processor):
 
                     stdin, stdout, stderr = client.exec_command(exec_command)
                     # Wait for execution
-                    time.sleep(2)
+                    time.sleep(6)
                     try:
                         with sftp.open(remote_output_path, "r") as file:
                             output = file.read().decode()
