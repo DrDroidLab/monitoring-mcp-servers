@@ -1,5 +1,15 @@
 apiVersion: v2
-type: application
 name: drd-vpc-agent
-description: A Helm chart for deploying the Doctor Droid VPC Agent in K8s Cluster
+description: Celery-only deployment
 version: 0.1.0
+
+dependencies:
+  - name: celery-beat
+    version: 0.1.0
+    repository: "file://charts/celery_beat"
+  - name: celery-worker
+    version: 0.1.0
+    repository: "file://charts/celery_worker"
+  - name: redis
+    version: 0.1.0
+    repository: "file://charts/redis"

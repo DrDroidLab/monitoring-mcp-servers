@@ -1,0 +1,22 @@
+global:
+  DRD_CLOUD_API_TOKEN: ""
+  DRD_CLOUD_API_HOST: "https://agent-api.drdroid.io"
+
+restartCron:
+  enabled: true
+  schedule: "0 * * * *" # hourly
+
+celery-beat:
+  image:
+    repository: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent
+    tag: latest
+    pullPolicy: Always
+
+celery-worker:
+  image:
+    repository: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent
+    tag: latest
+    pullPolicy: Always
+
+redis:
+  image: redis:7.2

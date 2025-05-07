@@ -20,6 +20,7 @@ class ConnectorsConfig(AppConfig):
     def ready(self):
         if not settings.LOADED_CONNECTIONS:
             logger.warning(f'No connections found in {settings.SECRETS_FILE_PATH}')
+            return
 
         drd_cloud_host = settings.DRD_CLOUD_API_HOST
         drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
