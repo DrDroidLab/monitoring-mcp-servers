@@ -14,6 +14,7 @@ DRD_CLOUD_API_TOKEN=$1
 
 # Create the namespace if it doesn't exist
 kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -f configmap.yaml -n $NAMESPACE
 
 # Create a values.override.yaml file to override the global API token
 cat <<EOF > values.override.yaml
