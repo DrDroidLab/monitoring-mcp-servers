@@ -5,7 +5,7 @@ global:
 
 restartCron:
   enabled: true
-  schedule: "0 * * * *" # hourly
+  schedule: "0 0 * * *"  # every day at 00:00 UTC
 
 celery-beat:
   image:

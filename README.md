@@ -26,10 +26,9 @@ Currently, the agent supports the following metric sources in your VPC:
 * Github
 * Postgres
 * Any SQL Database (via Sql Connection String)
+* Bash Commands
 
 Releasing soon (reach out to us if you need support for these or any other source):
-
-* Bash Commands
 * Azure
 
 ## Env vars
@@ -37,57 +36,36 @@ Releasing soon (reach out to us if you need support for these or any other sourc
 | Env Var Name        | Description                                    | Required | 
 |---------------------|------------------------------------------------|----------|
 | DRD_CLOUD_API_TOKEN | Authentication token for doctor droid platform | True     |
-| DRD_CLOUD_API_HOST  | API server host for droid platform             | True     |
 
-## Configuration
+## Installation
+To get started create an agent authentication token by visiting [site](https://playbooks.drdroid.io/agent-tokens)
 
-1. To get started create credentials/secret.yaml file with connections and corresponding credentials.
-   Secret format for different connections can be referenced from credentials/credentials_template.yaml.
+### Docker Compose
+1. Create credentials/secret.yaml file with integration credentials. Secret format for different connections can be referenced from [credentials/credentials_template.yaml.](https://github.com/DrDroidLab/drd-vpc-agent/blob/main/credentials/credentials_template.yaml)
 
-2. Create an agent token needed for the authenticating http calls between doctor droid platform and agent by
-   visiting [site](https://playbooks.drdroid.io/agent-tokens)
-   Once auth token is available, you can set the env var as DRD_CLOUD_API_TOKEN=<API_TOKEN>
-
-3. Install via Docker-Compose: To run via docker-compose you will have to clone the github project locally and run this:
-
+Command:
 ```shell
-DRD_CLOUD_API_TOKEN=<API_TOKEN> docker-compose -f agent.docker-compose.yaml up
+./deploy_docker.sh <API_TOKEN>
 ```
-
-4. Install via Helm Charts
-   Pre configuration steps:
-   a. Copy and paste the token generated in step 2 in the values.yaml file under var : 'DRD_CLOUD_API_TOKEN'
-   Ensure the values are updated in:
-
-   i. helm/charts/celery_beat/values.yaml
-   <img width="939" alt="Screenshot 2024-12-20 at 14 03 25" src="https://github.com/user-attachments/assets/0d76245f-ac43-4bfc-a986-54300c826225" />
+For any update the agent, re-run the command.
 
 
-
-   ii. helm/charts/celery_worker/values.yaml
-   <img width="939" alt="Screenshot 2024-12-20 at 14 03 25" src="https://github.com/user-attachments/assets/0d76245f-ac43-4bfc-a986-54300c826225" />
-
-   b. The secrets for the integrations to be installed are to be added in helm/configmap.yaml file.  
+### Helm
+1. Add the secrets for the integrations in helm/configmap.yaml file.
    Refer to the image below for a sample:
    <img width="934" alt="Screenshot 2024-12-20 at 14 02 43" src="https://github.com/user-attachments/assets/cadb2b0a-db0c-4128-bef7-fe2a6288b79b" />
 
+Command:
 ```shell
 cd helm
-kubectl create namespace drdroid
-kubectl apply -f configmap.yaml -n drdroid
-helm upgrade --install drd-vpc-agent . -n drdroid
+./deploy_helm.sh <API_TOKEN>
 ```
 
-In case you are looking to create access for running kubectl commands on this cluster from Doctor Droid platform, run
-the following as well.
-
-```shell
-kubectl apply -f clusterRole.yaml -n drdroid
-kubectl apply -f clusterRoleBinding.yaml -n drdroid
-```
+* The agent will be installed in the namespace 'drdroid' by default. This can be changed in the helm/deploy_helm.sh file.
+* Agent updates the image automatically every day at 00:00 UTC.
+* Agent will have read access to the cluster and will be able to fetch the metrics from the cluster.
 
 ## Support
-
 Visit [Doctor Droid website](https://drdroid.io?utm_param=github-py) for getting early access.
 Go through our [documentation](https://docs.drdroid.io?utm_param=github-py) to learn more.
 
