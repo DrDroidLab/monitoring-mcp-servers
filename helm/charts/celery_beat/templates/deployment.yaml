@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: drd-vpc-agent-celery-beat
+      annotations:
+        rollme: "{{ now | unixEpoch }}"
     spec:
       containers:
         - name: celery-beat
@@ -38,7 +40,6 @@ spec:
             - name: credentials-volume
               mountPath: /code/credentials/secrets.yaml
               subPath: secrets.yaml
-
       volumes:
         - name: credentials-volume
           configMap:
