@@ -18,7 +18,7 @@ spec:
         - name: celery-worker
           image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
           imagePullPolicy: Always
-          command: [ "./start-celery-worker.sh" ]
+          command: ["./start-celery-worker.sh"]
           env:
             - name: DJANGO_DEBUG
               value: "True"
