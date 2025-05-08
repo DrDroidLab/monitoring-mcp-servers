@@ -297,6 +297,7 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.KUBERNETES_CLUSTER_API_SERVER,
             SourceKeyType.KUBERNETES_CLUSTER_TOKEN,
         ],
+        []
     ],
     Source.GCM: [
         [

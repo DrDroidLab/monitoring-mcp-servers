@@ -21,11 +21,13 @@ class ConnectorsConfig(AppConfig):
         if not settings.LOADED_CONNECTIONS:
             logger.warning(f'No connections found in {settings.SECRETS_FILE_PATH}')
             return
-
         drd_cloud_host = settings.DRD_CLOUD_API_HOST
         drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
         loaded_connections = settings.LOADED_CONNECTIONS
-
+        if settings.NATIVE_KUBERNETES_API_MODE:
+            logger.info('Native Kubernetes API mode is enabled')
+            k8_connector = {'native_k8s_connector': {'type': 'KUBERNETES'}}
+            loaded_connections.update(k8_connector)
         if loaded_connections:
             register_connectors(drd_cloud_host, drd_cloud_api_token, loaded_connections)
             for c, metadata in loaded_connections.items():

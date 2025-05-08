@@ -8,6 +8,7 @@ from utils.yaml_utils import load_yaml
 
 logger = logging.getLogger(__name__)
 
+
 class AgentConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'agent'
@@ -23,6 +24,9 @@ class AgentConfig(AppConfig):
 
         drd_cloud_host = settings.DRD_CLOUD_API_HOST
         drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
+        native_k8s_mode = settings.NATIVE_KUBERNETES_API_MODE
+        if native_k8s_mode:
+            logger.info('Native Kubernetes API mode is enabled')
 
         # Establish reachability with DRD Cloud
         response = requests.get(f'{drd_cloud_host}/connectors/proxy/ping',

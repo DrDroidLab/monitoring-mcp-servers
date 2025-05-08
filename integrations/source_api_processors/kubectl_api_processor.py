@@ -4,6 +4,8 @@ import logging
 import subprocess
 import tempfile
 
+from allauth.socialaccount.providers.mediawiki.provider import settings
+
 from integrations.processor import Processor
 
 logger = logging.getLogger(__name__)
@@ -12,10 +14,14 @@ logger = logging.getLogger(__name__)
 class KubectlApiProcessor(Processor):
     client = None
 
-    def __init__(self, api_server, token, ssl_ca_cert=None, ssl_ca_cert_path=None):
+    def __init__(self, api_server=None, token=None, ssl_ca_cert=None, ssl_ca_cert_path=None):
         self.__api_server = api_server
         self.__token = token
         self.__ca_cert = None
+        self.native_connection_mode = settings.NATIVE_KUBERNETES_API_MODE
+        if not self.native_connection_mode:
+            if not api_server or not token:
+                raise ValueError("Kubernetes API server and token are required for KubectlApiProcessor")
         if ssl_ca_cert_path:
             self.__ca_cert = ssl_ca_cert_path
         elif ssl_ca_cert:
@@ -30,7 +36,9 @@ class KubectlApiProcessor(Processor):
         command = "kubectl version --output=json"
         if 'kubectl' in command:
             command = command.replace('kubectl', '')
-        if self.__ca_cert:
+        if self.native_connection_mode:
+            kubectl_command = ["kubectl"] + command.split()
+        elif self.__ca_cert:
             kubectl_command = [
                                   "kubectl",
                                   f"--server={self.__api_server}",
@@ -70,7 +78,9 @@ class KubectlApiProcessor(Processor):
             commands = [cmd.strip() for cmd in command.split('|')]
         else:
             commands = [command]
-        if self.__ca_cert:
+        if self.native_connection_mode:
+            kubectl_command = ["kubectl"] + command.split()
+        elif self.__ca_cert:
             kubectl_command = [
                                   "kubectl",
                                   f"--server={self.__api_server}",
