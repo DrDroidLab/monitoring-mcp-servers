@@ -18,16 +18,12 @@ class ConnectorsConfig(AppConfig):
     name = 'connectors'
 
     def ready(self):
-        if not settings.LOADED_CONNECTIONS:
+        if not settings.LOADED_CONNECTIONS and not settings.NATIVE_KUBERNETES_API_MODE:
             logger.warning(f'No connections found in {settings.SECRETS_FILE_PATH}')
             return
         drd_cloud_host = settings.DRD_CLOUD_API_HOST
         drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
-        loaded_connections = settings.LOADED_CONNECTIONS
-        if settings.NATIVE_KUBERNETES_API_MODE:
-            logger.info('Native Kubernetes API mode is enabled')
-            k8_connector = {'native_k8s_connector': {'type': 'KUBERNETES'}}
-            loaded_connections.update(k8_connector)
+        loaded_connections = settings.LOADED_CONNECTIONS if settings.LOADED_CONNECTIONS else {}
         if loaded_connections:
             register_connectors(drd_cloud_host, drd_cloud_api_token, loaded_connections)
             for c, metadata in loaded_connections.items():
@@ -48,5 +44,8 @@ class ConnectorsConfig(AppConfig):
                 if credentials_dict:
                     request_id = uuid.uuid4().hex
                     populate_connector_metadata.delay(request_id, connector_name, connector_type, credentials_dict)
+                elif settings.NATIVE_KUBERNETES_API_MODE:
+                    request_id = uuid.uuid4().hex
+                    populate_connector_metadata.delay(request_id, connector_name, connector_type, credentials_dict)
                 else:
-                    raise ValueError(f'Invalid credentials for {connector_name}')
+                    logger.warning(f'No credentials found for connector {connector_name}')

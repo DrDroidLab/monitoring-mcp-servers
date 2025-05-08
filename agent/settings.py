@@ -23,9 +23,14 @@ env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def load_yaml(filepath):
+def load_yaml(filepath, native_k8s_connector_mode=False):
     with open(filepath, 'r') as file:
-        return yaml.safe_load(file)
+        loaded_connection = yaml.safe_load(file)
+    if native_k8s_connector_mode:
+        if not loaded_connection:
+            loaded_connection = {}
+        loaded_connection.update({'native_k8s_connector': {'type': 'KUBERNETES'}})
+    return loaded_connection
 
 
 # Quick-start development settings - unsuitable for production
@@ -205,7 +210,7 @@ DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST", default="https://agent-api.dr
 NATIVE_KUBERNETES_API_MODE = env.bool("NATIVE_KUBERNETES_API_MODE", default=False)
 
 SECRETS_FILE_PATH = BASE_DIR / 'credentials/secrets.yaml'
-LOADED_CONNECTIONS = load_yaml(SECRETS_FILE_PATH)
+LOADED_CONNECTIONS = load_yaml(SECRETS_FILE_PATH, NATIVE_KUBERNETES_API_MODE)
 
 # deprecated
 DRD_AGENT_API_TOKEN = env.str("DRD_AGENT_API_TOKEN", "test-abc")

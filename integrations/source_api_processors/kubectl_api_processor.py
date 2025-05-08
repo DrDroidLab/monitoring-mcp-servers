@@ -4,7 +4,7 @@ import logging
 import subprocess
 import tempfile
 
-from allauth.socialaccount.providers.mediawiki.provider import settings
+from django.conf import settings
 
 from integrations.processor import Processor
 
@@ -19,9 +19,8 @@ class KubectlApiProcessor(Processor):
         self.__token = token
         self.__ca_cert = None
         self.native_connection_mode = settings.NATIVE_KUBERNETES_API_MODE
-        if not self.native_connection_mode:
-            if not api_server or not token:
-                raise ValueError("Kubernetes API server and token are required for KubectlApiProcessor")
+        if not self.native_connection_mode and (not api_server or not token):
+            raise ValueError("Kubernetes API server and token are required for KubectlApiProcessor")
         if ssl_ca_cert_path:
             self.__ca_cert = ssl_ca_cert_path
         elif ssl_ca_cert:
