@@ -1,0 +1,95 @@
+name: "VPC Agent build"
+run-name: "VPC Agent updated by ${{ github.actor }} and run by ${{ github.triggering_actor }}"
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/build-and-push.yaml
+      - **
+    branches:
+      - "main"
+  push:
+    paths:
+      - .github/workflows/build-and-push.yaml
+      - **
+    branches:
+      - "main"
+
+permissions: write-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      SHORT_SHA: ${{ steps.setup.outputs.SHORT_SHA }}
+      EPOCH_TIMESTAMP: ${{ steps.setup.outputs.EPOCH_TIMESTAMP }}
+      MONTH: ${{ steps.setup.outputs.MONTH }}
+      YEAR: ${{ steps.setup.outputs.YEAR }}
+      CLEAN_BRANCH_NAME: ${{ steps.setup.outputs.CLEAN_BRANCH_NAME }}
+      AWS_REGION_PROD: ${{ steps.setup.outputs.AWS_REGION_PROD }}
+    steps:
+      - name: Set variables
+        id: setup
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+          echo "EPOCH_TIMESTAMP=$(date +%s)" >> $GITHUB_OUTPUT
+          echo "MONTH=$(date +%m)" >> $GITHUB_OUTPUT
+          echo "YEAR=$(date +%Y)" >> $GITHUB_OUTPUT
+          echo "AWS_REGION_PROD=us-east-1" >> $GITHUB_OUTPUT
+
+          # Handle both PR and push events
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH_NAME="${{ github.base_ref }}"
+          else
+            BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          fi
+
+          echo "CLEAN_BRANCH_NAME=$(echo ${BRANCH_NAME} | tr '/' '-')" >> $GITHUB_OUTPUT
+
+
+
+  build:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ needs.setup.outputs.AWS_REGION_PROD}}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Tag
+        env:
+          IMAGE_TAG_SHA: ${{ needs.setup.outputs.SHORT_SHA }}
+          IMAGE_TAG_BRANCH: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}-${{needs.setup.outputs.EPOCH_TIMESTAMP}}
+          IMAGE_TAG_BRANCH_ORIG: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}
+          IMAGE_TAG_EPOCH_TIMESTAMP: ${{ needs.setup.outputs.EPOCH_TIMESTAMP }}
+        run: |
+          echo "Building for repository"
+
+          REPO_NAME=${{ secrets.REPO_NAME }}
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 \
+          --cache-from ${REPO_NAME}:$IMAGE_TAG_BRANCH \
+          --tag ${REPO_NAME}:$IMAGE_TAG_SHA \
+          --tag ${REPO_NAME}:$IMAGE_TAG_EPOCH_TIMESTAMP \
+          --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH_ORIG \
+          --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH .
+
+      - name: Push to ECR
+        if: github.event_name == 'push'
+        run: |
+          echo "Pushing to repository"
+          REPO_NAME=${{ secrets.REPO_NAME }}
+          docker push ${REPO_NAME} --all-tags
