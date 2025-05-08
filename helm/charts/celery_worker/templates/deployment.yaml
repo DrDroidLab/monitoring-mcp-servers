@@ -18,7 +18,7 @@ spec:
         - name: celery-worker
           image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
           imagePullPolicy: Always
-          command: ["./start-celery-worker.sh"]
+          command: [ "./start-celery-worker.sh" ]
           env:
             - name: DJANGO_DEBUG
               value: "True"
@@ -32,6 +32,8 @@ spec:
               value: {{ .Values.global.DRD_CLOUD_API_TOKEN | quote }}
             - name: DRD_CLOUD_API_HOST
               value: {{ .Values.global.DRD_CLOUD_API_HOST | quote }}
+            - name: NATIVE_KUBERNETES_API_MODE
+              value: {{ .Values.global.NATIVE_KUBERNETES_API_MODE | quote }}
           volumeMounts:
             - name: credentials-volume
               mountPath: /code/credentials/secrets.yaml
