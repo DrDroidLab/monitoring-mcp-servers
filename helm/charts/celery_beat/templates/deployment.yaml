@@ -17,6 +17,7 @@ spec:
       containers:
         - name: celery-beat
           image: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent:latest
+          imagePullPolicy: Always
           command: ["./start-celery-beat.sh"]
           env:
             - name: DJANGO_DEBUG
@@ -28,9 +29,11 @@ spec:
             - name: REDIS_URL
               value: "redis://redis-service:6379/0"
             - name: DRD_CLOUD_API_TOKEN
-              value: {{ .Values.DRD_CLOUD_API_TOKEN }}
+              value: {{ .Values.global.DRD_CLOUD_API_TOKEN | quote }}
             - name: DRD_CLOUD_API_HOST
-              value: {{ .Values.DRD_CLOUD_API_HOST }}
+              value: {{ .Values.global.DRD_CLOUD_API_HOST | quote }}
+            - name: NATIVE_KUBERNETES_API_MODE
+              value: {{ .Values.global.NATIVE_KUBERNETES_API_MODE | quote }}
           volumeMounts:
             - name: credentials-volume
               mountPath: /code/credentials/secrets.yaml

@@ -172,10 +172,9 @@ class BashProcessor(Processor):
                     sftp = client.open_sftp()
                     sftp.put(script_file_path, remote_script_path)  # Upload script
                     sftp.chmod(remote_script_path, 0o755)  # Make script executable
-
                     stdin, stdout, stderr = client.exec_command(exec_command)
                     # Wait for execution
-                    time.sleep(10)
+                    exit_status = stdout.channel.recv_exit_status()
                     try:
                         with sftp.open(remote_output_path, "r") as file:
                             output = file.read().decode()
