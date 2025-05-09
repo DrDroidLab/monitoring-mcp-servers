@@ -31,7 +31,7 @@ class RootlySourceManager(SourceManager):
         return RootlyApiProcessor(**generated_credentials)
 
     def execute_send_timeline_event(self, time_range: TimeRange, rootly_task: Rootly,
-                                    rootly_connector: ConnectorProto) -> PlaybookTaskResult:
+                                    rootly_connector: ConnectorProto):
         try:
             if not rootly_connector:
                 raise Exception("Task execution Failed:: No Rootly source found")

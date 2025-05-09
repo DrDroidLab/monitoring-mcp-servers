@@ -42,7 +42,7 @@ class BigQuerySourceManager(SourceManager):
         return BigQueryApiProcessor(**generated_credentials)
 
     def execute_query_table(self, time_range: TimeRange, bq_task: BigQuery,
-                            bq_connector: ConnectorProto) -> PlaybookTaskResult:
+                            bq_connector: ConnectorProto):
         try:
             if not bq_connector:
                 raise Exception("Task execution Failed:: No BigQuery source found")

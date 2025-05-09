@@ -80,7 +80,7 @@ class ApiSourceManager(SourceManager):
         }
 
     def execute_http_request(self, time_range: TimeRange, api_task: Api,
-                             api_connector_proto: ConnectorProto) -> PlaybookTaskResult:
+                             api_connector_proto: ConnectorProto):
         try:
             http_request = api_task.http_request
             method = http_request.method

@@ -22,7 +22,7 @@ class GrafanaApiProcessor(Processor):
     def test_connection(self):
         try:
             url = '{}/api/datasources'.format(self.__host)
-            response = requests.get(url, headers=self.headers, verify=self.__ssl_verify)
+            response = requests.get(url, headers=self.headers, verify=self.__ssl_verify, timeout=20)
             if response and response.status_code == 200:
                 return True
             else:
@@ -99,17 +99,41 @@ class GrafanaApiProcessor(Processor):
             logger.error(f"Exception occurred while getting promql metric timeseries with error: {e}")
             raise e
 
-    def panel_query_datasource_api(self, tr: TimeRange, queries):
+    def fetch_alert_rules(self):
+        try:
+            url = '{}/api/v1/provisioning/alert-rules'.format(self.__host)
+            response = requests.get(url, headers=self.headers, verify=self.__ssl_verify)
+            if response and response.status_code == 200:
+                return response.json()
+            else:
+                raise Exception(
+                    f"Failed to fetch alert rules. Status Code: {response.status_code}. Response Text: {response.text}")
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching grafana alert rules with error: {e}")
+            raise e
+
+    def panel_query_datasource_api(self, tr: TimeRange, queries, interval_ms=300000):
         try:
             if not queries or len(queries) == 0:
                 raise ValueError("No queries provided.")
+
             url = f"{self.__host}/api/ds/query"
+
             from_tr = int(tr.time_geq * 1000)
             to_tr = int(tr.time_lt * 1000)
-            payload = {"queries": queries, "from": str(from_tr), "to": str(to_tr)}
+
+            for query in queries:
+                query["intervalMs"] = interval_ms # 5 minutes default, in milliseconds
+
+            payload = {
+                "queries": queries,
+                "from": str(from_tr),
+                "to": str(to_tr)
+            }
+
             response = requests.post(url, headers=self.headers, json=payload)
             if response.status_code == 429:
-                logger.error("Grafana query API responded with 429 (rate limited). Headers: %s", response.headers)
+                logger.info("Grafana query API responded with 429 (rate limited). Headers: %s", response.headers)
                 return None
             elif response.status_code == 200:
                 return response.json()

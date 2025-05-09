@@ -62,7 +62,7 @@ class JenkinsSourceManager(SourceManager):
         generated_credentials = generate_credentials_dict(jenkins_connector.type, jenkins_connector.keys)
         return JenkinsAPIProcessor(**generated_credentials)
 
-    def run_job(self, time_range: TimeRange, jenkins_task: Jenkins, jenkins_connector: Connector) -> PlaybookTaskResult:
+    def run_job(self, time_range: TimeRange, jenkins_task: Jenkins, jenkins_connector: Connector):
         try:
             if not jenkins_connector:
                 raise Exception("Task execution Failed:: No Jenkins source found")
@@ -106,7 +106,7 @@ class JenkinsSourceManager(SourceManager):
             raise Exception(f"Error while executing Jenkins task: {e}")
 
     def fetch_last_build_details(self, time_range: TimeRange, jenkins_task: Jenkins,
-                                 jenkins_connector: Connector) -> PlaybookTaskResult:
+                                 jenkins_connector: Connector):
         try:
             if not jenkins_connector:
                 raise Exception("Task execution Failed:: No Jenkins source found")

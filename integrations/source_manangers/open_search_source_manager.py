@@ -87,7 +87,7 @@ class OpenSearchSourceManager(SourceManager):
         return OpenSearchApiProcessor(**generated_credentials)
 
     def execute_query_logs(self, time_range: TimeRange, os_task: OpenSearch,
-                           os_connector: ConnectorProto) -> PlaybookTaskResult:
+                           os_connector: ConnectorProto):
         try:
             if not os_connector:
                 raise ValueError("OpenSearchSourceManager.execute_query_logs:: Task execution Failed:: "
@@ -166,7 +166,7 @@ class OpenSearchSourceManager(SourceManager):
                             f"{str(e)}")
 
     def execute_delete_index(self, time_range: TimeRange, os_task: OpenSearch,
-                             os_connector: ConnectorProto) -> PlaybookTaskResult:
+                             os_connector: ConnectorProto):
         try:
             if not os_connector:
                 raise ValueError("OpenSearchSourceManager.execute_delete_index:: Task execution Failed:: "
@@ -191,7 +191,7 @@ class OpenSearchSourceManager(SourceManager):
                 f"OpenSearchSourceManager.execute_delete_index:: Error while executing OpenSearch task: {str(e)}")
 
     def execute_get_node_stats(self, time_range: TimeRange, os_task: OpenSearch,
-                               os_connector: ConnectorProto) -> PlaybookTaskResult:
+                               os_connector: ConnectorProto):
         try:
             if not os_connector:
                 raise ValueError("OpenSearchSourceManager.execute_get_node_stats:: Task execution Failed:: "
@@ -208,7 +208,7 @@ class OpenSearchSourceManager(SourceManager):
                 f"OpenSearchSourceManager.execute_get_node_stats:: Error while executing OpenSearch task: {str(e)}")
 
     def execute_get_index_stats(self, time_range: TimeRange, os_task: OpenSearch,
-                                os_connector: ConnectorProto) -> PlaybookTaskResult:
+                                os_connector: ConnectorProto):
         try:
             if not os_connector:
                 raise ValueError("OpenSearchSourceManager.execute_get_index_stats:: Task execution Failed:: "

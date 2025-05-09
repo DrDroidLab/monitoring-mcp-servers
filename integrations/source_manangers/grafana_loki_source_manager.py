@@ -58,7 +58,7 @@ class GrafanaLokiSourceManager(SourceManager):
         return GrafanaLokiApiProcessor(**generated_credentials)
 
     def execute_query_logs(self, time_range: TimeRange, grafana_loki_task: GrafanaLoki,
-                           grafana_loki_connector: ConnectorProto) -> PlaybookTaskResult:
+                           grafana_loki_connector: ConnectorProto):
         try:
             if not grafana_loki_connector:
                 raise Exception("Task execution Failed:: No Grafana Loki source found")

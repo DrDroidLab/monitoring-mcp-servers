@@ -1,6 +1,7 @@
 import logging
 
 from google.protobuf.wrappers_pb2 import StringValue
+from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, PlaybookExecutionStatusType
 
 from integrations.source_manager import SourceManager
 from integrations.source_manangers.api_source_manager import ApiSourceManager

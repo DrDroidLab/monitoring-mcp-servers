@@ -49,7 +49,7 @@ class DocumentationSourceManager(SourceManager):
         }
 
     def execute_markdown(self, time_range: TimeRange, doc_task: Documentation,
-                         doc_connector_proto: ConnectorProto) -> PlaybookTaskResult:
+                         doc_connector_proto: ConnectorProto):
         try:
             content_output = TextResult()
             if doc_task.type == Documentation.TaskType.MARKDOWN:
@@ -59,7 +59,7 @@ class DocumentationSourceManager(SourceManager):
             raise Exception(f"Error while executing API call task: {e}")
 
     def execute_iframe(self, time_range: TimeRange, doc_task: Documentation,
-                       doc_connector_proto: ConnectorProto) -> PlaybookTaskResult:
+                       doc_connector_proto: ConnectorProto):
         try:
             content_output = TextResult()
             if doc_task.type == Documentation.TaskType.IFRAME:

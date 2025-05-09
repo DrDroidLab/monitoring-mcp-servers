@@ -49,7 +49,7 @@ class SqlDatabaseConnectionSourceManager(SourceManager):
         return DBConnectionStringProcessor(**generated_credentials)
 
     def execute_sql_query(self, time_range: TimeRange, sql_data_fetch_task: SqlDataFetch,
-                          sql_db_connector: ConnectorProto) -> PlaybookTaskResult:
+                          sql_db_connector: ConnectorProto):
         try:
             if not sql_db_connector:
                 raise Exception("Task execution Failed:: No SQL Database source found")

@@ -14,7 +14,7 @@ from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, PlaybookTa
     PlaybookExecutionStatusType
 from protos.playbooks.playbook_pb2 import PlaybookTask
 from utils.proto_utils import proto_to_dict, dict_to_proto
-
+from integrations.utils.executor_utils import check_multiple_task_results
 logger = logging.getLogger(__name__)
 
 
@@ -126,7 +126,7 @@ class SourceManager:
 
         return resolved_task, resolved_source_task_proto, task_local_variable_map
 
-    def execute_task(self, time_range: TimeRange, global_variable_set, task: PlaybookTask) -> PlaybookTaskResult:
+    def execute_task(self, time_range: TimeRange, global_variable_set, task: PlaybookTask):
         try:
             source_connector_proto = None
             if task.task_connector_sources and len(task.task_connector_sources) > 0:
@@ -142,18 +142,26 @@ class SourceManager:
             try:
                 # Execute task
                 task_type = resolved_source_task.type
-                playbook_task_result: PlaybookTaskResult = self.task_type_callable_map[task_type]['executor'](
+                playbook_task_result = self.task_type_callable_map[task_type]['executor'](
                     time_range, resolved_source_task, source_connector_proto)
-                # Set task local variables in playbook_task_result to be stored in database
-                task_local_variable_map_proto = dict_to_proto(task_local_variable_map,
-                                                              Struct) if task_local_variable_map else Struct()
-                playbook_task_result.task_local_variable_set.CopyFrom(task_local_variable_map_proto)
-                playbook_task_result.status = PlaybookExecutionStatusType.FINISHED
-                # Apply result transformer
-                playbook_task_result = self.apply_task_result_transformer(resolved_task, playbook_task_result)
-                return playbook_task_result
+                if check_multiple_task_results(playbook_task_result):
+                    task_results = []
+                    for result in playbook_task_result:
+                        task_results.append(self.postprocess_task_result(result, resolved_task, task_local_variable_map))
+                    return task_results
+                return self.postprocess_task_result(playbook_task_result, resolved_task, task_local_variable_map)
             except Exception as e:
                 source_str = Source.Name(resolved_task.source).lower()
                 raise Exception(f"Error while executing task for source: {source_str} with error: {e}")
         except Exception as e:
             raise Exception(f"Error while executing task: {e}")
+
+    def postprocess_task_result(self, playbook_task_result: PlaybookTaskResult, resolved_task: PlaybookTask, task_local_variable_map: dict):
+        task_local_variable_map_proto = dict_to_proto(task_local_variable_map,
+                                                              Struct) if task_local_variable_map else Struct()
+        playbook_task_result.task_local_variable_set.CopyFrom(task_local_variable_map_proto)
+        playbook_task_result.status = PlaybookExecutionStatusType.FINISHED
+
+        # Apply result transformer
+        playbook_task_result = self.apply_task_result_transformer(resolved_task, playbook_task_result)
+        return playbook_task_result

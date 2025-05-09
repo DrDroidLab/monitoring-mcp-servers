@@ -1,4 +1,5 @@
 import logging
+import copy
 
 import requests
 from celery import shared_task
@@ -58,18 +59,29 @@ def execute_task_and_send_result(playbook_task_execution_log):
         global_variable_set_dict = playbook_task_execution_log.get('execution_global_variable_set', {})
         global_variable_set = dict_to_proto(global_variable_set_dict, Struct) if global_variable_set_dict else Struct()
 
+        processed_logs = []
         try:
-            result = source_facade.execute_task(time_rance, global_variable_set, task_proto)
+            results = source_facade.execute_task(time_rance, global_variable_set, task_proto)
+            if not isinstance(results, list):
+                results = [results]
+            for result in results:
+                current_log_copy = copy.deepcopy(playbook_task_execution_log)
+                result_dict = proto_to_dict(result)
+                current_log_copy['result'] = result_dict
+                processed_logs.append(current_log_copy)
         except Exception as e:
             logger.error(f'execute_task_and_send_result:: Error while executing task: {str(e)}')
-            result = PlaybookTaskResult(error=StringValue(value=str(e)))
+            current_log_copy = copy.deepcopy(playbook_task_execution_log)
+            error_result = PlaybookTaskResult(error=StringValue(value=str(e)))
+            current_log_copy['result'] = proto_to_dict(error_result)
+            processed_logs.append(current_log_copy)
 
-        result_dict = proto_to_dict(result)
-        playbook_task_execution_log['result'] = result_dict
-
+        if not processed_logs:
+            logger.warning(f'execute_task_and_send_result:: No results to send for task: {task.get("id")}')
+            return True
         response = requests.post(f'{drd_cloud_host}/playbooks-engine/proxy/execution/results',
                                  headers={'Authorization': f'Bearer {drd_cloud_api_token}'},
-                                 json={'playbook_task_execution_logs': [playbook_task_execution_log]})
+                                 json={'playbook_task_execution_logs': processed_logs})
 
         if response.status_code != 200:
             logger.error(f'execute_task_and_send_result:: Failed to send task result to Doctor Droid Cloud with code: '

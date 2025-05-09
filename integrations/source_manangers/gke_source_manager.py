@@ -159,7 +159,7 @@ class GkeSourceManager(SourceManager):
             ssl_ca_cert_path = instance.api_client.configuration.ssl_ca_cert
             return KubectlApiProcessor(api_server=gke_host, token=token, ssl_ca_cert_path=ssl_ca_cert_path)
 
-    def get_pods(self, time_range: TimeRange, gke_task: Gke, gke_connector: ConnectorProto) -> PlaybookTaskResult:
+    def get_pods(self, time_range: TimeRange, gke_task: Gke, gke_connector: ConnectorProto):
         try:
             if not gke_connector:
                 raise Exception("Task execution Failed:: No GKE source found")
@@ -214,7 +214,7 @@ class GkeSourceManager(SourceManager):
             raise Exception(f"Failed to get pods in gke: {e}")
 
     def get_deployments(self, time_range: TimeRange, gke_task: Gke,
-                        gke_connector: ConnectorProto) -> PlaybookTaskResult:
+                        gke_connector: ConnectorProto):
         try:
             if not gke_connector:
                 raise Exception("Task execution Failed:: No GKE source found")
@@ -270,7 +270,7 @@ class GkeSourceManager(SourceManager):
         except Exception as e:
             raise Exception(f"Failed to get deployments in gke: {e}")
 
-    def get_events(self, time_range: TimeRange, gke_task: Gke, gke_connector: ConnectorProto) -> PlaybookTaskResult:
+    def get_events(self, time_range: TimeRange, gke_task: Gke, gke_connector: ConnectorProto):
         try:
             if not gke_connector:
                 raise Exception("Task execution Failed:: No GKE source found")
@@ -326,7 +326,7 @@ class GkeSourceManager(SourceManager):
         except Exception as e:
             raise Exception(f"Failed to get events in gke: {e}")
 
-    def get_services(self, time_range: TimeRange, gke_task: Gke, gke_connector: ConnectorProto) -> PlaybookTaskResult:
+    def get_services(self, time_range: TimeRange, gke_task: Gke, gke_connector: ConnectorProto):
         try:
             if not gke_connector:
                 raise Exception("Task execution Failed:: No GKE source found")
@@ -381,7 +381,7 @@ class GkeSourceManager(SourceManager):
             raise Exception(f"Failed to get services in gke: {e}")
 
     def execute_kubectl_command(self, time_range: TimeRange, gke_task: Gke,
-                                gke_connector: ConnectorProto) -> PlaybookTaskResult:
+                                gke_connector: ConnectorProto):
         try:
             if not gke_connector:
                 raise Exception("Task execution Failed:: No EKS source found")

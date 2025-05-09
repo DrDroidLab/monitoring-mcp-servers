@@ -164,7 +164,7 @@ class GithubSourceManager(SourceManager):
         return GithubAPIProcessor(**generated_credentials)
 
     def fetch_related_commits(self, time_range: TimeRange, github_task: Github,
-                              github_connector: ConnectorProto) -> PlaybookTaskResult:
+                              github_connector: ConnectorProto):
         try:
             task = github_task.fetch_related_commits
             repo = task.repo.value
@@ -201,7 +201,7 @@ class GithubSourceManager(SourceManager):
             raise Exception(f"Error while executing Github fetch_related_commits task: {e}")
 
     def fetch_file(self, time_range: TimeRange, github_task: Github,
-                   github_connector: ConnectorProto) -> PlaybookTaskResult:
+                   github_connector: ConnectorProto):
         try:
             task = github_task.fetch_file
             repo = task.repo.value
@@ -223,7 +223,7 @@ class GithubSourceManager(SourceManager):
             raise Exception(f"Error while executing Github fetch_related_commits task: {e}")
 
     def update_file(self, time_range: TimeRange, github_task: Github,
-                    github_connector: ConnectorProto) -> PlaybookTaskResult:
+                    github_connector: ConnectorProto):
         try:
             task = github_task.update_file
             repo = task.repo.value
@@ -251,7 +251,7 @@ class GithubSourceManager(SourceManager):
             raise Exception(f"Error while executing Github fetch_related_commits task: {e}")
 
     def fetch_recent_commits(self, time_range: TimeRange, github_task: Github,
-                             github_connector: ConnectorProto) -> PlaybookTaskResult:
+                             github_connector: ConnectorProto):
         try:
             task = github_task.fetch_recent_commits
             repo = task.repo.value
@@ -272,7 +272,7 @@ class GithubSourceManager(SourceManager):
             raise Exception(f"Error while executing Github fetch_recent_commits task: {e}")
 
     def fetch_recent_merges(self, time_range: TimeRange, github_task: Github,
-                            github_connector: ConnectorProto) -> PlaybookTaskResult:
+                            github_connector: ConnectorProto):
         try:
             task = github_task.fetch_recent_merges
             repo = task.repo.value

@@ -33,7 +33,7 @@ class MSTeamsSourceManager(SourceManager):
         return MSTeamsApiProcessor(**generated_credentials)
 
     def execute_send_message_webhook(self, time_range: TimeRange, msteams_task: MSTeams,
-                                     ms_teams_connector: ConnectorProto) -> PlaybookTaskResult:
+                                     ms_teams_connector: ConnectorProto):
         try:
             if not ms_teams_connector:
                 raise Exception("Task execution Failed:: No MSTeams Webhook source found")

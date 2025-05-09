@@ -55,7 +55,7 @@ class ClickhouseSourceManager(SourceManager):
         return ClickhouseDBProcessor(**generated_credentials)
 
     def execute_sql_query(self, time_range: TimeRange, clickhouse_task: SqlDataFetch,
-                          clickhouse_connector: ConnectorProto) -> PlaybookTaskResult:
+                          clickhouse_connector: ConnectorProto):
         try:
             if not clickhouse_connector:
                 raise Exception("Task execution Failed:: No Clickhouse source found")
