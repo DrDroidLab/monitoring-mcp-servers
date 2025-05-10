@@ -28,7 +28,6 @@ def fetch_playbook_execution_tasks():
                      f'Cloud: {response.json()}')
         return False
     playbook_task_executions = response.json().get('playbook_task_executions', [])
-    logger.info(f'fetch_playbook_execution_tasks:: Found {len(playbook_task_executions)} playbook task executions')
     for pet in playbook_task_executions:
         try:
             request_id = pet.get('proxy_execution_request_id', None)
@@ -70,7 +69,7 @@ def execute_task_and_send_result(playbook_task_execution_log):
                 current_log_copy['result'] = result_dict
                 processed_logs.append(current_log_copy)
         except Exception as e:
-            logger.error(f'execute_task_and_send_result:: Error while executing task: {str(e)}')
+            logger.error(f'execute_task_and_send_result:: Error while executing tasks: {str(e)}')
             current_log_copy = copy.deepcopy(playbook_task_execution_log)
             error_result = PlaybookTaskResult(error=StringValue(value=str(e)))
             current_log_copy['result'] = proto_to_dict(error_result)
