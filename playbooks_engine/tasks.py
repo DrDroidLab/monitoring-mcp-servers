@@ -12,6 +12,7 @@ from protos.base_pb2 import TimeRange
 from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult
 from protos.playbooks.playbook_pb2 import PlaybookTask
 from utils.proto_utils import dict_to_proto, proto_to_dict
+from integrations.utils.executor_utils import check_multiple_task_results
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ def fetch_playbook_execution_tasks():
                      f'Cloud: {response.json()}')
         return False
     playbook_task_executions = response.json().get('playbook_task_executions', [])
+    num_playbook_task_executions = len(playbook_task_executions) if check_multiple_task_results(playbook_task_executions) else 1
+    logger.info(f'fetch_playbook_execution_tasks:: Found {num_playbook_task_executions} playbook task executions')
     for pet in playbook_task_executions:
         try:
             request_id = pet.get('proxy_execution_request_id', None)
