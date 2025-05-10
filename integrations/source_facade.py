@@ -1,7 +1,6 @@
 import logging
 
 from google.protobuf.wrappers_pb2 import StringValue
-from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, PlaybookExecutionStatusType
 
 from integrations.source_manager import SourceManager
 from integrations.source_manangers.api_source_manager import ApiSourceManager
@@ -56,7 +55,7 @@ class SourceFacade:
             raise ValueError(f'No executor found for source: {source}')
         return self._map.get(source)
 
-    def execute_task(self, time_range, global_variable_set, task: PlaybookTask) -> PlaybookTaskResult:
+    def execute_task(self, time_range, global_variable_set, task: PlaybookTask):
         source = task.source
         if source not in self._map:
             raise ValueError(f'No executor found for source: {source}')
