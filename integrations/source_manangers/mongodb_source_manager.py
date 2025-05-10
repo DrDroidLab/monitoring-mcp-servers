@@ -78,7 +78,7 @@ class MongoDBSourceManager(SourceManager):
         return MongoDBProcessor(**generated_credentials)
 
     def execute_mongo_query(self, time_range: TimeRange, mongodb_task: MongoDB,
-                            mongodb_connector: ConnectorProto) -> PlaybookTaskResult:
+                            mongodb_connector: ConnectorProto):
         try:
             if not mongodb_connector:
                 raise Exception("Task execution Failed:: No MongoDB source found")

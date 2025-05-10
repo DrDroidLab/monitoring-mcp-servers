@@ -53,7 +53,7 @@ class AzureSourceManager(SourceManager):
         return AzureApiProcessor(**generated_credentials)
 
     def filter_log_events(self, time_range: TimeRange, azure_task: Azure,
-                          azure_connector: ConnectorProto) -> PlaybookTaskResult:
+                          azure_connector: ConnectorProto):
         try:
             tr_end_time = time_range.time_lt
             end_time = int(tr_end_time * 1000)

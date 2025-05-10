@@ -85,7 +85,7 @@ class ArgoCDSourceManager(SourceManager):
         return ArgoCDAPIProcessor(**generated_credentials)
 
     def fetch_deployment_info(self, time_range: TimeRange, argocd_task: ArgoCD,
-                              argocd_connector: ConnectorProto) -> PlaybookTaskResult:
+                              argocd_connector: ConnectorProto):
         # Loop through the commits and get the diff for each one
         try:
             deployment_info = self.get_connector_processor(argocd_connector).get_deployment_info()
@@ -139,7 +139,7 @@ class ArgoCDSourceManager(SourceManager):
             raise Exception(f"Error while executing ArgoCD fetch_deployment_info task: {e}")
 
     def rollback_application(self, time_range: TimeRange, argocd_task: ArgoCD,
-                             argocd_connector: ConnectorProto) -> PlaybookTaskResult:
+                             argocd_connector: ConnectorProto):
         try:
             app_name = argocd_task.rollback_application.app_name
             revision = argocd_task.rollback_application.revision

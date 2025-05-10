@@ -56,7 +56,7 @@ class SlackSourceManager(SourceManager):
         return SlackApiProcessor(**generated_credentials)
 
     def execute_send_message(self, time_range: TimeRange, slack_task: Slack,
-                             slack_connector: ConnectorProto) -> PlaybookTaskResult:
+                             slack_connector: ConnectorProto):
         try:
             if not slack_connector:
                 raise Exception("Task execution Failed:: No Postgres source found")
@@ -96,7 +96,7 @@ class SlackSourceManager(SourceManager):
             raise Exception(f"Error while executing Postgres task: {e}")
 
     def execute_send_thread_reply(self, time_range: TimeRange, slack_task: Slack,
-                                  slack_connector: ConnectorProto) -> PlaybookTaskResult:
+                                  slack_connector: ConnectorProto):
         try:
             if not slack_connector:
                 raise Exception("Task execution Failed:: No Postgres source found")

@@ -114,7 +114,7 @@ class CloudwatchSourceManager(SourceManager):
             raise e
 
     def execute_metric_execution(self, time_range: TimeRange, cloudwatch_task: Cloudwatch,
-                                 cloudwatch_connector: ConnectorProto) -> PlaybookTaskResult:
+                                 cloudwatch_connector: ConnectorProto):
         try:
             if not cloudwatch_connector:
                 raise Exception("Task execution Failed:: No Cloudwatch source found")
@@ -225,7 +225,7 @@ class CloudwatchSourceManager(SourceManager):
             raise Exception(f"Error while executing Cloudwatch task: {e}")
 
     def execute_filter_log_events(self, time_range: TimeRange, cloudwatch_task: Cloudwatch,
-                                  cloudwatch_connector: ConnectorProto) -> PlaybookTaskResult:
+                                  cloudwatch_connector: ConnectorProto):
         try:
             if not cloudwatch_connector:
                 raise Exception("Task execution Failed:: No Cloudwatch source found")

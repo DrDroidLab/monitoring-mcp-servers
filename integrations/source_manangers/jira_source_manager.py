@@ -177,7 +177,7 @@ class JiraSourceManager(SourceManager):
             raise
 
     def get_users(self, time_range: TimeRange, jira_task: Jira,
-                  jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                  jira_connector: ConnectorProto):
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
@@ -230,7 +230,7 @@ class JiraSourceManager(SourceManager):
             )
 
     def assign_ticket(self, time_range: TimeRange, jira_task: Jira,
-                      jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                      jira_connector: ConnectorProto):
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
@@ -314,7 +314,7 @@ class JiraSourceManager(SourceManager):
             )
 
     def create_ticket(self, time_range: TimeRange, jira_task: Jira,
-                      jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                      jira_connector: ConnectorProto):
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
@@ -399,7 +399,7 @@ class JiraSourceManager(SourceManager):
             )
 
     def get_ticket(self, time_range: TimeRange, jira_task: Jira,
-                   jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                   jira_connector: ConnectorProto):
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")
@@ -440,7 +440,7 @@ class JiraSourceManager(SourceManager):
                                       text=TextResult(output=StringValue(value=error_msg)), source=self.source)
 
     def search_tickets(self, time_range: TimeRange, jira_task: Jira,
-                       jira_connector: ConnectorProto) -> PlaybookTaskResult:
+                       jira_connector: ConnectorProto):
         try:
             if not jira_connector:
                 logger.error("Task execution Failed: No JIRA source found")

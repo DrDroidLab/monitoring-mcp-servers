@@ -37,7 +37,7 @@ class KubernetesSourceManager(SourceManager):
         return KubectlApiProcessor(**generated_credentials)
 
     def execute_command(self, time_range: TimeRange, kubernetes_task: Kubectl,
-                        kubernetes_connector: ConnectorProto) -> PlaybookTaskResult:
+                        kubernetes_connector: ConnectorProto):
         try:
             command_str = kubernetes_task.command.command.value
             commands = command_str.split('\n')

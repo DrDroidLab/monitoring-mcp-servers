@@ -55,7 +55,7 @@ class SourceFacade:
             raise ValueError(f'No executor found for source: {source}')
         return self._map.get(source)
 
-    def execute_task(self, time_range, global_variable_set, task: PlaybookTask) -> PlaybookTaskResult:
+    def execute_task(self, time_range, global_variable_set, task: PlaybookTask):
         source = task.source
         if source not in self._map:
             raise ValueError(f'No executor found for source: {source}')

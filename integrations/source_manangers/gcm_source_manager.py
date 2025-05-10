@@ -76,7 +76,7 @@ class GcmSourceManager(SourceManager):
         return GcmApiProcessor(**generated_credentials)
 
     def execute_mql_execution(self, time_range: TimeRange, gcm_task: Gcm,
-                              gcm_connector: ConnectorProto) -> PlaybookTaskResult:
+                              gcm_connector: ConnectorProto):
         try:
             if not gcm_connector:
                 raise Exception("Task execution Failed:: No GCM source found")
@@ -161,7 +161,7 @@ class GcmSourceManager(SourceManager):
             raise Exception(f"Error while executing GCM task: {e}")
 
     def execute_filter_log_events(self, time_range: TimeRange, gcm_task: Gcm,
-                                  gcm_connector: ConnectorProto) -> PlaybookTaskResult:
+                                  gcm_connector: ConnectorProto):
         try:
             if not gcm_connector:
                 raise Exception("Task execution Failed:: No GCM source found")

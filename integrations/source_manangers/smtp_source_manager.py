@@ -53,7 +53,7 @@ class SMTPSourceManager(SourceManager):
         return SmtpApiProcessor(**generated_credentials)
 
     def execute_send_email(self, time_range: TimeRange, smtp_task: SMTP,
-                           smtp_connector: ConnectorProto) -> PlaybookTaskResult:
+                           smtp_connector: ConnectorProto):
         try:
             if not smtp_connector:
                 raise Exception("Task execution Failed:: No SMTP source found")

@@ -56,7 +56,7 @@ class PostgresSourceManager(SourceManager):
         return PostgresDBProcessor(**generated_credentials)
 
     def execute_sql_query(self, time_range: TimeRange, pg_task: SqlDataFetch,
-                          pg_connector: ConnectorProto) -> PlaybookTaskResult:
+                          pg_connector: ConnectorProto):
         try:
             if not pg_connector:
                 raise Exception("Task execution Failed:: No Postgres source found")

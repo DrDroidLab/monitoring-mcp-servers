@@ -77,7 +77,7 @@ class DatadogSourceManager(SourceManager):
         return DatadogApiProcessor(**generated_credentials)
 
     def execute_service_metric_execution(self, time_range: TimeRange, dd_task: Datadog,
-                                         datadog_connector: ConnectorProto) -> PlaybookTaskResult:
+                                         datadog_connector: ConnectorProto):
         try:
             if not datadog_connector:
                 raise Exception("Task execution Failed:: No Datadog source found")
@@ -191,7 +191,7 @@ class DatadogSourceManager(SourceManager):
             raise Exception(f"Error while executing Datadog task: {e}")
 
     def execute_query_metric_execution(self, time_range: TimeRange, dd_task: Datadog,
-                                       datadog_connector: ConnectorProto) -> PlaybookTaskResult:
+                                       datadog_connector: ConnectorProto):
         try:
             if not datadog_connector:
                 raise Exception("Task execution Failed:: No Datadog source found")

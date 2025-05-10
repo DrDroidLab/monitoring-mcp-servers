@@ -107,7 +107,7 @@ class ElasticSearchSourceManager(SourceManager):
         return ElasticSearchApiProcessor(**generated_credentials)
 
     def execute_query_logs(self, time_range: TimeRange, es_task: ElasticSearchProto,
-                           es_connector: ConnectorProto) -> PlaybookTaskResult:
+                           es_connector: ConnectorProto):
         try:
             if not es_connector:
                 raise Exception("Task execution Failed:: No ElasticSearch source found")
@@ -209,7 +209,7 @@ class ElasticSearchSourceManager(SourceManager):
             raise Exception(f"Error while executing ElasticSearch task: {e}")
 
     def execute_check_cluster_health(self, time_range: TimeRange, es_task: ElasticSearchProto,
-                                   es_connector: ConnectorProto) -> PlaybookTaskResult:
+                                   es_connector: ConnectorProto):
         try:
             if not es_connector:
                 raise Exception("Task execution Failed:: No ElasticSearch source found")
@@ -262,7 +262,7 @@ class ElasticSearchSourceManager(SourceManager):
             raise Exception(f"Error while checking ElasticSearch cluster health: {e}")
             
     def execute_node_stats(self, time_range: TimeRange, es_task: ElasticSearchProto,
-                          es_connector: ConnectorProto) -> PlaybookTaskResult:
+                          es_connector: ConnectorProto):
         try:
             if not es_connector:
                 raise Exception("Task execution Failed:: No ElasticSearch source found")
@@ -287,7 +287,7 @@ class ElasticSearchSourceManager(SourceManager):
             raise Exception(f"Error while fetching ElasticSearch node stats: {e}")
 
     def execute_cat_indices(self, time_range: TimeRange, es_task: ElasticSearchProto,
-                           es_connector: ConnectorProto) -> PlaybookTaskResult:
+                           es_connector: ConnectorProto):
         try:
             if not es_connector:
                 raise Exception("Task execution Failed:: No ElasticSearch source found")
@@ -328,7 +328,7 @@ class ElasticSearchSourceManager(SourceManager):
             raise Exception(f"Error while fetching ElasticSearch cat indices: {e}")
 
     def execute_cat_thread_pool_search(self, time_range: TimeRange, es_task: ElasticSearchProto,
-                                      es_connector: ConnectorProto) -> PlaybookTaskResult:
+                                      es_connector: ConnectorProto):
         try:
             if not es_connector:
                 raise Exception("Task execution Failed:: No ElasticSearch source found")

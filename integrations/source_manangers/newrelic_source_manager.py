@@ -115,7 +115,7 @@ class NewRelicSourceManager(SourceManager):
         return NewRelicGraphQlConnector(**generated_credentials)
 
     def execute_entity_application_golden_metric_execution(self, time_range: TimeRange, nr_task: NewRelic,
-                                                           nr_connector: ConnectorProto) -> PlaybookTaskResult:
+                                                           nr_connector: ConnectorProto):
         try:
             if not nr_connector:
                 raise Exception("Task execution Failed:: No New Relic source found")
@@ -222,7 +222,7 @@ class NewRelicSourceManager(SourceManager):
             raise Exception(f"Error while executing New Relic task: {e}")
 
     def execute_entity_dashboard_widget_nrql_metric_execution(self, time_range: TimeRange, nr_task: NewRelic,
-                                                              nr_connector: ConnectorProto) -> PlaybookTaskResult:
+                                                              nr_connector: ConnectorProto):
         try:
             if not nr_connector:
                 raise Exception("Task execution Failed:: No New Relic source found")
@@ -343,7 +343,7 @@ class NewRelicSourceManager(SourceManager):
             raise Exception(f"Error while executing New Relic task: {e}")
 
     def execute_nrql_metric_execution(self, time_range: TimeRange, nr_task: NewRelic,
-                                      nr_connector: ConnectorProto) -> PlaybookTaskResult:
+                                      nr_connector: ConnectorProto):
         try:
             if not nr_connector:
                 raise Exception("Task execution Failed:: No New Relic source found")

@@ -53,7 +53,7 @@ class BashSourceManager(SourceManager):
         return BashProcessor(**generated_credentials)
 
     def execute_command(self, time_range: TimeRange, bash_task: Bash,
-                        remote_server_connector: ConnectorProto) -> PlaybookTaskResult:
+                        remote_server_connector: ConnectorProto):
         try:
             bash_command: Bash.Command = bash_task.command
             remote_server_str = bash_command.remote_server.value if bash_command.remote_server else None

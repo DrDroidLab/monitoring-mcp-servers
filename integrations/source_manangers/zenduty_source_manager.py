@@ -31,7 +31,7 @@ class ZendutySourceManager(SourceManager):
         return ZenDutyApiProcessor(**generated_credentials)
 
     def execute_send_note(self, time_range: TimeRange, zd_task: Zenduty,
-                          zenduty_connector: ConnectorProto) -> PlaybookTaskResult:
+                          zenduty_connector: ConnectorProto):
         try:
             if not zenduty_connector:
                 raise Exception("Task execution Failed:: No Zenduty source found")

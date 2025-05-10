@@ -187,7 +187,7 @@ class EksSourceManager(SourceManager):
         except Exception as e:
             raise Exception(f"Failed to test eks: {e}")
 
-    def get_pods(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto) -> PlaybookTaskResult:
+    def get_pods(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto):
         try:
             if not eks_connector:
                 raise Exception("Task execution Failed:: No EKS source found")
@@ -243,7 +243,7 @@ class EksSourceManager(SourceManager):
             raise Exception(f"Failed to get pods in eks: {e}")
 
     def get_deployments(self, time_range: TimeRange, eks_task: Eks,
-                        eks_connector: ConnectorProto) -> PlaybookTaskResult:
+                        eks_connector: ConnectorProto):
         try:
             if not eks_connector:
                 raise Exception("Task execution Failed:: No EKS source found")
@@ -300,7 +300,7 @@ class EksSourceManager(SourceManager):
         except Exception as e:
             raise Exception(f"Failed to get deployments in eks: {e}")
 
-    def get_events(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto) -> PlaybookTaskResult:
+    def get_events(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto):
         try:
             if not eks_connector:
                 raise Exception("Task execution Failed:: No EKS source found")
@@ -357,7 +357,7 @@ class EksSourceManager(SourceManager):
         except Exception as e:
             raise Exception(f"Failed to get events in eks: {e}")
 
-    def get_services(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto) -> PlaybookTaskResult:
+    def get_services(self, time_range: TimeRange, eks_task: Eks, eks_connector: ConnectorProto):
         try:
             if not eks_connector:
                 raise Exception("Task execution Failed:: No EKS source found")
@@ -414,7 +414,7 @@ class EksSourceManager(SourceManager):
             raise Exception(f"Failed to get services in eks: {e}")
 
     def execute_kubectl_command(self, time_range: TimeRange, eks_task: Eks,
-                                eks_connector: ConnectorProto) -> PlaybookTaskResult:
+                                eks_connector: ConnectorProto):
         try:
             if not eks_connector:
                 raise Exception("Task execution Failed:: No EKS source found")

@@ -34,12 +34,14 @@ class Grafana(google.protobuf.message.Message):
         PROMQL_METRIC_EXECUTION: Grafana._TaskType.ValueType  # 1
         PROMETHEUS_DATASOURCE_METRIC_EXECUTION: Grafana._TaskType.ValueType  # 2
         QUERY_DASHBOARD_PANEL_METRIC: Grafana._TaskType.ValueType  # 3
+        EXECUTE_ALL_DASHBOARD_PANELS: Grafana._TaskType.ValueType  # 4
 
     class TaskType(_TaskType, metaclass=_TaskTypeEnumTypeWrapper): ...
     UNKNOWN: Grafana.TaskType.ValueType  # 0
     PROMQL_METRIC_EXECUTION: Grafana.TaskType.ValueType  # 1
     PROMETHEUS_DATASOURCE_METRIC_EXECUTION: Grafana.TaskType.ValueType  # 2
     QUERY_DASHBOARD_PANEL_METRIC: Grafana.TaskType.ValueType  # 3
+    EXECUTE_ALL_DASHBOARD_PANELS: Grafana.TaskType.ValueType  # 4
 
     @typing_extensions.final
     class PromQlMetricExecution(google.protobuf.message.Message):
@@ -149,10 +151,34 @@ class Grafana(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["dashboard_id", b"dashboard_id", "datasource_uid", b"datasource_uid", "panel_id", b"panel_id"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["dashboard_id", b"dashboard_id", "datasource_uid", b"datasource_uid", "panel_id", b"panel_id", "queries", b"queries"]) -> None: ...
 
+    @typing_extensions.final
+    class ExecuteAllDashboardPanelsTask(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        DASHBOARD_UID_FIELD_NUMBER: builtins.int
+        PANEL_IDS_FIELD_NUMBER: builtins.int
+        INTERVAL_FIELD_NUMBER: builtins.int
+        @property
+        def dashboard_uid(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def panel_ids(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def interval(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
+        def __init__(
+            self,
+            *,
+            dashboard_uid: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            panel_ids: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            interval: google.protobuf.wrappers_pb2.UInt64Value | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["dashboard_uid", b"dashboard_uid", "interval", b"interval", "panel_ids", b"panel_ids"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["dashboard_uid", b"dashboard_uid", "interval", b"interval", "panel_ids", b"panel_ids"]) -> None: ...
+
     TYPE_FIELD_NUMBER: builtins.int
     PROMQL_METRIC_EXECUTION_FIELD_NUMBER: builtins.int
     PROMETHEUS_DATASOURCE_METRIC_EXECUTION_FIELD_NUMBER: builtins.int
     QUERY_DASHBOARD_PANEL_METRIC_FIELD_NUMBER: builtins.int
+    EXECUTE_ALL_DASHBOARD_PANELS_FIELD_NUMBER: builtins.int
     type: global___Grafana.TaskType.ValueType
     @property
     def promql_metric_execution(self) -> global___Grafana.PromQlMetricExecution: ...
@@ -160,6 +186,8 @@ class Grafana(google.protobuf.message.Message):
     def prometheus_datasource_metric_execution(self) -> protos.playbooks.source_task_definitions.promql_task_pb2.PromQl.PromQlMetricExecution: ...
     @property
     def query_dashboard_panel_metric(self) -> global___Grafana.QueryDashboardPanelMetricTask: ...
+    @property
+    def execute_all_dashboard_panels(self) -> global___Grafana.ExecuteAllDashboardPanelsTask: ...
     def __init__(
         self,
         *,
@@ -167,9 +195,10 @@ class Grafana(google.protobuf.message.Message):
         promql_metric_execution: global___Grafana.PromQlMetricExecution | None = ...,
         prometheus_datasource_metric_execution: protos.playbooks.source_task_definitions.promql_task_pb2.PromQl.PromQlMetricExecution | None = ...,
         query_dashboard_panel_metric: global___Grafana.QueryDashboardPanelMetricTask | None = ...,
+        execute_all_dashboard_panels: global___Grafana.ExecuteAllDashboardPanelsTask | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["prometheus_datasource_metric_execution", b"prometheus_datasource_metric_execution", "promql_metric_execution", b"promql_metric_execution", "query_dashboard_panel_metric", b"query_dashboard_panel_metric", "task", b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["prometheus_datasource_metric_execution", b"prometheus_datasource_metric_execution", "promql_metric_execution", b"promql_metric_execution", "query_dashboard_panel_metric", b"query_dashboard_panel_metric", "task", b"task", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["promql_metric_execution", "prometheus_datasource_metric_execution", "query_dashboard_panel_metric"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["execute_all_dashboard_panels", b"execute_all_dashboard_panels", "prometheus_datasource_metric_execution", b"prometheus_datasource_metric_execution", "promql_metric_execution", b"promql_metric_execution", "query_dashboard_panel_metric", b"query_dashboard_panel_metric", "task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["execute_all_dashboard_panels", b"execute_all_dashboard_panels", "prometheus_datasource_metric_execution", b"prometheus_datasource_metric_execution", "promql_metric_execution", b"promql_metric_execution", "query_dashboard_panel_metric", b"query_dashboard_panel_metric", "task", b"task", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["promql_metric_execution", "prometheus_datasource_metric_execution", "query_dashboard_panel_metric", "execute_all_dashboard_panels"] | None: ...
 
 global___Grafana = Grafana

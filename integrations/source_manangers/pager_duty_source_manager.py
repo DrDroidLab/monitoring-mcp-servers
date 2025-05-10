@@ -31,7 +31,7 @@ class PagerDutySourceManager(SourceManager):
         return PdApiProcessor(**generated_credentials)
 
     def execute_send_note(self, time_range: TimeRange, pd_task: PagerDuty,
-                          pagerduty_connector: ConnectorProto) -> PlaybookTaskResult:
+                          pagerduty_connector: ConnectorProto):
         try:
             if not pagerduty_connector:
                 raise Exception("Task execution Failed:: No PagerDuty source found")

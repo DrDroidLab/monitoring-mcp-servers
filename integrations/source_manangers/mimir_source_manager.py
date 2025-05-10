@@ -41,7 +41,7 @@ class MimirSourceManager(SourceManager):
         return MimirApiProcessor(**generated_credentials)
 
     def execute_promql_metric_execution(self, time_range: TimeRange, mimir_task: PromQl,
-                                        mimir_connector: ConnectorProto) -> PlaybookTaskResult:
+                                        mimir_connector: ConnectorProto):
         try:
             if not mimir_connector:
                 raise Exception("Task execution Failed:: No Mimir source found")

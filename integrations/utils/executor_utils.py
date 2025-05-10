@@ -6,6 +6,7 @@ from integrations.source_api_processors.lambda_function_processor import LambdaF
 from protos.literal_pb2 import LiteralType
 from protos.playbooks.source_task_definitions.lambda_function_task_pb2 import Lambda
 from protos.ui_definition_pb2 import FormField
+from protos.playbooks.playbook_commons_pb2 import PlaybookExecutionStatusType
 
 
 def apply_result_transformer(result_dict, lambda_function: Lambda.Function) -> Dict:
@@ -60,3 +61,9 @@ def resolve_global_variables(form_fields: [FormField], global_variable_set: Stru
                                 raise Exception(f"Global variable {gk} is None")
                             item[cf.key_name.value] = item[cf.key_name.value].replace(gk, gv)
     return source_task_type_def, task_local_variable_map
+
+def check_multiple_task_results(task_result):
+    if isinstance(task_result, list):
+        return True
+    else:
+        return False
