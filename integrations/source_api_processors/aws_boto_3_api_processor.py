@@ -1,6 +1,10 @@
 import logging
+from datetime import datetime, timedelta
 
 import boto3
+import requests
+from botocore.exceptions import ClientError
+from django.conf import settings
 
 from integrations.processor import Processor
 from utils.time_utils import current_milli_time
@@ -138,3 +142,327 @@ class AWSBoto3ApiProcessor(Processor):
         except Exception as e:
             logger.error(f"Exception occurred while fetching logs for log_group: {log_group} with error: {e}")
             raise e
+
+    # ECS Methods
+    def list_all_clusters(self):
+        """List all ECS clusters in the account."""
+        try:
+            client = self.get_connection()
+            clusters = []
+            paginator = client.get_paginator('list_clusters')
+            
+            for page in paginator.paginate():
+                if 'clusterArns' in page:
+                    clusters.extend(page['clusterArns'])
+            
+            # Get detailed information for each cluster
+            if clusters:
+                response = client.describe_clusters(clusters=clusters)
+                return response.get('clusters', [])
+            
+            return []
+        except Exception as e:
+            logger.error(f"Exception occurred while listing ECS clusters with error: {e}")
+            return None
+
+    def list_tasks_in_cluster(self, cluster_arn):
+        """List all tasks in a specific ECS cluster, including both running and stopped tasks."""
+        try:
+            client = self.get_connection()
+            all_tasks = []
+            
+            # Get RUNNING tasks
+            running_tasks = []
+            paginator = client.get_paginator('list_tasks')
+            for page in paginator.paginate(cluster=cluster_arn, desiredStatus='RUNNING'):
+                if 'taskArns' in page and page['taskArns']:
+                    running_tasks.extend(page['taskArns'])
+            
+            # Get STOPPED tasks
+            stopped_tasks = []
+            for page in paginator.paginate(cluster=cluster_arn, desiredStatus='STOPPED'):
+                if 'taskArns' in page and page['taskArns']:
+                    stopped_tasks.extend(page['taskArns'])
+            
+            # Combine all task ARNs
+            all_tasks = running_tasks + stopped_tasks
+            
+            # Get detailed information for each task
+            if all_tasks:
+                # ECS API limits the number of tasks in a single describe_tasks call
+                # Process in batches of 100
+                task_details = []
+                for i in range(0, len(all_tasks), 100):
+                    batch = all_tasks[i:i+100]
+                    response = client.describe_tasks(
+                        cluster=cluster_arn,
+                        tasks=batch
+                    )
+                    task_details.extend(response.get('tasks', []))
+                
+                return task_details
+            
+            return []
+        except Exception as e:
+            logger.error(f"Exception occurred while listing tasks in ECS cluster: {cluster_arn} with error: {e}")
+            return None
+
+    def get_task_definition(self, task_definition_arn):
+        """Get details of a specific task definition."""
+        try:
+            client = self.get_connection()
+            response = client.describe_task_definition(
+                taskDefinition=task_definition_arn
+            )
+            return response.get('taskDefinition')
+        except Exception as e:
+            logger.error(f"Exception occurred while getting ECS task definition: {task_definition_arn} with error: {e}")
+            return None
+
+    def list_services_in_cluster(self, cluster_arn):
+        """List all services in a specific ECS cluster."""
+        try:
+            client = self.get_connection()
+            services = []
+            paginator = client.get_paginator('list_services')
+            
+            for page in paginator.paginate(cluster=cluster_arn):
+                if 'serviceArns' in page and page['serviceArns']:
+                    service_arns = page['serviceArns']
+                    # Get detailed information for each service
+                    response = client.describe_services(
+                        cluster=cluster_arn,
+                        services=service_arns
+                    )
+                    services.extend(response.get('services', []))
+            
+            return services
+        except Exception as e:
+            logger.error(f"Exception occurred while listing services in ECS cluster: {cluster_arn} with error: {e}")
+            return None
+            
+    def get_task_definitions_map(self, cluster_name):
+        """
+        Get a mapping of task IDs to their task definitions for a specific cluster.
+        
+        Args:
+            cluster_name (str): The name of the ECS cluster
+            
+        Returns:
+            dict: A dictionary mapping task IDs to their task definition names
+        """
+        try:
+            client = self.get_connection()
+            task_def_map = {}
+            
+            # Get all task ARNs in the cluster (both running and stopped)
+            running_task_arns = client.list_tasks(cluster=cluster_name, desiredStatus="RUNNING").get("taskArns", [])
+            stopped_tasks_arns = client.list_tasks(cluster=cluster_name, desiredStatus="STOPPED").get("taskArns", [])
+            task_arns = running_task_arns + stopped_tasks_arns
+            
+            if not task_arns:
+                return {}
+                
+            # Process tasks in batches of 100 (AWS API limit)
+            for i in range(0, len(task_arns), 100):
+                batch = task_arns[i:i+100]
+                task_details = client.describe_tasks(cluster=cluster_name, tasks=batch)
+                
+                for task_info in task_details.get("tasks", []):
+                    task_id = task_info.get("taskArn").split("/")[-1]
+                    task_def_arn = task_info.get("taskDefinitionArn")
+                    # Extract task definition name and revision (e.g., "Vidushee-Experiment:4")
+                    task_def_name = task_def_arn.split("/")[-1] if task_def_arn else "unknown"
+                    task_def_map[task_id] = task_def_name
+                    
+            return task_def_map
+            
+        except Exception as e:
+            logger.error(f"Exception occurred while getting task definitions map for cluster: {cluster_name} with error: {e}")
+            return {}
+    
+    def get_task_logs(self, cluster_name, max_lines=100):
+        """
+        Fetch logs for all running tasks in an ECS cluster.
+        
+        Args:
+            cluster_name (str): ECS cluster name.
+            task_definition_name (str): Task definition (format: "name:revision").
+            max_lines (int, optional): Number of log lines to return (default: 100).
+        
+        Returns:
+            dict: Container-wise logs for all tasks.
+        """
+        try:
+            client = self.get_connection()
+            logs_client = boto3.client('logs', 
+                                      aws_access_key_id=self.__aws_access_key,
+                                      aws_secret_access_key=self.__aws_secret_key, 
+                                      region_name=self.region,
+                                      aws_session_token=self.__aws_session_token)
+            
+            # Get all running and stopped tasks in the cluster
+            running_task_arns = client.list_tasks(cluster=cluster_name, desiredStatus="RUNNING").get("taskArns", [])
+            stopped_tasks_arns = client.list_tasks(cluster=cluster_name, desiredStatus="STOPPED").get("taskArns", [])
+            task_arns = running_task_arns + stopped_tasks_arns
+
+            if not task_arns:
+                return {"error": f"No running tasks found in cluster: {cluster_name}"}
+
+            # Step 2: Get details of all running tasks
+            task_details = client.describe_tasks(cluster=cluster_name, tasks=task_arns)
+            if not task_details.get("tasks"):
+                return {"error": "Could not retrieve task details."}
+
+            logs_by_task = {}
+
+            # Step 3: Iterate through each running task
+            for task_info in task_details["tasks"]:
+                task_arn = task_info.get("taskArn")
+                task_id = task_arn.split("/")[-1]
+                task_definition_arn = task_info.get("taskDefinitionArn")
+
+                # Get task definition to fetch log configuration
+                task_def_response = client.describe_task_definition(taskDefinition=task_definition_arn)
+                container_definitions = task_def_response["taskDefinition"]["containerDefinitions"]
+
+                logs_by_task[task_id] = {}
+
+                for container_def in container_definitions:
+                    container_name = container_def["name"]
+                    log_config = container_def.get("logConfiguration", {})
+
+                    if not log_config or log_config.get("logDriver") != "awslogs":
+                        logs_by_task[task_id][container_name] = {
+                            "error": "Logs not configured to use CloudWatch. Check ECS task definition."
+                        }
+                        continue
+
+                    # Extract CloudWatch log configuration
+                    log_group = log_config["options"].get("awslogs-group")
+                    log_stream_prefix = log_config["options"].get("awslogs-stream-prefix")
+
+                    if not log_group or not log_stream_prefix:
+                        logs_by_task[task_id][container_name] = {"error": "Missing log group or stream prefix."}
+                        continue
+
+                    # Construct log stream name variations
+                    log_stream_variations = [
+                        f"{log_stream_prefix}/{container_name}/{task_id}",
+                        f"{log_stream_prefix}/{task_id}/{container_name}",
+                        f"{container_name}/{task_id}"
+                    ]
+
+                    # Fetch logs from CloudWatch
+                    for stream_name in log_stream_variations:
+                        try:
+                            # Calculate timestamps for the last 2 weeks
+                            end_time = int(datetime.now().timestamp() * 1000)
+                            start_time = int((datetime.now() - timedelta(weeks=2)).timestamp() * 1000)
+                            
+                            log_events_response = logs_client.get_log_events(
+                                logGroupName=log_group,
+                                logStreamName=stream_name,
+                                limit=max_lines,
+                                startTime=start_time,
+                                endTime=end_time
+                            )
+                            log_messages = [event["message"] for event in log_events_response.get("events", [])]
+
+                            if log_messages:
+                                logs_by_task[task_id][container_name] = {
+                                    "logGroup": log_group,
+                                    "logStream": stream_name,
+                                    "logs": log_messages
+                                }
+                                break  # Stop searching if logs are found
+                        except Exception:
+                            continue  # Try next log stream variation
+
+            return logs_by_task
+
+        except Exception as e:
+            logger.error(f"Exception occurred while getting ECS task logs: {e}")
+            return {"error": f"Failed to fetch logs: {str(e)}"}
+
+    # S3 Methods
+    def download_file_contents_from_s3(self, bucket_name, object_key, expiration=3600):
+        """
+        Generates a pre-signed URL and returns the text content of the file from S3.
+
+        :param bucket_name: str - S3 bucket name
+        :param object_key: str - Key (path) to the file in the bucket
+        :param expiration: int - Pre-signed URL expiry time in seconds
+        :return: str or None - File content as text if successful, None otherwise
+        """
+        s3_client = boto3.client('s3',
+                                aws_access_key_id=self.__aws_access_key,
+                                aws_secret_access_key=self.__aws_secret_key, 
+                                region_name=self.region,
+                                aws_session_token=self.__aws_session_token)
+
+        try:
+            url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': bucket_name, 'Key': object_key},
+                ExpiresIn=expiration
+            )
+        except ClientError as e:
+            print(f"[ERROR] Failed to generate pre-signed URL: {e}")
+            return None
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            # Try decoding the content as UTF-8
+            try:
+                content = response.content.decode('utf-8')
+            except UnicodeDecodeError:
+                print("[WARNING] File is not in UTF-8 format or is binary.")
+                return None
+
+            return content
+
+        except requests.RequestException as e:
+            print(f"[ERROR] Failed to download file: {e}")
+            return None
+        
+    # RDS Methods
+    def pi_get_long_running_queries(self, resource_uri, query_end_time, start_minutes_ago=60, service_type='RDS'):
+        end_time = query_end_time if query_end_time else datetime.now()
+        start_time = end_time - timedelta(minutes=start_minutes_ago)
+        client = self.get_connection()
+        try:
+            response = client.describe_dimension_keys(
+                ServiceType=service_type,
+                Identifier=resource_uri,
+                StartTime=start_time,
+                EndTime=end_time,
+                Metric='db.load.avg',
+                PeriodInSeconds=300,
+                GroupBy={
+                    "Dimensions": ["db.sql_tokenized.id", "db.sql_tokenized.statement"],
+                    "Group": "db.sql_tokenized",
+                },
+                AdditionalMetrics=[
+                    "db.sql_tokenized.stats.sum_timer_wait_per_call.avg",
+                    "db.sql_tokenized.stats.sum_rows_examined_per_call.avg",
+                ],
+            )
+            query_data = []
+            for dimension in response.get('Keys', []):
+                sql = dimension.get('Dimensions', {}).get('db.sql_tokenized.statement', 'Unknown')
+                additional_metrics = dimension.get('AdditionalMetrics', {})
+                total_rows_examined = additional_metrics.get('db.sql_tokenized.stats.sum_rows_examined_per_call.avg', 0)
+                total_wait_time_ms = additional_metrics.get('db.sql_tokenized.stats.sum_timer_wait_per_call.avg', 0)
+                query_data.append({
+                    'sql': sql,
+                    'total_query_time_ms': total_wait_time_ms,
+                    'total_rows_examined': total_rows_examined,
+                })
+            query_data.sort(key=lambda x: x['total_query_time_ms'], reverse=True)
+            return query_data
+        except Exception as e:
+            print(f"Error fetching long-running queries: {e}")
+        return []

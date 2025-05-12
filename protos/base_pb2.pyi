@@ -561,6 +561,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     CLOUDWATCH_LOG_GROUP_QUERY: _SourceModelType.ValueType  # 203
     CLOUDWATCH_ALARMS: _SourceModelType.ValueType  # 204
     RDS_INSTANCES: _SourceModelType.ValueType  # 205
+    CLOUDWATCH_DASHBOARD: _SourceModelType.ValueType  # 206
     GRAFANA_DATASOURCE: _SourceModelType.ValueType  # 301
     """Grafana Models"""
     GRAFANA_DASHBOARD: _SourceModelType.ValueType  # 302
@@ -626,6 +627,10 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """ArgoCd Models"""
     JENKINS_JOBS: _SourceModelType.ValueType  # 2901
     """jenkins Models"""
+    ECS_CLUSTER: _SourceModelType.ValueType  # 4001
+    """ECS Models"""
+    ECS_TASK: _SourceModelType.ValueType  # 4002
+    ECS_SERVICE: _SourceModelType.ValueType  # 4003
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -656,6 +661,7 @@ CLOUDWATCH_LOG_GROUP: SourceModelType.ValueType  # 202
 CLOUDWATCH_LOG_GROUP_QUERY: SourceModelType.ValueType  # 203
 CLOUDWATCH_ALARMS: SourceModelType.ValueType  # 204
 RDS_INSTANCES: SourceModelType.ValueType  # 205
+CLOUDWATCH_DASHBOARD: SourceModelType.ValueType  # 206
 GRAFANA_DATASOURCE: SourceModelType.ValueType  # 301
 """Grafana Models"""
 GRAFANA_DASHBOARD: SourceModelType.ValueType  # 302
@@ -721,6 +727,10 @@ ARGOCD_APPS: SourceModelType.ValueType  # 2801
 """ArgoCd Models"""
 JENKINS_JOBS: SourceModelType.ValueType  # 2901
 """jenkins Models"""
+ECS_CLUSTER: SourceModelType.ValueType  # 4001
+"""ECS Models"""
+ECS_TASK: SourceModelType.ValueType  # 4002
+ECS_SERVICE: SourceModelType.ValueType  # 4003
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final

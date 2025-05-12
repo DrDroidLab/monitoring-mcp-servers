@@ -367,6 +367,7 @@ enum SourceModelType {
   CLOUDWATCH_LOG_GROUP_QUERY = 203;
   CLOUDWATCH_ALARMS = 204;
   RDS_INSTANCES = 205;
+  CLOUDWATCH_DASHBOARD = 206;
 
   //Grafana Models
   GRAFANA_DATASOURCE = 301;
@@ -459,4 +460,9 @@ enum SourceModelType {
 
   // jenkins Models
   JENKINS_JOBS = 2901;
+
+  // ECS Models
+  ECS_CLUSTER = 4001;
+  ECS_TASK = 4002;
+  ECS_SERVICE = 4003;
 }
