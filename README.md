@@ -15,10 +15,10 @@ Currently, the agent supports the following metric sources in your VPC:
 * Grafana
 * Grafana Loki
 * Cloudwatch
-* Azure AKS (via native Kubernetes)
-* AWS EKS (via AWS/native Kubernetes)
-* GKE (via native Kubernetes)
 * Kubernetes
+* Azure AKS (via native Kubernetes)
+* AWS EKS (via native Kubernetes)
+* GKE (via native Kubernetes)
 * New Relic
 * Datadog
 * Opensearch
@@ -29,6 +29,7 @@ Currently, the agent supports the following metric sources in your VPC:
 * Bash Commands
 
 Releasing soon (reach out to us if you need support for these or any other source):
+
 * Azure
 
 ## Env vars
@@ -38,35 +39,52 @@ Releasing soon (reach out to us if you need support for these or any other sourc
 | DRD_CLOUD_API_TOKEN | Authentication token for doctor droid platform | True     |
 
 ## Installation
+
 To get started create an agent authentication token by visiting [site](https://playbooks.drdroid.io/agent-tokens)
 
 ### Docker Compose
-1. Create credentials/secret.yaml file with integration credentials. Secret format for different connections can be referenced from [credentials/credentials_template.yaml.](https://github.com/DrDroidLab/drd-vpc-agent/blob/main/credentials/credentials_template.yaml)
+
+1. Create credentials/secret.yaml file with valid credentials. Secrets format for different connections can be
+   referenced
+   from: [credentials/credentials_template.yaml.](https://github.com/DrDroidLab/drd-vpc-agent/blob/main/credentials/credentials_template.yaml)
 
 Command:
+
 ```shell
 ./deploy_docker.sh <API_TOKEN>
 ```
+
 For any update the agent, re-run the command.
 
-
 ### Helm
+
 1. Add the secrets for the integrations in helm/configmap.yaml file.
    Refer to the image below for a sample:
    <img width="934" alt="Screenshot 2024-12-20 at 14 02 43" src="https://github.com/user-attachments/assets/cadb2b0a-db0c-4128-bef7-fe2a6288b79b" />
 
 Command:
+
 ```shell
 cd helm
 ./deploy_helm.sh <API_TOKEN>
 ```
 
-* The agent will be installed in the namespace 'drdroid' by default. This can be changed in the helm/deploy_helm.sh file.
+* The agent will be installed in the namespace 'drdroid' by default. This can be changed in the helm/deploy_helm.sh
+  file.
 * Agent updates the image automatically every day at 00:00 UTC.
 * Agent will have read access to the cluster and will be able to fetch the metrics from the cluster.
 
 ## Support
-Visit [Doctor Droid website](https://drdroid.io?utm_param=github-py) for getting early access.
-Go through our [documentation](https://docs.drdroid.io?utm_param=github-py) to learn more.
 
-For any queries, reach out at [dipesh@drdroid.io](mailto:dipesh@drdroid.io).
+Go through our [documentation](https://docs.drdroid.io?utm_param=github-py) to learn more.
+Visit [Doctor Droid website](https://drdroid.io?utm_param=github-py) for more information.
+
+For any queries, reach out at [support@drdroid.io](mailto:support@drdroid.io).
+
+## Contributions
+We welcome contributions to the Doctor Droid Python Proxy Agent. If you have any suggestions or improvements, please
+feel free to open an issue or submit a pull request. We appreciate your help in making this project better!
+
+### Maintainers:
+* [Mohit Goyal](https://github.com/droid-mohit)
+
