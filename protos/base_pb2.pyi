@@ -626,6 +626,10 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """ArgoCd Models"""
     JENKINS_JOBS: _SourceModelType.ValueType  # 2901
     """jenkins Models"""
+    KUBERNETES_NAMESPACE: _SourceModelType.ValueType  # 3001
+    """Kubernetes Models"""
+    KUBERNETES_SERVICE: _SourceModelType.ValueType  # 3002
+    KUBERNETES_DEPLOYMENT: _SourceModelType.ValueType  # 3003
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -721,6 +725,10 @@ ARGOCD_APPS: SourceModelType.ValueType  # 2801
 """ArgoCd Models"""
 JENKINS_JOBS: SourceModelType.ValueType  # 2901
 """jenkins Models"""
+KUBERNETES_NAMESPACE: SourceModelType.ValueType  # 3001
+"""Kubernetes Models"""
+KUBERNETES_SERVICE: SourceModelType.ValueType  # 3002
+KUBERNETES_DEPLOYMENT: SourceModelType.ValueType  # 3003
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final

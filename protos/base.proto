@@ -459,4 +459,10 @@ enum SourceModelType {
 
   // jenkins Models
   JENKINS_JOBS = 2901;
+
+  // Kubernetes Models
+  KUBERNETES_NAMESPACE = 3001;
+  KUBERNETES_SERVICE = 3002;
+  KUBERNETES_DEPLOYMENT = 3003;
+
 }
