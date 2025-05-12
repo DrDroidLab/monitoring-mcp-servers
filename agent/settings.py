@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-import uuid
 from pathlib import Path
 
 import yaml
@@ -30,8 +29,8 @@ def load_yaml(filepath, native_k8s_connector_mode=False):
     if native_k8s_connector_mode:
         if not loaded_connection:
             loaded_connection = {}
-        uuid_hex = uuid.uuid4().hex
-        loaded_connection.update({f'native_k8_connection_{uuid_hex}': {'type': 'KUBERNETES'}})
+        api_token_identifier = DRD_CLOUD_API_TOKEN[-3:]
+        loaded_connection.update({f'native_k8_connection_{api_token_identifier}': {'type': 'KUBERNETES'}})
     return loaded_connection
 
 
