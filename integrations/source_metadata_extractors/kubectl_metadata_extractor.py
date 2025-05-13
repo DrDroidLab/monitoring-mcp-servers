@@ -20,53 +20,37 @@ class KubernetesMetadataExtractor(SourceMetadataExtractor):
     def extract_namespaces(self):
         model_type = SourceModelType.KUBERNETES_NAMESPACE
         model_data = {}
-
         try:
             command = "get namespaces -o json"
             json_output = self.__kubectl_api_processor.execute_command(command)
-
             data = json.loads(json_output)
-
             for item in data.get('items', []):
                 metadata = item.get('metadata', {})
-
                 namespace_name = metadata.get('name')
                 if not namespace_name:
                     continue
-
                 model_data[namespace_name] = item
-
-                self.create_or_update_model_metadata(model_type, namespace_name, item)
-
             logger.info(f"Extracted {len(model_data)} namespaces")
-
+            if len(model_data) > 0:
+                self.create_or_update_model_metadata(model_type, model_data)
         except Exception as e:
             logger.error(f"Error extracting Kubernetes namespaces: {e}")
-
-        return model_data
 
     @log_function_call
     def extract_services(self):
         model_type = SourceModelType.KUBERNETES_SERVICE
         model_data = {}
-
         try:
             command = "get services --all-namespaces -o json"
-
             json_output = self.__kubectl_api_processor.execute_command(command)
             data = json.loads(json_output)
-
             for item in data.get('items', []):
                 metadata = item.get('metadata', {})
-
                 service_name = metadata.get('name')
                 service_namespace = metadata.get('namespace', 'default')
-
                 if not service_name:
                     continue
-
                 namespaced_name = f"{service_namespace}/{service_name}"
-
                 model_data[namespaced_name] = item
             logger.info(f"Extracted {len(model_data)} services from all namespaces")
             if len(model_data) > 0:
@@ -78,29 +62,20 @@ class KubernetesMetadataExtractor(SourceMetadataExtractor):
     def extract_deployments(self):
         model_type = SourceModelType.KUBERNETES_DEPLOYMENT
         model_data = {}
-
         try:
             command = "get deployments --all-namespaces -o json"
-
             json_output = self.__kubectl_api_processor.execute_command(command)
             data = json.loads(json_output)
-
             for item in data.get('items', []):
                 metadata = item.get('metadata', {})
-
                 deployment_name = metadata.get('name')
                 deployment_namespace = metadata.get('namespace', 'default')
-
                 if not deployment_name:
                     continue
-
                 namespaced_name = f"{deployment_namespace}/{deployment_name}"
-
                 model_data[namespaced_name] = item
             logger.info(f"Extracted {len(model_data)} deployments from all namespaces")
             if len(model_data) > 0:
                 self.create_or_update_model_metadata(model_type, model_data)
         except Exception as e:
             logger.error(f"Error extracting Kubernetes deployments: {e}")
-
-        return model_data
