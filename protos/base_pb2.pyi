@@ -626,6 +626,23 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """ArgoCd Models"""
     JENKINS_JOBS: _SourceModelType.ValueType  # 2901
     """jenkins Models"""
+    POSTHOG_PERSON: _SourceModelType.ValueType  # 3001
+    """PostHog Models"""
+    POSTHOG_GROUP: _SourceModelType.ValueType  # 3002
+    POSTHOG_COHORT: _SourceModelType.ValueType  # 3003
+    POSTHOG_PROPERTY: _SourceModelType.ValueType  # 3004
+    ECS_CLUSTER: _SourceModelType.ValueType  # 4001
+    """ECS Models"""
+    ECS_TASK: _SourceModelType.ValueType  # 4002
+    ECS_SERVICE: _SourceModelType.ValueType  # 4003
+    SIGNOZ_DASHBOARD: _SourceModelType.ValueType  # 5001
+    """SignOz Models"""
+    SIGNOZ_ALERT: _SourceModelType.ValueType  # 5002
+    SIGNOZ_METRIC: _SourceModelType.ValueType  # 5003
+    KUBERNETES_NAMESPACE: _SourceModelType.ValueType  # 6001
+    """Kubernetes Models"""
+    KUBERNETES_SERVICE: _SourceModelType.ValueType  # 6002
+    KUBERNETES_DEPLOYMENT: _SourceModelType.ValueType  # 6003
 
 class SourceModelType(_SourceModelType, metaclass=_SourceModelTypeEnumTypeWrapper): ...
 
@@ -721,6 +738,23 @@ ARGOCD_APPS: SourceModelType.ValueType  # 2801
 """ArgoCd Models"""
 JENKINS_JOBS: SourceModelType.ValueType  # 2901
 """jenkins Models"""
+POSTHOG_PERSON: SourceModelType.ValueType  # 3001
+"""PostHog Models"""
+POSTHOG_GROUP: SourceModelType.ValueType  # 3002
+POSTHOG_COHORT: SourceModelType.ValueType  # 3003
+POSTHOG_PROPERTY: SourceModelType.ValueType  # 3004
+ECS_CLUSTER: SourceModelType.ValueType  # 4001
+"""ECS Models"""
+ECS_TASK: SourceModelType.ValueType  # 4002
+ECS_SERVICE: SourceModelType.ValueType  # 4003
+SIGNOZ_DASHBOARD: SourceModelType.ValueType  # 5001
+"""SignOz Models"""
+SIGNOZ_ALERT: SourceModelType.ValueType  # 5002
+SIGNOZ_METRIC: SourceModelType.ValueType  # 5003
+KUBERNETES_NAMESPACE: SourceModelType.ValueType  # 6001
+"""Kubernetes Models"""
+KUBERNETES_SERVICE: SourceModelType.ValueType  # 6002
+KUBERNETES_DEPLOYMENT: SourceModelType.ValueType  # 6003
 global___SourceModelType = SourceModelType
 
 @typing_extensions.final
