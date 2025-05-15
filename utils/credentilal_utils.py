@@ -392,7 +392,7 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         if 'protocol' not in credential_yaml:
             raise Exception(f'Protocol not found in credential yaml for grafana loki source in connector: {connector_name}')
 
-        c_source = Source.GRAFANA
+        c_source = Source.GRAFANA_LOKI
 
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.GRAFANA_LOKI_HOST,
