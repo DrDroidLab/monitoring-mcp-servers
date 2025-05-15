@@ -383,20 +383,16 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key=StringValue(value=credential_yaml['ssl_verify'])
             ))
     elif c_type == 'GRAFANA_LOKI':
-        # host: str, port: int, protocol: str, x_scope_org_id: str = 'anonymous', ssl_verify: bool = True):
-        if 'host' not in credential_yaml or 'grafana_api_key' not in credential_yaml:
-            raise Exception(
-                f'Host not found in credential yaml for grafana loki source in connector: {connector_name}')
+        if 'host' not in credential_yaml:
+            raise Exception(f'Host not found in credential yaml for grafana loki source in connector: {connector_name}')
 
         if 'port' not in credential_yaml:
-            raise Exception(
-                f'Port not found in credential yaml for grafana loki source in connector: {connector_name}')
+            raise Exception(f'Port not found in credential yaml for grafana loki source in connector: {connector_name}')
 
         if 'protocol' not in credential_yaml:
-            raise Exception(
-                f'Protocol not found in credential yaml for grafana loki source in connector: {connector_name}')
+            raise Exception(f'Protocol not found in credential yaml for grafana loki source in connector: {connector_name}')
 
-        c_source = Source.GRAFANA
+        c_source = Source.GRAFANA_LOKI
 
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.GRAFANA_LOKI_HOST,
@@ -404,7 +400,7 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
         ))
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.GRAFANA_LOKI_PORT,
-            key=StringValue(value=credential_yaml['port'])
+            key=StringValue(value=str(credential_yaml['port']))
         ))
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.GRAFANA_LOKI_PROTOCOL,
@@ -416,9 +412,14 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key=StringValue(value=credential_yaml['x_scope_org_id'])
             ))
         if credential_yaml.get('ssl_verify', None):
+            ssl_verify_flag = credential_yaml['ssl_verify']
+            if isinstance(ssl_verify_flag, str):
+                ssl_verify_flag = ssl_verify_flag.lower()
+            if isinstance(ssl_verify_flag, bool):
+                ssl_verify_flag = str(ssl_verify_flag).lower()
             c_keys.append(ConnectorKey(
                 key_type=SourceKeyType.SSL_VERIFY,
-                key=StringValue(value=credential_yaml['ssl_verify'])
+                key=StringValue(value=ssl_verify_flag)
             ))
     elif c_type == 'SQL_DATABASE_CONNECTION':
         if 'connection_string' not in credential_yaml:
