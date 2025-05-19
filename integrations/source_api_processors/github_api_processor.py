@@ -430,3 +430,118 @@ class GithubAPIProcessor(Processor):
             logger.error(f"GithubAPIProcessor.list_all_members:: Exception occurred while fetching github repos "
                          f"in {self.org} with error: {e}")
         return None
+
+    def _branch_exists(self, repo, branch):
+        """ Check if the branch exists in the repository. """
+        try:
+            url = f"{self.base_url}/repos/{self.org}/{repo}/branches/{branch}"
+            headers = {'Authorization': f'Bearer {self.__api_key}'}
+            response = requests.get(url, headers=headers)
+            return response.status_code == 200
+        except Exception as e:
+            logger.error(f"Error checking branch {branch} in {repo}: {e}")
+            return False
+
+    def _create_pr(self, repo, title, head, base, body):
+        """ Create a pull request after verifying changes exist. """
+        try:
+            # First, check if head and base branches have differences
+            compare_url = f"{self.base_url}/repos/{self.org}/{repo}/compare/{base}...{head}"
+            headers = {'Authorization': f'Bearer {self.__api_key}', 'Accept': 'application/vnd.github+json'}
+            compare_response = requests.get(compare_url, headers=headers)
+            compare_response.raise_for_status()
+
+            compare_data = compare_response.json()
+            if compare_data.get("status") == "identical":
+                raise Exception(f"No changes between {head} and {base}. PR not needed.")
+
+            # Proceed with PR creation
+            url = f"{self.base_url}/repos/{self.org}/{repo}/pulls"
+            payload = {"owner": self.org,
+                       "repo": repo,
+                       "title": title,
+                       "head": head,
+                       "base": base,
+                       "body": body}
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error creating PR in {repo}: {e}")
+
+    def _get_file_shas(self, repo, branch, files_to_update):
+        """ Get SHA values of existing files to update them. """
+        try:
+            headers = {'Authorization': f'Bearer {self.__api_key}'}
+            file_shas = {}
+
+            for file in files_to_update:
+                file_path = file['path']
+                url = f"{self.base_url}/repos/{self.org}/{repo}/contents/{file_path}?ref={branch}"
+                response = requests.get(url, headers=headers)
+
+                if response.status_code == 200:
+                    file_shas[file_path] = response.json().get('sha', None)
+                elif response.status_code != 404:
+                    raise Exception(f"Error checking file {file_path}: {response.text}")
+
+            return file_shas
+        except Exception as e:
+            logger.error(f"Error retrieving file SHAs for repo {repo}: {e}")
+            return {}
+
+    def _commit_changes(self, repo, branch, files_to_update, file_shas, commit_message, committer_name,
+                        committer_email):
+        """ Commit changes to the specified branch. """
+        try:
+            headers = {'Authorization': f'Bearer {self.__api_key}'}
+            commit_count = 0  # Track successful commits
+
+            for file in files_to_update:
+                file_path = file['path']
+                file_content = file['content']
+                file_sha = file_shas.get(file_path)
+
+                update_url = f"{self.base_url}/repos/{self.org}/{repo}/contents/{file_path}"
+                payload = {
+                    "message": commit_message,
+                    "content": self._encode_content(file_content),
+                    "branch": branch,
+                    "committer": {"name": committer_name, "email": committer_email}
+                }
+                if file_sha:
+                    payload["sha"] = file_sha  # Required if updating an existing file
+
+                response = requests.put(update_url, headers=headers, json=payload)
+                response.raise_for_status()
+                commit_count += 1
+
+            if commit_count == 0:
+                raise Exception("No changes were committed, PR cannot be created.")
+
+        except Exception as e:
+            logger.error(f"Error committing changes in {repo} on branch {branch}: {e}")
+            raise Exception(f"Commit failed: {e}")
+
+    # Author: (VG), some code is repetitive. Please bear with it. I will refactor it later.
+    def create_pull_request(self, repo, title, head, base, body, files_to_update, commit_message, committer_name,
+                            committer_email):
+        """
+        Creates a pull request after checking/creating the branch and committing changes.
+        """
+        try:
+            # 1. Check if the head branch exists; if not, create it
+            if not self._branch_exists(repo, head):
+                self.create_branch(repo, head, base)
+
+            # 2. Get file SHAs and commit changes
+            file_shas = self._get_file_shas(repo, head, files_to_update)
+            self._commit_changes(repo, head, files_to_update, file_shas, commit_message, committer_name,
+                                 committer_email)
+
+            # 3. Create the PR
+            return self._create_pr(repo, title, head, base, body)
+        except Exception as e:
+            logger.error(f"Error in create_pull_request for {repo}: {e}")
+            return {"error": str(e)}
