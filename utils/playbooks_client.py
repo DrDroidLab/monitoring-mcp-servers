@@ -1,7 +1,8 @@
 from typing import Dict, Any
 import requests
 from requests.exceptions import RequestException
-from agent.settings import DRD_CLOUD_API_TOKEN
+from agent.settings import DRD_CLOUD_API_TOKEN, DRD_CLOUD_API_HOST
+
 
 class PrototypeClient:
     """
@@ -11,18 +12,15 @@ class PrototypeClient:
     in a clean and type-safe manner.
     """
 
-    def __init__(self, auth_token: str):
+    def __init__(self):
         """
         Initialize the client.
-        
-        Args:
-            auth_token (str): Bearer token for authentication
         """
-        if not auth_token:
-            raise ValueError("auth_token is required")
+        if not DRD_CLOUD_API_TOKEN and not DRD_CLOUD_API_HOST:
+            raise ValueError("DRD_CLOUD_API_TOKEN and DRD_CLOUD_API_HOST must be set")
 
-        self.auth_token = auth_token
-        self.base_url = DRD_CLOUD_API_TOKEN
+        self.auth_token = DRD_CLOUD_API_TOKEN
+        self.base_url = DRD_CLOUD_API_HOST
 
     def _get_headers(self) -> Dict[str, str]:
         """Get the default headers for API requests."""
