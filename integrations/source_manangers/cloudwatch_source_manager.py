@@ -723,7 +723,6 @@ class CloudwatchSourceManager(SourceManager):
             # Parse the dashboard asset from the response
             dashboard_asset = assets_result['assets'][0]  # Assuming first result is our dashboard
             dashboard_data = dashboard_asset.get('cloudwatch_dashboard', {})
-            widget_title = dashboard_asset.get('metadata', {}).get('title', dashboard_name)
 
             # 2. Iterate through widgets and fetch metrics, creating individual results
             task_results = []
