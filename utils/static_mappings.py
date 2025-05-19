@@ -376,6 +376,12 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.JENKINS_API_TOKEN
         ],
     ],
+    Source.ARGOCD: [
+        [
+            SourceKeyType.ARGOCD_SERVER,
+            SourceKeyType.ARGOCD_TOKEN,
+        ]
+    ],
 }
 integrations_connector_type_display_name_map = {
     Source.SLACK: 'SLACK',

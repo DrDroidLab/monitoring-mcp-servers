@@ -590,17 +590,17 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
                 key=StringValue(value=credential_yaml['cluster_token'])
             ))
     elif c_type == 'ARGOCD':
-        if 'server' not in credential_yaml or 'token' not in credential_yaml:
+        if 'argocd_server' not in credential_yaml or 'argocd_token' not in credential_yaml:
             raise Exception(f'Api Server or Token not found in credential yaml for ArgoCd source in '
                             f'connector: {connector_name}')
         c_source = Source.ARGOCD
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.ARGOCD_SERVER,
-            key=StringValue(value=credential_yaml['server'])
+            key=StringValue(value=credential_yaml['argocd_server'])
         ))
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.ARGOCD_TOKEN,
-            key=StringValue(value=credential_yaml['token'])
+            key=StringValue(value=credential_yaml['argocd_token'])
         ))
     elif c_type == 'JIRA_CLOUD':
         if 'jira_cloud_api_key' not in credential_yaml or 'jira_domain' not in credential_yaml or 'jira_email' not in credential_yaml:
