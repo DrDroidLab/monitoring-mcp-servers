@@ -1,8 +1,7 @@
 import pytz
-import json
 import logging
 from datetime import datetime, timedelta, date
-from typing import Any, Optional
+from typing import Any
 
 from google.protobuf.wrappers_pb2 import StringValue, DoubleValue, UInt64Value, Int64Value
 from google.protobuf.struct_pb2 import Struct
@@ -19,6 +18,7 @@ from integrations.source_manager import SourceManager
 from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import proto_to_dict, dict_to_proto
 from utils.time_utils import calculate_timeseries_bucket_size
+from utils.playbooks_client import PrototypeClient
 
 logger = logging.getLogger(__name__)
 
@@ -704,27 +704,26 @@ class CloudwatchSourceManager(SourceManager):
             if not dashboard_name:
                  raise ValueError("Dashboard name is required for FETCH_DASHBOARD task")
 
-            # 1. Fetch the Dashboard Asset from the database/cache
-            dashboard_asset_filter = AccountConnectorAssetsModelFilters(
-                cloudwatch_dashboard_model_filters=CloudwatchDashboardAssetOptions(dashboard_names=[dashboard_name])
-            )
-            assets_result: AccountConnectorAssets = asset_manager_facade.get_asset_model_values(
-                cloudwatch_connector,
-                SourceModelType.CLOUDWATCH_DASHBOARD,
-                dashboard_asset_filter
+            # Use PrototypeClient to fetch the Dashboard Asset
+            client = PrototypeClient()
+            assets_result = client.get_connector_assets(
+                connector_type="CLOUDWATCH",
+                connector_id=cloudwatch_connector.id.value,
+                meta={
+                    "dashboard_names": [dashboard_name],
+                    "model_type": "CLOUDWATCH_DASHBOARD"
+                }
             )
 
-            assets_result = assets_result[0]
-
-            if not assets_result or not assets_result.HasField('cloudwatch') or not assets_result.cloudwatch.assets:
+            if not assets_result or not assets_result.get('assets'):
                 logger.error(f"Dashboard asset not found or empty for name: {dashboard_name}")
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                     value=f"Could not find dashboard asset information for '{dashboard_name}'. Please ensure metadata extraction ran successfully.")))
 
-            # Assuming only one dashboard matches the name filter
-            dashboard_asset_model: CloudwatchAssetModel = assets_result.cloudwatch.assets[0]
-            dashboard_data: CloudwatchDashboardAssetModel = dashboard_asset_model.cloudwatch_dashboard
-            widget_title = proto_to_dict(dashboard_asset_model).get('metadata', {}).get('title', dashboard_name) # Use title from metadata if available
+            # Parse the dashboard asset from the response
+            dashboard_asset = assets_result['assets'][0]  # Assuming first result is our dashboard
+            dashboard_data = dashboard_asset.get('cloudwatch_dashboard', {})
+            widget_title = dashboard_asset.get('metadata', {}).get('title', dashboard_name)
 
             # 2. Iterate through widgets and fetch metrics, creating individual results
             task_results = []
@@ -732,7 +731,6 @@ class CloudwatchSourceManager(SourceManager):
             end_time_dt = datetime.utcfromtimestamp(time_range.time_lt).replace(tzinfo=pytz.UTC)
 
             effective_period = self._get_step_interval(time_range, task) # Use helper to get period
-            print(f"Effective period: {effective_period}")
 
             # Keep track of unique boto processors per region needed
             boto_processors = {}
