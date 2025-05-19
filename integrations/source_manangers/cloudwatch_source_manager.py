@@ -14,6 +14,7 @@ from protos.playbooks.playbook_commons_pb2 import TimeseriesResult, LabelValuePa
     PlaybookTaskResultType, TableResult, TextResult, ApiResponseResult
 from protos.playbooks.source_task_definitions.cloudwatch_task_pb2 import Cloudwatch
 from protos.ui_definition_pb2 import FormField, FormFieldType
+from protos.assets.cloudwatch_asset_pb2 import CloudwatchDashboardAssetModel
 from integrations.source_manager import SourceManager
 from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import proto_to_dict, dict_to_proto
@@ -90,7 +91,7 @@ class CloudwatchSourceManager(SourceManager):
                     FormField(key_name=StringValue(value="max_lines"),
                               display_name=StringValue(value="Max Lines"),
                               data_type=LiteralType.LONG,
-                              default_value=Literal(literal_type=LiteralType.LONG, long=Int64Value(value=1000)),
+                              default_value=Literal(type=LiteralType.LONG, long=Int64Value(value=1000)),
                               form_field_type=FormFieldType.TEXT_FT)
                               ],
                 'model_types': [SourceModelType.ECS_TASK],
@@ -148,14 +149,14 @@ class CloudwatchSourceManager(SourceManager):
                               display_name=StringValue(value="Metric Aggregation"),
                               description=StringValue(value='Select Aggregation Function'),
                               data_type=LiteralType.STRING,
-                              default_value=Literal(literal_type=LiteralType.STRING,
+                              default_value=Literal(type=LiteralType.STRING,
                                                     string=StringValue(value="Average")),
                               valid_values=[
-                                  Literal(literal_type=LiteralType.STRING, string=StringValue(value="Average")),
-                                  Literal(literal_type=LiteralType.STRING, string=StringValue(value="Sum")),
-                                  Literal(literal_type=LiteralType.STRING, string=StringValue(value="SampleCount")),
-                                  Literal(literal_type=LiteralType.STRING, string=StringValue(value="Maximum")),
-                                  Literal(literal_type=LiteralType.STRING, string=StringValue(value="Minimum"))],
+                                  Literal(type=LiteralType.STRING, string=StringValue(value="Average")),
+                                  Literal(type=LiteralType.STRING, string=StringValue(value="Sum")),
+                                  Literal(type=LiteralType.STRING, string=StringValue(value="SampleCount")),
+                                  Literal(type=LiteralType.STRING, string=StringValue(value="Maximum")),
+                                  Literal(type=LiteralType.STRING, string=StringValue(value="Minimum"))],
                               form_field_type=FormFieldType.DROPDOWN_FT),
                 ]
             },
@@ -709,10 +710,6 @@ class CloudwatchSourceManager(SourceManager):
             assets_result = client.get_connector_assets(
                 connector_type="CLOUDWATCH",
                 connector_id=cloudwatch_connector.id.value,
-                meta={
-                    "dashboard_names": [dashboard_name],
-                    "model_type": "CLOUDWATCH_DASHBOARD"
-                }
             )
 
             if not assets_result or not assets_result.get('assets'):
@@ -722,7 +719,8 @@ class CloudwatchSourceManager(SourceManager):
 
             # Parse the dashboard asset from the response
             dashboard_asset = assets_result['assets'][0]  # Assuming first result is our dashboard
-            dashboard_data = dashboard_asset.get('cloudwatch_dashboard', {})
+            dashboard_data = dict_to_proto(dashboard_asset.get('cloudwatch_dashboard', {}), CloudwatchDashboardAssetModel)
+            print(f"Dashboard data gugugu: {dashboard_data}")
 
             # 2. Iterate through widgets and fetch metrics, creating individual results
             task_results = []

@@ -1,5 +1,5 @@
 from django.conf import settings
-from google.protobuf.wrappers_pb2 import StringValue
+from google.protobuf.wrappers_pb2 import StringValue, UInt64Value
 
 from protos.base_pb2 import Source, SourceKeyType
 from protos.connectors.connector_pb2 import Connector, ConnectorKey
@@ -284,7 +284,7 @@ def generate_credentials_dict(connector_type, connector_keys):
     return credentials_dict
 
 
-def credential_yaml_to_connector_proto(connector_name, credential_yaml):
+def credential_yaml_to_connector_proto(connector_name, credential_yaml, connector_id=None):
     if 'type' not in credential_yaml:
         raise Exception(f'Type not found in credential yaml for connector: {connector_name}')
 
@@ -674,4 +674,8 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml):
             ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
-    return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
+    
+    if connector_id:
+        return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys, id=UInt64Value(value=connector_id))
+    else:
+        return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
