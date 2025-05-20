@@ -19,18 +19,18 @@ ignored_db_names = ['information_schema', 'mysql', 'performance_schema', 'sys', 
 
 class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, region, aws_access_key=None, aws_secret_key=None, aws_assumed_role_arn=None,
-                 aws_drd_cloud_role_arn=None, account_id=None, connector_id=None):
+    def __init__(self, request_id: str, connector_name: str, region, aws_access_key=None, aws_secret_key=None,
+                 aws_assumed_role_arn=None, aws_drd_cloud_role_arn=None):
         self.__region = region
-        self.__aws_access_key = aws_access_key if aws_access_key else None
-        self.__aws_secret_key = aws_secret_key if aws_access_key else None
-        self.__aws_assumed_role_arn = aws_assumed_role_arn if aws_assumed_role_arn else None
+        self.__aws_access_key = aws_access_key
+        self.__aws_secret_key = aws_secret_key
+        self.__aws_assumed_role_arn = aws_assumed_role_arn
         self.__aws_drd_cloud_role_arn = aws_drd_cloud_role_arn
 
-        super().__init__(account_id, connector_id, Source.CLOUDWATCH)
+        super().__init__(request_id, connector_name, Source.CLOUDWATCH)
 
     @log_function_call
-    def extract_metric(self, save_to_db=False):
+    def extract_metric(self):
         model_type = SourceModelType.CLOUDWATCH_METRIC
         model_data = {}
         try:
@@ -225,16 +225,16 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                                                                       'DimensionNames': list(dimension_map.keys())}
                     if not next_token or next_token == '':
                         break
-                if save_to_db:
-                    model_data[namespace] = {self.__region: metric_dimension_map}
-                    if metric_dimension_map:
-                        self.create_or_update_model_metadata(model_type, namespace, model_data[namespace])
+
+                model_data[namespace] = {self.__region: metric_dimension_map}
+
+            if len(model_data) > 0:
+                self.create_or_update_model_metadata(model_type, model_data)
         except Exception as e:
             raise e
-        return model_data
 
     @log_function_call
-    def extract_log_groups(self, save_to_db=False):
+    def extract_log_groups(self):
         model_type = SourceModelType.CLOUDWATCH_LOG_GROUP
         model_data = {}
         cloudwatch_boto3_processor = AWSBoto3ApiProcessor('logs', self.__region, self.__aws_access_key,
@@ -243,14 +243,14 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             all_log_groups = cloudwatch_boto3_processor.logs_describe_log_groups()
             model_data[self.__region] = {'log_groups': all_log_groups}
-            if save_to_db:
-                self.create_or_update_model_metadata(model_type, self.__region, model_data[self.__region])
         except Exception as e:
             logger.error(f'Error extracting cloudwatch log groups: {e}')
-        return model_data
+        
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
-    def extract_log_group_queries(self, save_to_db=False):
+    def extract_log_group_queries(self):
         model_type = SourceModelType.CLOUDWATCH_LOG_GROUP_QUERY
         model_data = {}
         cloudwatch_boto3_processor = AWSBoto3ApiProcessor('logs', self.__region, self.__aws_access_key,
@@ -274,14 +274,14 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
 
             for log_group, queries in parsed_queries_by_group.items():
                 model_data[log_group] = {'queries': queries}
-                if save_to_db:
-                    self.create_or_update_model_metadata(model_type, log_group, {'queries': queries})
         except Exception as e:
             logger.error(f'Error extracting cloudwatch log group queries: {e}')
-        return model_data
+
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
-    def extract_alarms(self, save_to_db=False):
+    def extract_alarms(self):
         model_type = SourceModelType.CLOUDWATCH_ALARMS
         model_data = {}
         cloudwatch_boto3_processor = AWSBoto3ApiProcessor('cloudwatch', self.__region, self.__aws_access_key,
@@ -294,16 +294,14 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                 alarm_name = alarm['AlarmName']
                 model_data[alarm_name] = alarm
 
-                if save_to_db:
-                    self.create_or_update_model_metadata(model_type, alarm_name, alarm)
-
-            return model_data
         except Exception as e:
             logger.error(f'Error extracting CloudWatch alarms: {e}')
-            return {}
+        
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
-    def extract_ecs_clusters(self, save_to_db=False):
+    def extract_ecs_clusters(self):
         model_type = SourceModelType.ECS_CLUSTER
         model_data = {}
         
@@ -349,17 +347,15 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                 
                 # Store metadata with cluster name as model_uid
                 model_data[cluster_name] = cluster_metadata
-                
-                if save_to_db:
-                    self.create_or_update_model_metadata(model_type, cluster_name, cluster_metadata)
                     
         except Exception as e:
             logger.error(f'Error extracting ECS clusters: {e}')
             
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
         
     @log_function_call
-    def extract_ecs_tasks(self, save_to_db=False):
+    def extract_ecs_tasks(self):
         model_type = SourceModelType.ECS_TASK
         model_data = {}
         
@@ -411,16 +407,15 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                     # Store metadata with task ARN as model_uid
                     model_data[task_arn] = task_metadata
                     
-                    if save_to_db:
-                        self.create_or_update_model_metadata(model_type, task_arn, task_metadata)
                         
         except Exception as e:
             logger.error(f'Error extracting ECS tasks: {e}')
             
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
         
     @log_function_call
-    def extract_rds_instances(self, save_to_db=False):
+    def extract_rds_instances(self):
         model_type = SourceModelType.RDS_INSTANCES
         model_data = {}
         try:
@@ -450,15 +445,13 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                         logger.error(
                             f'Error fetching Performance Insights data for RDS instance {db_detail["DBInstanceIdentifier"]}: {e}')
                         db_detail['db_names'] = []
-                    if save_to_db:
-                        self.create_or_update_model_metadata(model_type, db_detail['DBInstanceIdentifier'], db_detail)
-                return model_data
         except Exception as e:
             logger.error(f'Error extracting RDS instances: {e}')
-            return {}
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
-    def extract_dashboards(self, save_to_db=False):
+    def extract_dashboards(self):
         model_type = SourceModelType.CLOUDWATCH_DASHBOARD
         model_data = {}
         cloudwatch_boto3_processor = AWSBoto3ApiProcessor('cloudwatch', self.__region, self.__aws_access_key,
@@ -528,7 +521,7 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                                 metric_name = metric_details_list[1]
                                 dimensions = []
                                 widget_stat = stat # Use widget-level stat unless overridden in options
-                                widget_period = period
+                                widget_period = int(period)
                                 unit = None # Default unit
 
                                 # Check for options dict at the end
@@ -562,7 +555,7 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                                         'metric_name': metric_name,
                                         'dimensions': dimensions,
                                         'statistic': widget_stat,
-                                        'period': widget_period,
+                                        'period': int(widget_period),
                                         'region': region,
                                         'unit': unit,
                                         'widget_title': title
@@ -591,8 +584,6 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
                             'region': self.__region # Store the primary region this was extracted from
                         }
                         model_data[dashboard_name] = dashboard_metadata
-                        if save_to_db:
-                            self.create_or_update_model_metadata(model_type, dashboard_name, dashboard_metadata)
 
                 except Exception as e:
                     logger.error(f'Error processing dashboard {dashboard_name}: {e}')
@@ -601,5 +592,6 @@ class CloudwatchSourceMetadataExtractor(SourceMetadataExtractor):
         except Exception as e:
             logger.error(f'Error listing or fetching CloudWatch dashboards: {e}')
 
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 

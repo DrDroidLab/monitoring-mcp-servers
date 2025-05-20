@@ -718,7 +718,9 @@ class CloudwatchSourceManager(SourceManager):
                     value=f"Could not find dashboard asset information for '{dashboard_name}'. Please ensure metadata extraction ran successfully.")))
 
             # Parse the dashboard asset from the response
+            print(f"Assets result gugugu: {assets_result}")
             dashboard_asset = assets_result['assets'][0]  # Assuming first result is our dashboard
+            print(f"Dashboard asset gugugu: {dashboard_asset}")
             dashboard_data = dict_to_proto(dashboard_asset.get('cloudwatch_dashboard', {}), CloudwatchDashboardAssetModel)
             print(f"Dashboard data gugugu: {dashboard_data}")
 
