@@ -1,15 +1,12 @@
 import json
 import logging
 from datetime import datetime
-from typing import Optional
 
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value
 
 from integrations.source_api_processors.posthog_api_processor import PosthogApiProcessor
 from integrations.source_manager import SourceManager
-from protos.assets.asset_pb2 import AccountConnectorAssets, AccountConnectorAssetsModelFilters
-from protos.assets.posthog_asset_pb2 import PosthogAssetModel
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import LiteralType
@@ -17,9 +14,6 @@ from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult, PlaybookTa
 from protos.playbooks.source_task_definitions.posthog_task_pb2 import PostHog
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
-from utils.playbooks_client import PrototypeClient
-from utils.proto_utils import dict_to_proto
-from utils.string_utils import is_partial_match
 
 logger = logging.getLogger(__name__)
 
