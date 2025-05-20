@@ -1,6 +1,7 @@
 from typing import Dict, Any
 import requests
 from requests.exceptions import RequestException
+from protos.base_pb2 import SourceModelType
 from agent.settings import DRD_CLOUD_API_TOKEN, DRD_CLOUD_API_HOST
 
 
@@ -33,6 +34,8 @@ class PrototypeClient:
         self,
         connector_type: str,
         connector_id: str,
+        asset_type: SourceModelType,
+        filters: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """
         Retrieve connector assets based on specified parameters.
@@ -50,7 +53,11 @@ class PrototypeClient:
         payload = {
             "connector_type": connector_type,
             "connector_id": connector_id,
+            "type": asset_type,
         }
+
+        if filters:
+            payload["filters"] = filters
 
         try:
             response = requests.post(

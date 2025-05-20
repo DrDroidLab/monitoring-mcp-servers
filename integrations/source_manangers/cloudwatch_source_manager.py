@@ -14,7 +14,8 @@ from protos.playbooks.playbook_commons_pb2 import TimeseriesResult, LabelValuePa
     PlaybookTaskResultType, TableResult, TextResult, ApiResponseResult
 from protos.playbooks.source_task_definitions.cloudwatch_task_pb2 import Cloudwatch
 from protos.ui_definition_pb2 import FormField, FormFieldType
-from protos.assets.cloudwatch_asset_pb2 import CloudwatchDashboardAssetModel
+from protos.assets.cloudwatch_asset_pb2 import CloudwatchDashboardAssetModel, CloudwatchDashboardAssetOptions
+from protos.assets.asset_pb2 import AccountConnectorAssetsModelFilters
 from integrations.source_manager import SourceManager
 from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import proto_to_dict, dict_to_proto
@@ -705,20 +706,22 @@ class CloudwatchSourceManager(SourceManager):
             if not dashboard_name:
                  raise ValueError("Dashboard name is required for FETCH_DASHBOARD task")
 
+            dashboard_asset_filter = AccountConnectorAssetsModelFilters(
+                cloudwatch_dashboard_model_filters=CloudwatchDashboardAssetOptions(dashboard_names=[dashboard_name])
+            )
             # Use PrototypeClient to fetch the Dashboard Asset
             client = PrototypeClient()
             assets_result = client.get_connector_assets(
                 connector_type="CLOUDWATCH",
                 connector_id=cloudwatch_connector.id.value,
+                asset_type=SourceModelType.CLOUDWATCH_DASHBOARD,
+                filters=proto_to_dict(dashboard_asset_filter)
             )
-
             if not assets_result or not assets_result.get('assets'):
                 logger.error(f"Dashboard asset not found or empty for name: {dashboard_name}")
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                     value=f"Could not find dashboard asset information for '{dashboard_name}'. Please ensure metadata extraction ran successfully.")))
 
-            # Parse the dashboard asset from the response
-            print(f"Assets result gugugu: {assets_result}")
             dashboard_asset = assets_result['assets'][0]  # Assuming first result is our dashboard
             print(f"Dashboard asset gugugu: {dashboard_asset}")
             dashboard_data = dict_to_proto(dashboard_asset.get('cloudwatch_dashboard', {}), CloudwatchDashboardAssetModel)
