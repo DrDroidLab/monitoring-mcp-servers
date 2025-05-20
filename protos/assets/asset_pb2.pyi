@@ -23,6 +23,8 @@ import protos.assets.jira_asset_pb2
 import protos.assets.newrelic_asset_pb2
 import protos.assets.open_search_asset_pb2
 import protos.assets.postgres_asset_pb2
+import protos.assets.posthog_asset_pb2
+import protos.assets.signoz_asset_pb2
 import protos.assets.slack_asset_pb2
 import protos.connectors.connector_pb2
 import sys
@@ -59,6 +61,8 @@ class AccountConnectorAssets(google.protobuf.message.Message):
     JIRA_CLOUD_FIELD_NUMBER: builtins.int
     ARGOCD_FIELD_NUMBER: builtins.int
     JENKINS_FIELD_NUMBER: builtins.int
+    POSTHOG_FIELD_NUMBER: builtins.int
+    SIGNOZ_FIELD_NUMBER: builtins.int
     @property
     def connector(self) -> protos.connectors.connector_pb2.Connector: ...
     @property
@@ -101,6 +105,10 @@ class AccountConnectorAssets(google.protobuf.message.Message):
     def argocd(self) -> protos.assets.argocd_asset_pb2.ArgoCDAssets: ...
     @property
     def jenkins(self) -> protos.assets.jenkins_asset_pb2.JenkinsAssets: ...
+    @property
+    def posthog(self) -> protos.assets.posthog_asset_pb2.PosthogAssets: ...
+    @property
+    def signoz(self) -> protos.assets.signoz_asset_pb2.SignozAssets: ...
     def __init__(
         self,
         *,
@@ -125,10 +133,12 @@ class AccountConnectorAssets(google.protobuf.message.Message):
         jira_cloud: protos.assets.jira_asset_pb2.JiraAssets | None = ...,
         argocd: protos.assets.argocd_asset_pb2.ArgoCDAssets | None = ...,
         jenkins: protos.assets.jenkins_asset_pb2.JenkinsAssets | None = ...,
+        posthog: protos.assets.posthog_asset_pb2.PosthogAssets | None = ...,
+        signoz: protos.assets.signoz_asset_pb2.SignozAssets | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["argocd", b"argocd", "asana", b"asana", "assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector", b"connector", "datadog", b"datadog", "datadog_oauth", b"datadog_oauth", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "github", b"github", "gke", b"gke", "grafana", b"grafana", "jenkins", b"jenkins", "jira_cloud", b"jira_cloud", "new_relic", b"new_relic", "open_search", b"open_search", "postgres", b"postgres", "slack", b"slack"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["argocd", b"argocd", "asana", b"asana", "assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector", b"connector", "datadog", b"datadog", "datadog_oauth", b"datadog_oauth", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "github", b"github", "gke", b"gke", "grafana", b"grafana", "jenkins", b"jenkins", "jira_cloud", b"jira_cloud", "new_relic", b"new_relic", "open_search", b"open_search", "postgres", b"postgres", "slack", b"slack"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["assets", b"assets"]) -> typing_extensions.Literal["cloudwatch", "grafana", "clickhouse", "slack", "new_relic", "datadog", "postgres", "eks", "bash", "azure", "gke", "elastic_search", "gcm", "datadog_oauth", "open_search", "asana", "github", "jira_cloud", "argocd", "jenkins"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["argocd", b"argocd", "asana", b"asana", "assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector", b"connector", "datadog", b"datadog", "datadog_oauth", b"datadog_oauth", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "github", b"github", "gke", b"gke", "grafana", b"grafana", "jenkins", b"jenkins", "jira_cloud", b"jira_cloud", "new_relic", b"new_relic", "open_search", b"open_search", "postgres", b"postgres", "posthog", b"posthog", "signoz", b"signoz", "slack", b"slack"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["argocd", b"argocd", "asana", b"asana", "assets", b"assets", "azure", b"azure", "bash", b"bash", "clickhouse", b"clickhouse", "cloudwatch", b"cloudwatch", "connector", b"connector", "datadog", b"datadog", "datadog_oauth", b"datadog_oauth", "eks", b"eks", "elastic_search", b"elastic_search", "gcm", b"gcm", "github", b"github", "gke", b"gke", "grafana", b"grafana", "jenkins", b"jenkins", "jira_cloud", b"jira_cloud", "new_relic", b"new_relic", "open_search", b"open_search", "postgres", b"postgres", "posthog", b"posthog", "signoz", b"signoz", "slack", b"slack"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["assets", b"assets"]) -> typing_extensions.Literal["cloudwatch", "grafana", "clickhouse", "slack", "new_relic", "datadog", "postgres", "eks", "bash", "azure", "gke", "elastic_search", "gcm", "datadog_oauth", "open_search", "asana", "github", "jira_cloud", "argocd", "jenkins", "posthog", "signoz"] | None: ...
 
 global___AccountConnectorAssets = AccountConnectorAssets
 

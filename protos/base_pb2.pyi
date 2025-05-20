@@ -224,6 +224,8 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     DRD_ALERT_WEBHOOK: _Source.ValueType  # 66
     ROLLBAR: _Source.ValueType  # 67
     LAMBDA: _Source.ValueType  # 68
+    POSTHOG: _Source.ValueType  # 70
+    SIGNOZ: _Source.ValueType  # 72
 
 class Source(_Source, metaclass=_SourceEnumTypeWrapper): ...
 
@@ -295,6 +297,8 @@ ARGOCD: Source.ValueType  # 65
 DRD_ALERT_WEBHOOK: Source.ValueType  # 66
 ROLLBAR: Source.ValueType  # 67
 LAMBDA: Source.ValueType  # 68
+POSTHOG: Source.ValueType  # 70
+SIGNOZ: Source.ValueType  # 72
 global___Source = Source
 
 class _SourceKeyType:

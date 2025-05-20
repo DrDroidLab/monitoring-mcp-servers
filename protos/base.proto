@@ -181,6 +181,8 @@ enum Source {
   DRD_ALERT_WEBHOOK = 66;
   ROLLBAR = 67;
   LAMBDA = 68;
+  POSTHOG = 70;
+  SIGNOZ = 72;
 }
 
 enum SourceKeyType {

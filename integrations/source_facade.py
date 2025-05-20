@@ -32,6 +32,8 @@ from integrations.source_manangers.sql_database_connection_source_manager import
 from integrations.source_manangers.zenduty_source_manager import ZendutySourceManager
 from integrations.source_manangers.argocd_source_manager import ArgoCDSourceManager
 from integrations.source_manangers.jira_source_manager import JiraSourceManager
+from integrations.source_manangers.posthog_source_manager import PosthogSourceManager
+from integrations.source_manangers.signoz_source_manager import SignozSourceManager
 
 from protos.base_pb2 import Source
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
@@ -112,3 +114,6 @@ source_facade.register(Source.GITHUB, GithubSourceManager())
 source_facade.register(Source.ARGOCD, ArgoCDSourceManager())
 source_facade.register(Source.JIRA_CLOUD, JiraSourceManager())
 source_facade.register(Source.JENKINS, JenkinsSourceManager())
+
+source_facade.register(Source.POSTHOG, PosthogSourceManager())
+source_facade.register(Source.SIGNOZ, SignozSourceManager())

@@ -24,6 +24,8 @@ import "protos/assets/github_asset.proto";
 import "protos/assets/jira_asset.proto";
 import "protos/assets/argocd_asset.proto";
 import "protos/assets/jenkins_asset.proto";
+import "protos/assets/signoz_asset.proto";
+import "protos/assets/posthog_asset.proto";
 
 
 message AccountConnectorAssets {
@@ -49,6 +51,8 @@ message AccountConnectorAssets {
     JiraAssets jira_cloud = 19;
     ArgoCDAssets argocd = 20;
     JenkinsAssets jenkins = 21;
+    PosthogAssets posthog = 23;
+    SignozAssets signoz = 25;
   }
 }
 
