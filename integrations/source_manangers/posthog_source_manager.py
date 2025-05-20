@@ -32,7 +32,6 @@ class PosthogSourceManager(SourceManager):
         self.task_type_callable_map = {
             PostHog.TaskType.HOGQL_QUERY: {
                 "executor": self.execute_hogql_query,
-                "asset_descriptor": self.posthog_property_asset_descriptor,
                 "model_types": [SourceModelType.POSTHOG_PROPERTY],
                 "result_type": PlaybookTaskResultType.TABLE,
                 "display_name": "Execute HogQL Query to get events",
@@ -51,70 +50,6 @@ class PosthogSourceManager(SourceManager):
     def get_connector_processor(self, posthog_connector, **kwargs):
         generated_credentials = generate_credentials_dict(posthog_connector.type, posthog_connector.keys)
         return PosthogApiProcessor(**generated_credentials)
-
-    @staticmethod
-    def posthog_property_asset_descriptor(posthog_connector: ConnectorProto, filters: Optional[dict] = None):
-        """Generate a text description of PostHog properties to help the LLM craft queries"""
-        try:
-            prototype_client = PrototypeClient()
-            property_assets: AccountConnectorAssets = prototype_client.get_connector_assets(
-                posthog_connector,
-                SourceModelType.POSTHOG_PROPERTY,
-                AccountConnectorAssetsModelFilters()
-            )
-            property_assets = property_assets["assets"][0]["posthog"]["assets"]
-            property_assets = dict_to_proto(property_assets, PosthogAssetModel)
-            if not property_assets:
-                logger.warning(f"PosthogSourceManager.posthog_property_asset_descriptor:: No property assets found for "
-                               f"account: {posthog_connector.account_id.value}, connector: {posthog_connector.id.value}")
-                return ""
-                
-            property_assets = property_assets[0]
-            posthog_assets = property_assets.posthog.assets
-            all_property_assets = [asset.posthog_property for asset in posthog_assets if 
-                                   asset.type == SourceModelType.POSTHOG_PROPERTY]
-            
-            asset_list_string = "Available PostHog Properties:\n"
-            filtered_asset_list = ""
-            
-            # Group properties by type
-            property_by_type = {}
-            for asset in all_property_assets:
-                prop_type = asset.property_type.value if asset.HasField("property_type") and asset.property_type.value else "Other"
-                if prop_type not in property_by_type:
-                    property_by_type[prop_type] = []
-                property_by_type[prop_type].append(asset)
-                
-            # Format the property information
-            for prop_type, assets in property_by_type.items():
-                asset_list_string += f"\n## {prop_type} Properties\n"
-                
-                for asset in assets:
-                    prop_name = asset.name.value
-                    is_numerical = "Numerical" if asset.is_numerical.value else "String"
-                    
-                    tags_str = ""
-                    if asset.tags:
-                        tags_str = f", Tags: `{', '.join(asset.tags)}`"
-                        
-                    asset_string = f"- `{prop_name}` ({is_numerical}{tags_str})\n"
-                    asset_list_string += asset_string
-                    
-                    # Apply filters if provided
-                    if filters and "property_names" in filters and is_partial_match(prop_name, filters["property_names"]):
-                        filtered_asset_list += asset_string
-                
-            # Return filtered list if filters were applied
-            if filtered_asset_list:
-                return filtered_asset_list
-                
-            return asset_list_string
-            
-        except Exception as e:
-            logger.error(f"PosthogSourceManager.posthog_property_asset_descriptor:: Error while generating "
-                         f"property asset descriptor for account: {posthog_connector.account_id.value}, connector: "
-                         f"{posthog_connector.id.value} with error: {e}")
-        return ""
 
     def execute_event_query(self, time_range: TimeRange, ph_task: PostHog,
                             posthog_connector: ConnectorProto):
