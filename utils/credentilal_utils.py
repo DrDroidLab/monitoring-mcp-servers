@@ -279,6 +279,29 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['crumb'] = False
                 if conn_key.key.value.lower() == 'true':
                     credentials_dict['crumb'] = True
+    elif connector_type == Source.POSTHOG:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.POSTHOG_API_KEY:
+                credentials_dict['personal_api_key'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.POSTHOG_APP_HOST:
+                credentials_dict['posthog_host'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.POSTHOG_PROJECT_ID:
+                credentials_dict['project_id'] = conn_key.key.value
+
+    elif connector_type == Source.SIGNOZ:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.SIGNOZ_API_URL:
+                credentials_dict['signoz_api_url'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.SIGNOZ_API_TOKEN:
+                credentials_dict['signoz_api_token'] = conn_key.key.value
+    
+    elif connector_type == Source.SENTRY:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.SENTRY_API_KEY:
+                credentials_dict['api_key'] = conn_key.key.value
+            if conn_key.key_type == SourceKeyType.SENTRY_ORG_SLUG:
+                credentials_dict['org_slug'] = conn_key.key.value
+
     else:
         return None
     return credentials_dict
@@ -672,6 +695,50 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
                 key_type=SourceKeyType.SSL_VERIFY,
                 key=StringValue(value=credential_yaml['verify_certs'])
             ))
+
+    elif c_type == 'POSTHOG':
+        if 'api_key' not in credential_yaml or 'app_host' not in credential_yaml or 'project_id' not in credential_yaml:
+            raise Exception(f'Api key, app host or project id not found in credential yaml for posthog source in connector: {connector_name}')
+        c_source = Source.POSTHOG
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTHOG_API_KEY,
+            key=StringValue(value=credential_yaml['api_key'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTHOG_APP_HOST,
+            key=StringValue(value=credential_yaml['app_host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.POSTHOG_PROJECT_ID,
+            key=StringValue(value=credential_yaml['project_id'])
+        ))
+
+    elif c_type == 'SIGNOZ':
+        if 'signoz_api_url' not in credential_yaml or 'signoz_api_token' not in credential_yaml:
+            raise Exception(f'Signoz api url or token not found in credential yaml for signoz source in connector: {connector_name}')
+        c_source = Source.SIGNOZ
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.SIGNOZ_API_URL,
+            key=StringValue(value=credential_yaml['signoz_api_url'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.SIGNOZ_API_TOKEN,
+            key=StringValue(value=credential_yaml['signoz_api_token'])
+        ))
+
+    elif c_type == 'SENTRY':
+        if 'api_key' not in credential_yaml or 'org_slug' not in credential_yaml:
+            raise Exception(f'Api key or org slug not found in credential yaml for sentry source in connector: {connector_name}')
+        c_source = Source.SENTRY
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.SENTRY_API_KEY,
+            key=StringValue(value=credential_yaml['api_key'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.SENTRY_ORG_SLUG,
+            key=StringValue(value=credential_yaml['org_slug'])
+        ))
+
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     

@@ -34,6 +34,7 @@ from integrations.source_manangers.argocd_source_manager import ArgoCDSourceMana
 from integrations.source_manangers.jira_source_manager import JiraSourceManager
 from integrations.source_manangers.posthog_source_manager import PosthogSourceManager
 from integrations.source_manangers.signoz_source_manager import SignozSourceManager
+from integrations.source_manangers.sentry_source_manager import SentrySourceManager
 
 from protos.base_pb2 import Source
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
@@ -117,3 +118,4 @@ source_facade.register(Source.JENKINS, JenkinsSourceManager())
 
 source_facade.register(Source.POSTHOG, PosthogSourceManager())
 source_facade.register(Source.SIGNOZ, SignozSourceManager())
+source_facade.register(Source.SENTRY, SentrySourceManager())

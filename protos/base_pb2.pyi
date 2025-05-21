@@ -417,6 +417,11 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ARGOCD_SERVER: _SourceKeyType.ValueType  # 106
     ARGOCD_TOKEN: _SourceKeyType.ValueType  # 107
     ROLLBAR_ACCESS_TOKEN: _SourceKeyType.ValueType  # 108
+    POSTHOG_API_KEY: _SourceKeyType.ValueType  # 121
+    POSTHOG_APP_HOST: _SourceKeyType.ValueType  # 122
+    POSTHOG_PROJECT_ID: _SourceKeyType.ValueType  # 123
+    SIGNOZ_API_URL: _SourceKeyType.ValueType  # 136
+    SIGNOZ_API_TOKEN: _SourceKeyType.ValueType  # 137
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -530,6 +535,11 @@ CUSTOM_STRATEGIES_ACCOUNT_ID: SourceKeyType.ValueType  # 104
 ARGOCD_SERVER: SourceKeyType.ValueType  # 106
 ARGOCD_TOKEN: SourceKeyType.ValueType  # 107
 ROLLBAR_ACCESS_TOKEN: SourceKeyType.ValueType  # 108
+POSTHOG_API_KEY: SourceKeyType.ValueType  # 121
+POSTHOG_APP_HOST: SourceKeyType.ValueType  # 122
+POSTHOG_PROJECT_ID: SourceKeyType.ValueType  # 123
+SIGNOZ_API_URL: SourceKeyType.ValueType  # 136
+SIGNOZ_API_TOKEN: SourceKeyType.ValueType  # 137
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:

@@ -382,6 +382,13 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.ARGOCD_TOKEN,
         ]
     ],
+    Source.POSTHOG: [
+        [
+            SourceKeyType.POSTHOG_API_KEY,
+            SourceKeyType.POSTHOG_APP_HOST,
+            SourceKeyType.POSTHOG_PROJECT_ID,
+        ]
+    ],
 }
 integrations_connector_type_display_name_map = {
     Source.SLACK: 'SLACK',
@@ -421,6 +428,7 @@ integrations_connector_type_display_name_map = {
     Source.GITHUB_ACTIONS: 'GITHUB ACTIONS',
     Source.ARGOCD: 'ARGOCD',
     Source.ROLLBAR: 'ROLLBAR',
+    Source.POSTHOG: 'POSTHOG',
 }
 
 model_type_display_name_maps = {
@@ -490,5 +498,6 @@ masked_keys_types = [SourceKeyType.DATADOG_APP_KEY,
                      SourceKeyType.CUSTOM_STRATEGIES_ACCOUNT_ID,
                      SourceKeyType.KUBERNETES_CLUSTER_TOKEN,
                      SourceKeyType.KUBERNETES_CLUSTER_CERTIFICATE_AUTHORITY_DATA,
-                     SourceKeyType.REMOTE_SERVER_PEM
+                     SourceKeyType.REMOTE_SERVER_PEM,
+                     SourceKeyType.POSTHOG_API_KEY,
                      ]

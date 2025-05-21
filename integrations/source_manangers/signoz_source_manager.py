@@ -175,7 +175,7 @@ class SignozSourceManager(SourceManager):
                         data_type=LiteralType.BOOLEAN,
                         is_optional=True,
                         default_value=Literal(
-                            literal_type=LiteralType.BOOLEAN,
+                            type=LiteralType.BOOLEAN,
                             boolean=BoolValue(value=False),
                         ),
                         form_field_type=FormFieldType.CHECKBOX_FT,
@@ -187,21 +187,21 @@ class SignozSourceManager(SourceManager):
                         data_type=LiteralType.STRING,
                         is_optional=True,
                         default_value=Literal(
-                            literal_type=LiteralType.STRING,
+                            type=LiteralType.STRING,
                             string=StringValue(value="table"),
                         ),
                         form_field_type=FormFieldType.DROPDOWN_FT,
                         valid_values=[
                             Literal(
-                                literal_type=LiteralType.STRING,
+                                type=LiteralType.STRING,
                                 string=StringValue(value="table"),
                             ),
                             Literal(
-                                literal_type=LiteralType.STRING,
+                                type=LiteralType.STRING,
                                 string=StringValue(value="graph"),
                             ),
                             Literal(
-                                literal_type=LiteralType.STRING,
+                                type=LiteralType.STRING,
                                 string=StringValue(value="value"),
                             ),
                         ],
@@ -237,21 +237,21 @@ class SignozSourceManager(SourceManager):
                         data_type=LiteralType.STRING,
                         is_optional=True,
                         default_value=Literal(
-                            literal_type=LiteralType.STRING,
+                            type=LiteralType.STRING,
                             string=StringValue(value="table"),
                         ),
                         form_field_type=FormFieldType.DROPDOWN_FT,
                         valid_values=[
                             Literal(
-                                literal_type=LiteralType.STRING,
+                                type=LiteralType.STRING,
                                 string=StringValue(value="table"),
                             ),
                             Literal(
-                                literal_type=LiteralType.STRING,
+                                type=LiteralType.STRING,
                                 string=StringValue(value="graph"),
                             ),
                             Literal(
-                                literal_type=LiteralType.STRING,
+                                type=LiteralType.STRING,
                                 string=StringValue(value="value"),
                             ),
                         ],
@@ -287,7 +287,7 @@ class SignozSourceManager(SourceManager):
                         data_type=LiteralType.STRING,
                         is_optional=True,
                         default_value=Literal(
-                            literal_type=LiteralType.STRING,
+                            type=LiteralType.STRING,
                             string=StringValue(value="{}"),
                         ),
                         form_field_type=FormFieldType.MULTILINE_FT,  # Use multiline for JSON
