@@ -429,6 +429,8 @@ enum SourceModelType {
 
   //GCM Models
   GCM_METRIC = 1701;
+  GCM_DASHBOARD = 1702;
+  GCM_CLOUD_RUN_SERVICE_DASHBOARD = 1703;
 
   //Zen Duty Models
   ZENDUTY_INCIDENT = 1801;

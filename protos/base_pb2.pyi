@@ -613,6 +613,8 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """Elastic Search Models"""
     GCM_METRIC: _SourceModelType.ValueType  # 1701
     """GCM Models"""
+    GCM_DASHBOARD: _SourceModelType.ValueType  # 1702
+    GCM_CLOUD_RUN_SERVICE_DASHBOARD: _SourceModelType.ValueType  # 1703
     ZENDUTY_INCIDENT: _SourceModelType.ValueType  # 1801
     """Zen Duty Models"""
     ROOTLY_INCIDENT: _SourceModelType.ValueType  # 1901
@@ -726,6 +728,8 @@ ELASTIC_SEARCH_INDEX: SourceModelType.ValueType  # 1601
 """Elastic Search Models"""
 GCM_METRIC: SourceModelType.ValueType  # 1701
 """GCM Models"""
+GCM_DASHBOARD: SourceModelType.ValueType  # 1702
+GCM_CLOUD_RUN_SERVICE_DASHBOARD: SourceModelType.ValueType  # 1703
 ZENDUTY_INCIDENT: SourceModelType.ValueType  # 1801
 """Zen Duty Models"""
 ROOTLY_INCIDENT: SourceModelType.ValueType  # 1901
