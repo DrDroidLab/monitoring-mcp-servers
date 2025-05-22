@@ -1,12 +1,13 @@
 import re
 import time
-
-from sentry_sdk import capture_exception
+import logging
 
 from integrations.source_metadata_extractor import SourceMetadataExtractor
 from integrations.source_api_processors.grafana_api_processor import GrafanaApiProcessor
 from protos.base_pb2 import Source, SourceModelType
 from utils.logging_utils import log_function_call
+
+logger = logging.getLogger(__name__)
 
 
 def promql_get_metric_name(promql):
@@ -44,7 +45,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             datasources = self.__grafana_api_processor.fetch_data_sources()
         except Exception as e:
-            capture_exception(Exception(f'Error fetching grafana data sources: {e}'))
+            logger.error(f'Error fetching grafana data sources: {e}')
             return
         if not datasources:
             return
@@ -63,7 +64,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
             all_data_sources = self.__grafana_api_processor.fetch_data_sources()
             all_promql_data_sources = [ds for ds in all_data_sources if ds['type'] == 'prometheus']
         except Exception as e:
-            capture_exception(Exception(f'Error fetching grafana prometheus data sources: {e}'))
+            logger.error(f'Error fetching grafana prometheus data sources: {e}')
             return
         if not all_promql_data_sources:
             return
@@ -81,7 +82,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             all_dashboards = self.__grafana_api_processor.fetch_dashboards()
         except Exception as e:
-            capture_exception(Exception(f'Error fetching grafana dashboards: {e}'))
+            logger.error(f'Error fetching grafana dashboards: {e}')
             return
         if not all_dashboards:
             return
@@ -95,7 +96,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
             try:
                 dashboard_details = self.__grafana_api_processor.fetch_dashboard_details(uid)
             except Exception as e:
-                capture_exception(Exception(f'Error fetching grafana dashboard details: {e}'))
+                logger.error(f'Error fetching grafana dashboard details: {e}')
                 continue
             if not dashboard_details:
                 continue
@@ -110,7 +111,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             all_data_sources = self.__grafana_api_processor.fetch_data_sources()
         except Exception as e:
-            capture_exception(Exception(f'Error fetching grafana data sources for target metric promql: {e}'))
+            logger.error(f'Error fetching grafana data sources for target metric promql: {e}')
             return
         if not all_data_sources:
             return
@@ -118,7 +119,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             all_dashboards = self.__grafana_api_processor.fetch_dashboards()
         except Exception as e:
-            capture_exception(Exception(f'Error fetching grafana dashboard for target metric promql: {e}'))
+            logger.error(f'Error fetching grafana dashboard for target metric promql: {e}')
             return
         if not all_dashboards:
             return
@@ -132,7 +133,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
             try:
                 dashboard_details = self.__grafana_api_processor.fetch_dashboard_details(uid)
             except Exception as e:
-                capture_exception(Exception(f'Error fetching grafana dashboard details for target metric promql: {e}'))
+                logger.error(f'Error fetching grafana dashboard details for target metric promql: {e}')
                 continue
             if not dashboard_details:
                 continue
@@ -186,16 +187,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                     response = self.__grafana_api_processor.fetch_promql_metric_labels(
                                                         datasource_uid, metric_name)
                                                 except Exception as e:
-                                                    capture_exception(Exception(
-                                                        f'Error fetching promql metric labels for target metric promql: {e}'))
+                                                    logger.error(f'Error fetching promql metric labels for target metric promql: {e}')
                                                     response = None
                                                 while not response and retry_attempts < 3:
                                                     try:
                                                         response = self.__grafana_api_processor.fetch_promql_metric_labels(
                                                             datasource_uid, metric_name)
                                                     except Exception as e:
-                                                        capture_exception(Exception(
-                                                            f'Error fetching promql metric labels for target metric promql: {e}'))
+                                                        logger.error(f'Error fetching promql metric labels for target metric promql: {e}')
                                                         response = None
                                                     time.sleep(5)
                                                     retry_attempts += 1
@@ -210,16 +209,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                                 response = self.__grafana_api_processor.fetch_promql_metric_label_values(
                                                                     datasource_uid, metric_name, lb)
                                                             except Exception as e:
-                                                                capture_exception(Exception(
-                                                                    f'Error fetching promql metric label values for target metric promql: {e}'))
+                                                                logger.error(f'Error fetching promql metric label values for target metric promql: {e}')
                                                                 response = None
                                                             while not response and retry_attempts < 3:
                                                                 try:
                                                                     response = self.__grafana_api_processor.fetch_promql_metric_label_values(
                                                                         datasource_uid, metric_name, lb)
                                                                 except Exception as e:
-                                                                    capture_exception(Exception(
-                                                                        f'Error fetching promql metric label values for target metric promql: {e}'))
+                                                                    logger.error(f'Error fetching promql metric label values for target metric promql: {e}')
                                                                     response = None
                                                                 time.sleep(5)
                                                                 retry_attempts += 1
@@ -286,16 +283,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                             response = self.__grafana_api_processor.fetch_promql_metric_labels(
                                                                 datasource_uid, metric_name)
                                                         except Exception as e:
-                                                            capture_exception(Exception(
-                                                                f'Error fetching promql metric labels for target metric promql: {e}'))
+                                                            logger.error(f'Error fetching promql metric labels for target metric promql: {e}')
                                                             response = None
                                                         while not response and retry_attempts < 3:
                                                             try:
                                                                 response = self.__grafana_api_processor.fetch_promql_metric_labels(
                                                                     datasource_uid, metric_name)
                                                             except Exception as e:
-                                                                capture_exception(Exception(
-                                                                    f'Error fetching promql metric labels for target metric promql: {e}'))
+                                                                logger.error(f'Error fetching promql metric labels for target metric promql: {e}')
                                                                 response = None
                                                             time.sleep(5)
                                                             retry_attempts += 1
@@ -311,16 +306,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                                         response = self.__grafana_api_processor.fetch_promql_metric_label_values(
                                                                             datasource_uid, metric_name, lb)
                                                                     except Exception as e:
-                                                                        capture_exception(Exception(
-                                                                            f'Error fetching promql metric label values for target metric promql: {e}'))
+                                                                        logger.error(f'Error fetching promql metric label values for target metric promql: {e}')
                                                                         response = None
                                                                     while not response and retry_attempts < 3:
                                                                         try:
                                                                             response = self.__grafana_api_processor.fetch_promql_metric_label_values(
                                                                                 datasource_uid, metric_name, lb)
                                                                         except Exception as e:
-                                                                            capture_exception(Exception(
-                                                                                f'Error fetching promql metric label values for target metric promql: {e}'))
+                                                                            logger.error(f'Error fetching promql metric label values for target metric promql: {e}')
                                                                             response = None
                                                                         time.sleep(5)
                                                                         retry_attempts += 1
@@ -387,16 +380,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                             response = self.__grafana_api_processor.fetch_promql_metric_labels(
                                                                 datasource_uid, metric_name)
                                                         except Exception as e:
-                                                            capture_exception(Exception(
-                                                                f'Error fetching promql metric labels for target metric promql: {e}'))
+                                                            logger.error(f'Error fetching promql metric labels for target metric promql: {e}')
                                                             response = None
                                                         while not response and retry_attempts < 3:
                                                             try:
                                                                 response = self.__grafana_api_processor.fetch_promql_metric_labels(
                                                                     datasource_uid, metric_name)
                                                             except Exception as e:
-                                                                capture_exception(Exception(
-                                                                    f'Error fetching promql metric labels for target metric promql: {e}'))
+                                                                logger.error(f'Error fetching promql metric labels for target metric promql: {e}')
                                                                 response = None
                                                             time.sleep(5)
                                                             retry_attempts += 1
@@ -412,16 +403,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                                         response = self.__grafana_api_processor.fetch_promql_metric_label_values(
                                                                             datasource_uid, metric_name, lb)
                                                                     except Exception as e:
-                                                                        capture_exception(Exception(
-                                                                            f"Error fetching promql metric label values for target metric promql: {e}"))
+                                                                        logger.error(f"Error fetching promql metric label values for target metric promql: {e}")
                                                                         response = None
                                                                     while not response and retry_attempts < 3:
                                                                         try:
                                                                             response = self.__grafana_api_processor.fetch_promql_metric_label_values(
                                                                                 datasource_uid, metric_name, lb)
                                                                         except Exception as e:
-                                                                            capture_exception(Exception(
-                                                                                f"Error fetching promql metric label values for target metric promql: {e}"))
+                                                                            logger.error(f"Error fetching promql metric label values for target metric promql: {e}")
                                                                             response = None
                                                                         time.sleep(5)
                                                                         retry_attempts += 1
@@ -436,7 +425,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                 self.create_or_update_model_metadata(model_type, model_uid,
                                                                                      model_data[model_uid])
             except Exception as e:
-                capture_exception(Exception(f'Error extracting grafana target metric promql: {e}'))
+                logger.error(f'Error extracting grafana target metric promql: {e}')
         return model_data
 
     @log_function_call
@@ -445,7 +434,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         try:
             alert_rules = self.__grafana_api_processor.fetch_alert_rules()
         except Exception as e:
-            capture_exception(Exception(f"Error fetching Grafana alert rules: {e}"))
+            logger.error(f"Error fetching Grafana alert rules: {e}")
             return
 
         if not alert_rules:
