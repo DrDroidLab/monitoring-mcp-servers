@@ -662,6 +662,21 @@ class NewRelicSourceManager(SourceManager):
 
         return nrql_expression
 
+    def _prepare_apm_metric_nrql(self, nrql_expression: str, time_range: TimeRange) -> str:
+        """
+        Prepares the APM metric NRQL query string for execution by standardizing
+        the TIMESERIES and time range clauses based on the playbook context.
+        (Adapted from _prepare_widget_nrql)
+
+        Args:
+            nrql_expression: The original NRQL query from the APM metric asset.
+            time_range: The TimeRange object specifying the desired start and end times.
+
+        Returns:
+            The modified NRQL query string ready for execution.
+        """
+        return self._prepare_widget_nrql(nrql_expression, time_range) # Reuse existing logic for now
+
     # Refactored _parse_nrql_response
     def _parse_nrql_response(self, response: dict, widget_title: str) -> list[TimeseriesResult.LabeledMetricTimeseries]:
         """Parses the NRQL response and extracts timeseries data, handling COMPARE WITH and facets."""
@@ -829,6 +844,103 @@ class NewRelicSourceManager(SourceManager):
             logger.warning(f"Widget '{widget_title}': Failed to parse any timeseries data from the response.")
 
         return all_labeled_metric_timeseries
+    
+    def _parse_apm_metric_response(self, response: dict, metric_name: str, unit: str) -> list[TimeseriesResult.LabeledMetricTimeseries]:
+        """Parses the NRQL response for an APM metric and extracts timeseries data."""
+        labeled_metric_timeseries_list = []
+        if not response:
+            logger.warning(f"No data returned for APM metric '{metric_name}'")
+            return labeled_metric_timeseries_list
+
+        # APM metric responses typically have 'results' or sometimes 'facets' in rawResponse
+        direct_results = response.get('results', [])
+        facet_results = response.get('rawResponse', {}).get('facets', [])
+
+        results_to_process = []
+        is_faceted = False
+        if facet_results:
+            results_to_process = facet_results
+            is_faceted = True
+        elif direct_results:
+            results_to_process = [{'timeSeries': direct_results, 'name': 'default'}]
+        else:
+            logger.warning(f"No 'results' or 'facets' found in response for APM metric '{metric_name}'")
+            return labeled_metric_timeseries_list
+
+        # Process each series (facet or 'default')
+        for series_data in results_to_process:
+            metric_datapoints = []
+            series_name = series_data.get('name', 'default')
+
+            timeseries_data = series_data.get('timeSeries', [])
+            # Handle edge cases where series_data might be the list or a single point
+            if not timeseries_data and isinstance(series_data, list):
+                timeseries_data = series_data
+            elif not timeseries_data and 'beginTimeSeconds' in series_data:
+                timeseries_data = [series_data]
+
+            for ts in timeseries_data:
+                try:
+                    utc_timestamp = ts.get('beginTimeSeconds')
+                    if utc_timestamp is None: continue
+                    utc_datetime = datetime.utcfromtimestamp(utc_timestamp).replace(tzinfo=pytz.UTC)
+
+                    val = None
+                    potential_keys = ['result', 'score', 'count', 'average', 'sum', 'min', 'max', 'median'] # Common aggregates
+
+                    for p_key in potential_keys:
+                       if p_key in ts and isinstance(ts[p_key], dict) and 'score' in ts[p_key] and isinstance(ts[p_key]['score'], (int, float)):
+                            val = float(ts[p_key]['score'])
+                            break
+                       elif p_key in ts and isinstance(ts[p_key], (int, float)):
+                            val = float(ts[p_key])
+                            break
+
+                    # Fallback: iterate through all numeric values if specific keys not found
+                    if val is None:
+                        for k, v in ts.items():
+                            if isinstance(v, (int, float)) and k not in ['beginTimeSeconds', 'endTimeSeconds', 'facet']:
+                                val = float(v)
+                                break
+
+                    if val is None:
+                        logger.warning(
+                            f"Could not extract numeric value from datapoint {ts} for APM metric '{metric_name}', series '{series_name}'")
+                        continue
+
+                    datapoint = TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                        timestamp=int(utc_datetime.timestamp() * 1000),
+                        value=DoubleValue(value=val))
+                    metric_datapoints.append(datapoint)
+
+                except (ValueError, TypeError, KeyError, AttributeError) as e:
+                    logger.warning(
+                        f"Error processing datapoint {ts} for APM metric '{metric_name}', series '{series_name}': {str(e)}")
+                    continue
+
+            # Create LabeledMetricTimeseries if datapoints found
+            if metric_datapoints:
+                metric_label_values = [
+                    LabelValuePair(name=StringValue(value='apm_metric_name'), value=StringValue(value=metric_name)),
+                    LabelValuePair(name=StringValue(value='offset_seconds'), value=StringValue(value='0'))
+                ]
+                if is_faceted and series_name != 'default':
+                    metric_label_values.append(
+                        LabelValuePair(name=StringValue(value='facet'), value=StringValue(value=series_name))
+                    )
+
+                labeled_metric_timeseries_list.append(
+                    TimeseriesResult.LabeledMetricTimeseries(
+                        metric_label_values=metric_label_values,
+                        unit=StringValue(value=unit),
+                        datapoints=metric_datapoints
+                    )
+                )
+            else:
+                 logger.warning(f"No valid datapoints found for series '{series_name}' in APM metric '{metric_name}'")
+
+
+        return labeled_metric_timeseries_list
 
     def execute_fetch_dashboard_widgets(self, time_range: TimeRange, nr_task: NewRelic,
                                         nr_connector: ConnectorProto):
