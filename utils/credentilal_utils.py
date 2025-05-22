@@ -738,7 +738,23 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
             key_type=SourceKeyType.SENTRY_ORG_SLUG,
             key=StringValue(value=credential_yaml['org_slug'])
         ))
-
+    
+    elif c_type == 'NEW_RELIC':
+        if 'api_key' not in credential_yaml or 'app_id' not in credential_yaml or 'api_domain' not in credential_yaml:
+            raise Exception(f'Api key, app id or api domain not found in credential yaml for new relic source in connector: {connector_name}')
+        c_source = Source.NEW_RELIC
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.NEWRELIC_API_KEY,
+            key=StringValue(value=credential_yaml['api_key'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.NEWRELIC_APP_ID,
+            key=StringValue(value=credential_yaml['app_id'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.NEWRELIC_API_DOMAIN,
+            key=StringValue(value=credential_yaml['api_domain'])
+        ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     

@@ -21,7 +21,8 @@ from utils.credentilal_utils import generate_credentials_dict
 from utils.string_utils import is_partial_match
 from utils.playbooks_client import PrototypeClient
 from utils.time_utils import calculate_timeseries_bucket_size
-from utils.proto_utils import dict_to_proto
+from utils.proto_utils import dict_to_proto, proto_to_dict
+from utils.static_mappings import NEWRELIC_APM_QUERIES
 
 logger = logging.getLogger(__name__)
 
@@ -514,10 +515,11 @@ class NewRelicSourceManager(SourceManager):
             list[dict]:
         """Finds a dashboard by name and returns its filtered widgets."""
         prototype_client = PrototypeClient()
-        assets: AccountConnectorAssets = prototype_client.get_asset_model_values(
-            nr_connector,
+        assets: AccountConnectorAssets = prototype_client.get_connector_assets(
+            "NEW_RELIC",
+            nr_connector.id.value,
             SourceModelType.NEW_RELIC_ENTITY_DASHBOARD,
-            AccountConnectorAssetsModelFilters()
+            proto_to_dict(AccountConnectorAssetsModelFilters())
         )
 
         if not assets:
@@ -979,10 +981,11 @@ class NewRelicSourceManager(SourceManager):
                 list[dict]:
         """Finds V2 dashboards/widgets using the exact filtering logic from V1."""
         prototype_client = PrototypeClient()
-        assets_data: AccountConnectorAssets = prototype_client.get_asset_model_values(
-            nr_connector,
+        assets_data: AccountConnectorAssets = prototype_client.get_connector_assets(
+            "NEW_RELIC",
+            nr_connector.id.value,
             SourceModelType.NEW_RELIC_ENTITY_DASHBOARD_V2, # Fetch V2 model type
-            AccountConnectorAssetsModelFilters() # Use empty filter
+            proto_to_dict(AccountConnectorAssetsModelFilters())
         )
 
         # Check if the primary list or the nested assets are missing/empty
@@ -1258,20 +1261,19 @@ class NewRelicSourceManager(SourceManager):
 
             # 1. Get the specific application asset
             prototype_client = PrototypeClient()
-            assets_list = prototype_client.get_asset_model_values(
-                nr_connector,
+            assets: AccountConnectorAssets = prototype_client.get_connector_assets(
+                "NEW_RELIC",
+                nr_connector.id.value,
                 SourceModelType.NEW_RELIC_ENTITY_APPLICATION,
-                AccountConnectorAssetsModelFilters() # Filter by GUID
+                proto_to_dict(AccountConnectorAssetsModelFilters())
             )
 
-            if not assets_list:
+            if not assets:
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
                                           text=TextResult(output=StringValue(
                                               value=f"Application asset with GUID '{application_name}' not found")),
                                           source=self.source)
 
-            # Assuming the filter returns at most one asset for a specific GUID
-            assets: AccountConnectorAssets = dict_to_proto(assets_list, AccountConnectorAssets)
             application_asset = None
             for newrelic_asset in assets.new_relic.assets:
                 if newrelic_asset.type == SourceModelType.NEW_RELIC_ENTITY_APPLICATION and \

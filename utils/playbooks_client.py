@@ -3,7 +3,7 @@ import requests
 from requests.exceptions import RequestException
 from protos.base_pb2 import SourceModelType
 from protos.assets.asset_pb2 import AccountConnectorAssets
-from utils.proto_utils import proto_to_dict
+from utils.proto_utils import dict_to_proto
 from agent.settings import DRD_CLOUD_API_TOKEN, DRD_CLOUD_API_HOST
 
 
@@ -79,4 +79,4 @@ class PrototypeClient:
         """
         Post-process the assets to ensure they are in the correct format.
         """
-        return proto_to_dict(assets['assets'][0], AccountConnectorAssets)
+        return dict_to_proto(assets['assets'][0], AccountConnectorAssets)

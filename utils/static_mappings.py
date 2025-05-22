@@ -545,3 +545,14 @@ GCM_SERVICE_DASHBOARD_QUERIES = {
             "99": "fetch cloud_run_revision | metric 'run.googleapis.com/container/max_request_concurrencies' | align delta(1m) | every 1m | group_by [resource.service_name], [value_max_request_concurrencies_percentile: percentile(value.max_request_concurrencies, 99)]",
         },
     }
+
+NEWRELIC_APM_QUERIES = {
+    "Web transactions time": "SELECT sum(apm.service.overview.web * 1000) FROM Metric WHERE (entity.guid = {}) FACET `segmentName` LIMIT MAX TIMESERIES",
+    "Apdex score": "SELECT apdex(apm.service.apdex) as 'App server' , apdex(apm.service.apdex.user) as 'End user' FROM Metric WHERE (entity.guid = {}) LIMIT MAX TIMESERIES",
+    "Error rate": "SELECT sum(apm.service.error.count['count']) / count(apm.service.transaction.duration) AS 'Web errors' FROM Metric WHERE (entity.guid = {}) AND (transactionType = 'Web') LIMIT MAX TIMESERIES",
+    "Error User Impact": "SELECT uniqueCount(newrelic.error.group.userImpact) as 'Total' FROM Metric WHERE (entity.guid = {}) AND ((`error.expected` != true AND metricName = 'newrelic.error.group.userImpact')) LIMIT MAX TIMESERIES",
+    "Throughput": "SELECT rate(count(apm.service.transaction.duration), 1 minute) as 'Web throughput' FROM Metric WHERE (entity.guid = {}) AND (transactionType = 'Web') LIMIT MAX TIMESERIES ",
+    "Logs": "SELECT count(apm.service.logging.lines) as Metric FROM Metric WHERE (entity.guid = {}) FACET `severity` LIMIT MAX TIMESERIES ",
+    "Non-Web Transactions": "SELECT sum(apm.service.overview.other * 1000) FROM Metric WHERE (entity.guid = {}) FACET `segmentName` LIMIT MAX TIMESERIES",
+    "Average APM service transaction time (Non-Web)": "SELECT average(convert(apm.service.transaction.duration, unit, 'ms')) AS 'Response time' FROM Metric WHERE (entity.guid = {}) AND (transactionType = 'Other') LIMIT MAX TIMESERIES"
+}

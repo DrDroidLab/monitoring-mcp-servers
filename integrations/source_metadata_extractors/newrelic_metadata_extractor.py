@@ -2,7 +2,7 @@ from integrations.source_metadata_extractor import SourceMetadataExtractor
 from integrations.source_api_processors.new_relic_graph_ql_processor import NewRelicGraphQlConnector
 from protos.base_pb2 import Source, SourceModelType
 from utils.logging_utils import log_function_call
-
+from utils.static_mappings import NEWRELIC_APM_QUERIES
 
 class NewrelicSourceMetadataExtractor(SourceMetadataExtractor):
 
@@ -167,11 +167,21 @@ class NewrelicSourceMetadataExtractor(SourceMetadataExtractor):
         model_data = {}
         for entity in entities:
             entity_guid = entity['guid']
+            entity['apm_summary'] = []
+            for metric_name, query in NEWRELIC_APM_QUERIES.items():
+                formatted_query = query.replace('{}', f"'{entity_guid}'")
+                apm_metric = {
+                    'name': metric_name,
+                    'unit': '',
+                    'query': formatted_query
+                }
+                entity['apm_summary'].append(apm_metric)
+            
             model_data[entity_guid] = entity
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
 
-    def extract_dashboard_entity_v2(self, save_to_db=False):
+    def extract_dashboard_entity_v2(self):
         model_type = SourceModelType.NEW_RELIC_ENTITY_DASHBOARD_V2  
         cursor = 'null'
         types = ['DASHBOARD']
