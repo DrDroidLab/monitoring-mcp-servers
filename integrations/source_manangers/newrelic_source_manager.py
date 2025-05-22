@@ -21,6 +21,7 @@ from utils.credentilal_utils import generate_credentials_dict
 from utils.string_utils import is_partial_match
 from utils.playbooks_client import PrototypeClient
 from utils.time_utils import calculate_timeseries_bucket_size
+from utils.proto_utils import dict_to_proto
 
 logger = logging.getLogger(__name__)
 
@@ -1242,3 +1243,159 @@ class NewRelicSourceManager(SourceManager):
             )
 
         return processed_series_list
+    
+    def execute_entity_application_apm_metric_execution(self, time_range: TimeRange, nr_task: NewRelic,
+                                                        nr_connector: ConnectorProto):
+        try:
+            if not nr_connector:
+                raise Exception("Task execution Failed:: No New Relic source found")
+
+            task = nr_task.entity_application_apm_metric_execution
+            application_name = task.application_entity_name.value
+            timeseries_offsets = list(task.timeseries_offsets) # Ensure it's a list
+            filter_metric_names_str = task.apm_metric_names.value if task.HasField('apm_metric_names') else ''
+            filter_metric_names = [name.strip().lower() for name in filter_metric_names_str.split(',') if name.strip()]
+
+            # 1. Get the specific application asset
+            prototype_client = PrototypeClient()
+            assets_list = prototype_client.get_asset_model_values(
+                nr_connector,
+                SourceModelType.NEW_RELIC_ENTITY_APPLICATION,
+                AccountConnectorAssetsModelFilters() # Filter by GUID
+            )
+
+            if not assets_list:
+                return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                          text=TextResult(output=StringValue(
+                                              value=f"Application asset with GUID '{application_name}' not found")),
+                                          source=self.source)
+
+            # Assuming the filter returns at most one asset for a specific GUID
+            assets: AccountConnectorAssets = dict_to_proto(assets_list, AccountConnectorAssets)
+            application_asset = None
+            for newrelic_asset in assets.new_relic.assets:
+                if newrelic_asset.type == SourceModelType.NEW_RELIC_ENTITY_APPLICATION and \
+                   newrelic_asset.new_relic_entity_application.application_name.value == application_name:
+                    application_asset = newrelic_asset.new_relic_entity_application
+                    break
+
+            if not application_asset:
+                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                           text=TextResult(output=StringValue(
+                                               value=f"Application asset with GUID '{application_name}' not found within returned data")),
+                                           source=self.source)
+
+            # 2. Filter APM metrics if requested
+            all_apm_metrics = list(application_asset.apm_metrics)
+            if not all_apm_metrics:
+                return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                          text=TextResult(output=StringValue(
+                                              value=f"No APM metrics defined for application with GUID '{application_name}'")),
+                                          source=self.source)
+
+            metrics_to_process = []
+            if filter_metric_names:
+                for metric in all_apm_metrics:
+                    if metric.metric_name.value.lower() in filter_metric_names:
+                        metrics_to_process.append(metric)
+                if not metrics_to_process:
+                     return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                           text=TextResult(output=StringValue(
+                                               value=f"No APM metrics matching names {filter_metric_names_str} found for application with GUID '{application_entity_guid}'")),
+                                           source=self.source)
+            else:
+                metrics_to_process = all_apm_metrics # Process all if no filter
+
+            # 3. Process each APM metric
+            task_results = []
+            nr_gql_processor = self.get_connector_processor(nr_connector)
+
+            for apm_metric in metrics_to_process:
+                try:
+                    metric_name = apm_metric.metric_name.value
+                    unit = apm_metric.metric_unit.value
+                    base_nrql_expression = apm_metric.metric_nrql_expression.value
+
+                    if not base_nrql_expression:
+                         logger.warning(f"Skipping APM metric '{metric_name}' for application '{application_name}' as it has no NRQL query.")
+                         continue
+
+                    all_labeled_metric_timeseries = [] # Collect base and offset series
+                    prepared_nrql = self._prepare_apm_metric_nrql(base_nrql_expression, time_range)
+
+                    print(
+                        "Playbook Task Downstream Request: Type -> {}, Account -> {}, App Name -> {}, Metric -> {}, NRQL -> {}".format(
+                            "NewRelicAPM", nr_connector.account_id.value, application_name, metric_name, prepared_nrql), flush=True)
+
+                    response = nr_gql_processor.execute_nrql_query(prepared_nrql)
+                    base_timeseries = self._parse_apm_metric_response(response, metric_name, unit) # Already has offset 0 label
+                    all_labeled_metric_timeseries.extend(base_timeseries)
+
+                    for offset in timeseries_offsets:
+                        if offset == 0: continue # Skip 0, already processed
+
+                        adjusted_start_time = time_range.time_geq - offset
+                        adjusted_end_time = time_range.time_lt - offset
+                        adjusted_time_range = TimeRange(time_geq=adjusted_start_time, time_lt=adjusted_end_time)
+
+                        offset_nrql = self._prepare_apm_metric_nrql(base_nrql_expression, adjusted_time_range)
+
+                        print(
+                            "Playbook Task Downstream Request: Type -> {}, Account -> {}, App GUID -> {}, Metric -> {}, NRQL -> {}, Offset -> {}".format(
+                                "NewRelicAPM", nr_connector.account_id.value, application_name, metric_name, offset_nrql, offset), flush=True)
+
+                        offset_response = nr_gql_processor.execute_nrql_query(offset_nrql)
+                        offset_timeseries = self._parse_apm_metric_response(offset_response, metric_name, unit)
+
+                        # Create new LabeledMetricTimeseries objects with updated labels for the offset
+                        for series in offset_timeseries:
+                            updated_labels = [
+                                LabelValuePair(name=StringValue(value='apm_metric_name'), value=StringValue(value=metric_name)),
+                                LabelValuePair(name=StringValue(value='offset_seconds'), value=StringValue(value=str(offset)))
+                            ]
+                            # Preserve facet label if present
+                            facet_label = None
+                            for label in series.metric_label_values:
+                                if label.name.value == 'facet':
+                                    facet_label = label
+                                    break
+                            if facet_label:
+                                updated_labels.append(facet_label)
+
+                            # Create a new LabeledMetricTimeseries with updated labels
+                            new_labeled_metric_timeseries = TimeseriesResult.LabeledMetricTimeseries(
+                                metric_label_values=updated_labels,
+                                unit=series.unit,  # Reuse unit from original series
+                                datapoints=series.datapoints # Reuse datapoints from original series
+                            )
+                            all_labeled_metric_timeseries.append(new_labeled_metric_timeseries)
+
+                    if all_labeled_metric_timeseries:
+                         # Use the base prepared NRQL for the expression field for consistency
+                        timeseries_result = TimeseriesResult(metric_expression=StringValue(value=prepared_nrql),
+                                                             metric_name=StringValue(value=metric_name),
+                                                             labeled_metric_timeseries=all_labeled_metric_timeseries)
+                        task_result = PlaybookTaskResult(type=PlaybookTaskResultType.TIMESERIES,
+                                                         timeseries=timeseries_result, source=self.source)
+                        task_results.append(task_result)
+                    else:
+                        logger.warning(f"No timeseries data could be parsed for APM metric '{metric_name}'.")
+
+                except Exception as e:
+                    logger.error(f"Error processing APM metric '{apm_metric.metric_name.value}' for application '{application_name}': {str(e)}", exc_info=True)
+                    continue
+
+            # Check if any results were generated
+            if not task_results:
+                filter_msg = f" matching names '{filter_metric_names_str}'" if filter_metric_names_str else ""
+                logger.warning(f"No data retrieved for any APM metrics{filter_msg} in application '{application_name}'.")
+                return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
+                                          text=TextResult(output=StringValue(
+                                              value=f"No data found for the specified APM metrics{filter_msg} in application '{application_name}'. Check metric configurations and time range.")),
+                                          source=self.source)
+
+            return task_results # Return list of results
+
+        except Exception as e:
+            logger.error(f"General Error executing Fetch APM Metrics task for app {task.application_entity_name.value}: {str(e)}", exc_info=True)
+            raise Exception(f"Error while executing New Relic Fetch APM Metrics task: {e}")
