@@ -1301,7 +1301,7 @@ class NewRelicSourceManager(SourceManager):
                 if not metrics_to_process:
                      return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT,
                                            text=TextResult(output=StringValue(
-                                               value=f"No APM metrics matching names {filter_metric_names_str} found for application with GUID '{application_entity_guid}'")),
+                                               value=f"No APM metrics matching names {filter_metric_names_str} found for application '{application_name}'")),
                                            source=self.source)
             else:
                 metrics_to_process = all_apm_metrics # Process all if no filter
