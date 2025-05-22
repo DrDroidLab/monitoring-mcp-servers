@@ -868,6 +868,7 @@ class SignozSourceManager(SourceManager):
         try:
             prototype_client = PrototypeClient()
             assets_response = prototype_client.get_connector_assets(
+                "SIGNOZ",
                 signoz_connector.id.value,
                 SourceModelType.SIGNOZ_DASHBOARD,
                 AccountConnectorAssetsModelFilters(),  # Pass filters if possible later
