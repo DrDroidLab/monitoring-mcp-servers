@@ -14,8 +14,8 @@ from protos.playbooks.playbook_commons_pb2 import TimeseriesResult, LabelValuePa
     PlaybookTaskResultType, TableResult, TextResult, ApiResponseResult
 from protos.playbooks.source_task_definitions.cloudwatch_task_pb2 import Cloudwatch
 from protos.ui_definition_pb2 import FormField, FormFieldType
-from protos.assets.cloudwatch_asset_pb2 import CloudwatchDashboardAssetModel, CloudwatchDashboardAssetOptions
-from protos.assets.asset_pb2 import AccountConnectorAssetsModelFilters
+from protos.assets.cloudwatch_asset_pb2 import CloudwatchDashboardAssetModel, CloudwatchDashboardAssetOptions, CloudwatchAssetModel
+from protos.assets.asset_pb2 import AccountConnectorAssetsModelFilters, AccountConnectorAssets
 from integrations.source_manager import SourceManager
 from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import proto_to_dict, dict_to_proto
@@ -711,7 +711,7 @@ class CloudwatchSourceManager(SourceManager):
             )
             # Use PrototypeClient to fetch the Dashboard Asset
             client = PrototypeClient()
-            assets_result = client.get_connector_assets(
+            assets_result: AccountConnectorAssets = client.get_connector_assets(
                 connector_type="CLOUDWATCH",
                 connector_id=cloudwatch_connector.id.value,
                 asset_type=SourceModelType.CLOUDWATCH_DASHBOARD,
@@ -722,10 +722,8 @@ class CloudwatchSourceManager(SourceManager):
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                     value=f"Could not find dashboard asset information for '{dashboard_name}'. Please ensure metadata extraction ran successfully.")))
 
-            dashboard_asset = assets_result['assets'][0]["cloudwatch"]["assets"][0]
-            print(f"Dashboard asset gugugu: {dashboard_asset}")
-            dashboard_data = dict_to_proto(dashboard_asset.get('cloudwatch_dashboard', {}), CloudwatchDashboardAssetModel)
-            print(f"Dashboard data gugugu: {dashboard_data}")
+            dashboard_asset_model: CloudwatchAssetModel = assets_result.cloudwatch.assets[0]
+            dashboard_data: CloudwatchDashboardAssetModel = dashboard_asset_model.cloudwatch_dashboard
 
             # 2. Iterate through widgets and fetch metrics, creating individual results
             task_results = []

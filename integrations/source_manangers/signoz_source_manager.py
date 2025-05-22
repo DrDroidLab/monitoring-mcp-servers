@@ -14,6 +14,7 @@ from integrations.source_api_processors.signoz_api_processor import SignozApiPro
 from integrations.source_manager import SourceManager
 from protos.assets.asset_pb2 import (
     AccountConnectorAssetsModelFilters,
+    AccountConnectorAssets,
 )
 from protos.assets.signoz_asset_pb2 import (
     SignozDashboardModel,
@@ -867,19 +868,17 @@ class SignozSourceManager(SourceManager):
         """Finds a specific dashboard asset by name."""
         try:
             prototype_client = PrototypeClient()
-            assets_response = prototype_client.get_connector_assets(
+            assets:AccountConnectorAssets = prototype_client.get_connector_assets(
                 "SIGNOZ",
                 signoz_connector.id.value,
                 SourceModelType.SIGNOZ_DASHBOARD,
-                AccountConnectorAssetsModelFilters(),  # Pass filters if possible later
+                proto_to_dict(AccountConnectorAssetsModelFilters()),  # Pass filters if possible later
             )
-            assets_response = assets_response["assets"][0]["cloudwatch"]["assets"][0]
-            assets_response = dict_to_proto(assets_response, SignozDashboardModel)
-            if not assets_response or not assets_response.signoz or not assets_response.signoz.assets:
+            if not assets or not assets.signoz or not assets.signoz.assets:
                 logger.warning(f"No Signoz dashboard assets found for connector {signoz_connector.id.value}")
                 return None
 
-            for asset in assets_response[0].signoz.assets:
+            for asset in assets.signoz.assets:
                 if (
                     asset.type == SourceModelType.SIGNOZ_DASHBOARD
                     and asset.HasField("signoz_dashboard")

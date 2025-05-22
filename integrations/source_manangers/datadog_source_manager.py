@@ -392,11 +392,11 @@ class DatadogSourceManager(SourceManager):
             if dashboard_entity is None:
                 # Get all dashboard entities
                 prototype_client = PrototypeClient()
-                assets = prototype_client.get_connector_assets(
+                assets: AccountConnectorAssets = prototype_client.get_connector_assets(
                     "DATADOG",
                     datadog_connector.id.value,
                     SourceModelType.DATADOG_DASHBOARD,
-                    AccountConnectorAssetsModelFilters()
+                    proto_to_dict(AccountConnectorAssetsModelFilters())
                 )
 
                 if not assets:
@@ -405,8 +405,6 @@ class DatadogSourceManager(SourceManager):
                                              value=f"No dashboard assets found for the account")),
                                              source=self.source)]
 
-                assets_response = assets_response["assets"][0]["datadog"]["assets"][0]
-                assets_response = dict_to_proto(assets_response, DatadogDashboardModel)
                 dd_assets: [DatadogDashboardModel] = assets.datadog.assets
                 all_dashboard_asset: [DatadogDashboardModel] = [dd_asset.datadog_dashboard for dd_asset in dd_assets if
                                                                dd_asset.type == SourceModelType.DATADOG_DASHBOARD]
@@ -890,11 +888,11 @@ class DatadogSourceManager(SourceManager):
             
             # Fetch dashboard assets once
             prototype_client = PrototypeClient()
-            assets = prototype_client.get_connector_assets(
+            assets: AccountConnectorAssets = prototype_client.get_connector_assets(
                 "DATADOG",
                 datadog_connector.id.value,
                 SourceModelType.DATADOG_DASHBOARD,
-                AccountConnectorAssetsModelFilters()
+                proto_to_dict(AccountConnectorAssetsModelFilters())
             )
                 
             if not assets:
@@ -903,7 +901,6 @@ class DatadogSourceManager(SourceManager):
                     text=TextResult(output=StringValue(value="No dashboard assets found for the account")),
                     source=self.source)
                     
-            assets = assets[0]
             dd_assets: [DatadogDashboardModel] = assets.datadog.assets
             all_dashboard_asset: [DatadogDashboardModel] = [dd_asset.datadog_dashboard for dd_asset in dd_assets if 
                                                             dd_asset.type == SourceModelType.DATADOG_DASHBOARD]
@@ -943,19 +940,18 @@ class DatadogSourceManager(SourceManager):
                 "DATADOG",
                 dd_connector.id.value,
                 SourceModelType.DATADOG_SERVICE,
-                AccountConnectorAssetsModelFilters()
+                proto_to_dict(AccountConnectorAssetsModelFilters())
             )
             
             if not assets:
                 logger.warning(f"DatadogSourceManager.filter_using_assets:: No assets "
                                f"found for account: {dd_connector.account_id.value}, connector: {dd_connector.id.value}")
                 return "[]"
-                
-            assets = assets[0]
+
             dd_assets: [DatadogServiceAssetModel] = assets.datadog.assets
             all_service_asset: [DatadogServiceAssetModel] = [dd_asset.datadog_service for dd_asset in dd_assets if
                                                            dd_asset.type == SourceModelType.DATADOG_SERVICE]
-  
+
             matching_metrics = []
             # Iterate through each service asset
             for service_asset in all_service_asset:

@@ -2,6 +2,8 @@ from typing import Dict, Any
 import requests
 from requests.exceptions import RequestException
 from protos.base_pb2 import SourceModelType
+from protos.assets.asset_pb2 import AccountConnectorAssets
+from utils.proto_utils import proto_to_dict
 from agent.settings import DRD_CLOUD_API_TOKEN, DRD_CLOUD_API_HOST
 
 
@@ -66,9 +68,15 @@ class PrototypeClient:
                 headers=self._get_headers()
             )
             response.raise_for_status()
-            return response.json()
+            return self.post_process_assets(response.json())
 
         except RequestException as e:
             raise Exception(f"Failed to get connector assets: {str(e)}") from e
         except Exception as e:
             raise Exception(f"Failed to get connector assets: {str(e)}") from e
+    
+    def post_process_assets(self, assets: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Post-process the assets to ensure they are in the correct format.
+        """
+        return proto_to_dict(assets['assets'][0], AccountConnectorAssets)
