@@ -128,14 +128,14 @@ class NewrelicSourceMetadataExtractor(SourceMetadataExtractor):
             else:
                 break
         dashboard_entity_guid = [entity['guid'] for entity in entities]
-        dashboard_entity_search = self.__gql_processor.get_all_dashboard_entities(dashboard_entity_guid)
-        if not dashboard_entity_search or len(dashboard_entity_search) == 0:
-            return
-
         model_data = {}
-        for entity in dashboard_entity_search:
-            entity_id = entity['guid']
-            model_data[entity_id] = entity
+        for i in range(0, len(dashboard_entity_guid), 25):
+            dashboard_entity_search = self.__gql_processor.get_all_dashboard_entities(dashboard_entity_guid[i:i + 25])
+            if not dashboard_entity_search or len(dashboard_entity_search) == 0:
+                continue
+            for entity in dashboard_entity_search:
+                entity_id = entity['guid']
+                model_data[entity_id] = entity
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
 
