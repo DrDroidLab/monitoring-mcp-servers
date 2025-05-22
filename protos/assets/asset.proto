@@ -27,6 +27,7 @@ import "protos/assets/jenkins_asset.proto";
 import "protos/assets/signoz_asset.proto";
 import "protos/assets/posthog_asset.proto";
 import "protos/assets/sql_database_asset.proto";
+import "protos/assets/mongodb_asset.proto";
 
 
 message AccountConnectorAssets {
@@ -52,6 +53,7 @@ message AccountConnectorAssets {
     JiraAssets jira_cloud = 19;
     ArgoCDAssets argocd = 20;
     JenkinsAssets jenkins = 21;
+    MongoDBAssets mongodb = 22;
     PosthogAssets posthog = 23;
     SqlAssets sql = 24;
     SignozAssets signoz = 25;
@@ -92,6 +94,10 @@ message AccountConnectorAssetsModelFilters {
     AzureResourceAssetOptions azure_resource_model_filters = 30;
     GrafanaDashboardAssetOptions grafana_dashboard_model_filters = 31;
     JenkinsAppsAssetOptions jenkins_apps_model_filters = 32;
+    MongoDBDatabaseAssetOptions mongodb_database_model_filters = 33;
+    MongoDBCollectionAssetOptions mongodb_collection_model_filters = 34;
+    PosthogPropertyAssetOptions posthog_property_model_filters = 35;
+    SqlTableAssetOptions sql_table_model_filters = 36;
     EcsClusterAssetOptions ecs_cluster_model_filters = 39;
     EcsTaskAssetOptions ecs_task_model_filters = 37;
     EcsServiceAssetOptions ecs_service_model_filters = 38;
