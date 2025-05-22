@@ -26,6 +26,7 @@ import "protos/assets/argocd_asset.proto";
 import "protos/assets/jenkins_asset.proto";
 import "protos/assets/signoz_asset.proto";
 import "protos/assets/posthog_asset.proto";
+import "protos/assets/sql_database_asset.proto";
 
 
 message AccountConnectorAssets {
@@ -52,6 +53,7 @@ message AccountConnectorAssets {
     ArgoCDAssets argocd = 20;
     JenkinsAssets jenkins = 21;
     PosthogAssets posthog = 23;
+    SqlAssets sql = 24;
     SignozAssets signoz = 25;
   }
 }

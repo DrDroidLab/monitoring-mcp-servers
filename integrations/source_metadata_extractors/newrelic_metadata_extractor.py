@@ -170,3 +170,40 @@ class NewrelicSourceMetadataExtractor(SourceMetadataExtractor):
             model_data[entity_guid] = entity
         if len(model_data) > 0:
             self.create_or_update_model_metadata(model_type, model_data)
+
+    def extract_dashboard_entity_v2(self, save_to_db=False):
+        model_type = SourceModelType.NEW_RELIC_ENTITY_DASHBOARD_V2  
+        cursor = 'null'
+        types = ['DASHBOARD']
+        entity_search = self.__gql_processor.get_all_entities(cursor, types)
+        if 'results' not in entity_search:
+            return
+        results = entity_search['results']
+        entities = []
+        if 'entities' in results:
+            entities.extend(results['entities'])
+        if 'nextCursor' in results:
+            cursor = results['nextCursor']
+        while cursor and cursor != 'null':
+            entity_search = self.__gql_processor.get_all_entities(cursor, types)
+            if 'results' in entity_search:
+                results = entity_search['results']
+                if 'entities' in results:
+                    entities.extend(results['entities'])
+                if 'nextCursor' in results:
+                    cursor = results['nextCursor']
+                else:
+                    cursor = None
+            else:
+                break
+        dashboard_entity_guid = [entity['guid'] for entity in entities]
+        model_data = {}
+        for i in range(0, len(dashboard_entity_guid), 25):
+            dashboard_entity_search = self.__gql_processor.get_all_dashboard_entities(dashboard_entity_guid[i:i + 25])
+            if not dashboard_entity_search or len(dashboard_entity_search) == 0:
+                continue
+            for entity in dashboard_entity_search:
+                entity_id = entity['guid']
+                model_data[entity_id] = entity
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)

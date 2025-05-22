@@ -556,6 +556,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     NEW_RELIC_ENTITY_DASHBOARD: _SourceModelType.ValueType  # 4
     NEW_RELIC_ENTITY_APPLICATION: _SourceModelType.ValueType  # 5
     NEW_RELIC_NRQL: _SourceModelType.ValueType  # 6
+    NEW_RELIC_ENTITY_DASHBOARD_V2: _SourceModelType.ValueType  # 7
     DATADOG_MONITOR: _SourceModelType.ValueType  # 101
     """Datadog Models"""
     DATADOG_DASHBOARD: _SourceModelType.ValueType  # 102
@@ -569,6 +570,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     DATADOG_SERVICE: _SourceModelType.ValueType  # 110
     DATADOG_METRIC: _SourceModelType.ValueType  # 111
     DATADOG_QUERY: _SourceModelType.ValueType  # 112
+    DATADOG_APM: _SourceModelType.ValueType  # 113
     CLOUDWATCH_METRIC: _SourceModelType.ValueType  # 201
     """Cloudwatch Models"""
     CLOUDWATCH_LOG_GROUP: _SourceModelType.ValueType  # 202
@@ -584,6 +586,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     GRAFANA_ALERT_RULE: _SourceModelType.ValueType  # 305
     CLICKHOUSE_DATABASE: _SourceModelType.ValueType  # 401
     """Clickhouse Models"""
+    CLICKHOUSE_TABLE: _SourceModelType.ValueType  # 402
     SLACK_CHANNEL: _SourceModelType.ValueType  # 501
     """Slack Models"""
     MARKDOWN: _SourceModelType.ValueType  # 601
@@ -591,10 +594,12 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     IFRAME: _SourceModelType.ValueType  # 602
     POSTGRES_QUERY: _SourceModelType.ValueType  # 701
     """Postgres Models"""
+    POSTGRES_TABLE: _SourceModelType.ValueType  # 702
     EKS_CLUSTER: _SourceModelType.ValueType  # 801
     """EKS Models"""
     SQL_DATABASE_CONNECTION_RAW_QUERY: _SourceModelType.ValueType  # 901
     """Sql Database Connection Models"""
+    SQL_DATABASE_TABLE: _SourceModelType.ValueType  # 902
     AZURE_WORKSPACE: _SourceModelType.ValueType  # 1001
     """Azure Models"""
     AZURE_RESOURCE: _SourceModelType.ValueType  # 1002
@@ -671,6 +676,7 @@ NEW_RELIC_ENTITY: SourceModelType.ValueType  # 3
 NEW_RELIC_ENTITY_DASHBOARD: SourceModelType.ValueType  # 4
 NEW_RELIC_ENTITY_APPLICATION: SourceModelType.ValueType  # 5
 NEW_RELIC_NRQL: SourceModelType.ValueType  # 6
+NEW_RELIC_ENTITY_DASHBOARD_V2: SourceModelType.ValueType  # 7
 DATADOG_MONITOR: SourceModelType.ValueType  # 101
 """Datadog Models"""
 DATADOG_DASHBOARD: SourceModelType.ValueType  # 102
@@ -684,6 +690,7 @@ DATADOG_LIVE_INTEGRATION_CONFLUENT: SourceModelType.ValueType  # 109
 DATADOG_SERVICE: SourceModelType.ValueType  # 110
 DATADOG_METRIC: SourceModelType.ValueType  # 111
 DATADOG_QUERY: SourceModelType.ValueType  # 112
+DATADOG_APM: SourceModelType.ValueType  # 113
 CLOUDWATCH_METRIC: SourceModelType.ValueType  # 201
 """Cloudwatch Models"""
 CLOUDWATCH_LOG_GROUP: SourceModelType.ValueType  # 202
@@ -699,6 +706,7 @@ GRAFANA_PROMETHEUS_DATASOURCE: SourceModelType.ValueType  # 304
 GRAFANA_ALERT_RULE: SourceModelType.ValueType  # 305
 CLICKHOUSE_DATABASE: SourceModelType.ValueType  # 401
 """Clickhouse Models"""
+CLICKHOUSE_TABLE: SourceModelType.ValueType  # 402
 SLACK_CHANNEL: SourceModelType.ValueType  # 501
 """Slack Models"""
 MARKDOWN: SourceModelType.ValueType  # 601
@@ -706,10 +714,12 @@ MARKDOWN: SourceModelType.ValueType  # 601
 IFRAME: SourceModelType.ValueType  # 602
 POSTGRES_QUERY: SourceModelType.ValueType  # 701
 """Postgres Models"""
+POSTGRES_TABLE: SourceModelType.ValueType  # 702
 EKS_CLUSTER: SourceModelType.ValueType  # 801
 """EKS Models"""
 SQL_DATABASE_CONNECTION_RAW_QUERY: SourceModelType.ValueType  # 901
 """Sql Database Connection Models"""
+SQL_DATABASE_TABLE: SourceModelType.ValueType  # 902
 AZURE_WORKSPACE: SourceModelType.ValueType  # 1001
 """Azure Models"""
 AZURE_RESOURCE: SourceModelType.ValueType  # 1002

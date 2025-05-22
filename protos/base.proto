@@ -355,6 +355,7 @@ enum SourceModelType {
   NEW_RELIC_ENTITY_DASHBOARD = 4;
   NEW_RELIC_ENTITY_APPLICATION = 5;
   NEW_RELIC_NRQL = 6;
+  NEW_RELIC_ENTITY_DASHBOARD_V2 = 7;
 
   //Datadog Models
   DATADOG_MONITOR = 101;
@@ -369,6 +370,7 @@ enum SourceModelType {
   DATADOG_SERVICE = 110;
   DATADOG_METRIC = 111;
   DATADOG_QUERY = 112;
+  DATADOG_APM = 113;
 
   //Cloudwatch Models
   CLOUDWATCH_METRIC = 201;
@@ -387,6 +389,7 @@ enum SourceModelType {
 
   //Clickhouse Models
   CLICKHOUSE_DATABASE = 401;
+  CLICKHOUSE_TABLE = 402;
 
   //Slack Models
   SLACK_CHANNEL = 501;
@@ -397,12 +400,14 @@ enum SourceModelType {
 
   //Postgres Models
   POSTGRES_QUERY = 701;
+  POSTGRES_TABLE = 702;
 
   //EKS Models
   EKS_CLUSTER = 801;
 
   //Sql Database Connection Models
   SQL_DATABASE_CONNECTION_RAW_QUERY = 901;
+  SQL_DATABASE_TABLE = 902;
 
   //Azure Models
   AZURE_WORKSPACE = 1001;
