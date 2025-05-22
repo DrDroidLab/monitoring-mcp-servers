@@ -717,7 +717,7 @@ class CloudwatchSourceManager(SourceManager):
                 asset_type=SourceModelType.CLOUDWATCH_DASHBOARD,
                 filters=proto_to_dict(dashboard_asset_filter)
             )
-            if not assets_result or not assets_result.get('assets'):
+            if not assets_result:
                 logger.error(f"Dashboard asset not found or empty for name: {dashboard_name}")
                 return PlaybookTaskResult(type=PlaybookTaskResultType.TEXT, text=TextResult(output=StringValue(
                     value=f"Could not find dashboard asset information for '{dashboard_name}'. Please ensure metadata extraction ran successfully.")))
