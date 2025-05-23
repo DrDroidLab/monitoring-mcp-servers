@@ -35,7 +35,7 @@ from integrations.source_manangers.jira_source_manager import JiraSourceManager
 from integrations.source_manangers.posthog_source_manager import PosthogSourceManager
 from integrations.source_manangers.signoz_source_manager import SignozSourceManager
 from integrations.source_manangers.sentry_source_manager import SentrySourceManager
-
+from integrations.source_manangers.github_actions_source_manager import GithubActionsSourceManager
 from protos.base_pb2 import Source
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult
@@ -119,3 +119,4 @@ source_facade.register(Source.JENKINS, JenkinsSourceManager())
 source_facade.register(Source.POSTHOG, PosthogSourceManager())
 source_facade.register(Source.SIGNOZ, SignozSourceManager())
 source_facade.register(Source.SENTRY, SentrySourceManager())
+source_facade.register(Source.GITHUB_ACTIONS, GithubActionsSourceManager())

@@ -26,10 +26,10 @@ class GithubSourceMetadataExtractor(SourceMetadataExtractor):
                 return model_data
             for repo in repos:
                 model_data[repo['name']] = repo
-                self.create_or_update_model_metadata(model_type, repo['name'], repo)
         except Exception as e:
             logger.error(f'Error extracting Github repositories: {e}')
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
 
     @log_function_call
     def extract_members(self):
@@ -42,7 +42,7 @@ class GithubSourceMetadataExtractor(SourceMetadataExtractor):
                 return model_data
             for member in members:
                 model_data[member['login']] = member
-                self.create_or_update_model_metadata(model_type, member['login'], member)
         except Exception as e:
             logger.error(f'Error extracting Github members: {e}')
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)

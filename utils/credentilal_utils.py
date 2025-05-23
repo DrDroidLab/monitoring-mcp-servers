@@ -302,6 +302,11 @@ def generate_credentials_dict(connector_type, connector_keys):
             if conn_key.key_type == SourceKeyType.SENTRY_ORG_SLUG:
                 credentials_dict['org_slug'] = conn_key.key.value
 
+    elif connector_type == Source.GITHUB_ACTIONS:
+        for conn_key in connector_keys:
+            if conn_key.key_type == SourceKeyType.GITHUB_ACTIONS_TOKEN:
+                credentials_dict['api_key'] = conn_key.key.value
+
     else:
         return None
     return credentials_dict
@@ -794,6 +799,22 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.GITHUB_ACTIONS_TOKEN,
             key=StringValue(value=credential_yaml['token'])
+        ))
+    elif c_type == 'DATADOG':
+        if 'dd_api_key' not in credential_yaml or 'dd_app_key' not in credential_yaml or 'dd_api_domain' not in credential_yaml:
+            raise Exception(f'Api key, app key or api domain not found in credential yaml for datadog source in connector: {connector_name}')
+        c_source = Source.DATADOG
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.DATADOG_API_KEY, 
+            key=StringValue(value=credential_yaml['dd_api_key'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.DATADOG_APP_KEY,
+            key=StringValue(value=credential_yaml['dd_app_key'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.DATADOG_API_DOMAIN,
+            key=StringValue(value=credential_yaml['dd_api_domain'])
         ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')

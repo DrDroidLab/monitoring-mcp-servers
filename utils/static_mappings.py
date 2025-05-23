@@ -398,6 +398,13 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.GITHUB_ACTIONS_TOKEN,
         ]
     ],
+    Source.JIRA_CLOUD: [
+        [
+            SourceKeyType.JIRA_CLOUD_API_KEY,
+            SourceKeyType.JIRA_EMAIL,
+            SourceKeyType.JIRA_DOMAIN,
+        ]
+    ],
 }
 integrations_connector_type_display_name_map = {
     Source.SLACK: 'SLACK',
