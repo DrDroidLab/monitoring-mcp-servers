@@ -35,9 +35,9 @@ def promql_get_metric_optional_label_variable_pairs(promql):
 
 class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, grafana_host, grafana_api_key, ssl_verify="true", account_id=None, connector_id=None):
+    def __init__(self, request_id, connector_name, grafana_host, grafana_api_key, ssl_verify="true"):
         self.__grafana_api_processor = GrafanaApiProcessor(grafana_host, grafana_api_key, ssl_verify)
-        super().__init__(account_id, connector_id, Source.GRAFANA)
+        super().__init__(request_id, connector_name, Source.GRAFANA)
 
     @log_function_call
     def extract_data_source(self, save_to_db=False):

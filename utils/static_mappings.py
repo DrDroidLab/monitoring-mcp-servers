@@ -303,6 +303,10 @@ integrations_connector_type_connector_keys_map = {
         [
             SourceKeyType.GCM_PROJECT_ID,
             SourceKeyType.GCM_PRIVATE_KEY,
+        ],
+        [
+            SourceKeyType.GCM_PROJECT_ID,
+            SourceKeyType.GCM_SERVICE_ACCOUNT_JSON,
         ]
     ],
     Source.SMTP: [
@@ -387,6 +391,11 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.POSTHOG_API_KEY,
             SourceKeyType.POSTHOG_APP_HOST,
             SourceKeyType.POSTHOG_PROJECT_ID,
+        ]
+    ],
+    Source.GITHUB_ACTIONS: [
+        [
+            SourceKeyType.GITHUB_ACTIONS_TOKEN,
         ]
     ],
 }

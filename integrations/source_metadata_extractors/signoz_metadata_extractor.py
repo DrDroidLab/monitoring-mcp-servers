@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 class SignozSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, signoz_api_url, signoz_api_token=None, account_id=None, connector_id=None):
+    def __init__(self, request_id: str, connector_name: str, signoz_api_url, signoz_api_token=None):
         self.__signoz_api_processor = SignozApiProcessor(signoz_api_url, signoz_api_token)
-        super().__init__(account_id, connector_id, Source.SIGNOZ)
+        super().__init__(request_id, connector_name, Source.SIGNOZ)
 
     @log_function_call
     def extract_dashboards(self, save_to_db=False):

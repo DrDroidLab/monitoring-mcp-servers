@@ -18,7 +18,7 @@ class PostgresSourceMetadataExtractor(SourceMetadataExtractor):
     - etc.
     """
 
-    def __init__(self, host, port, user, password, database="postgres", account_id=None, connector_id=None):
+    def __init__(self, request_id, connector_name, host, port, user, password, database="postgres"):
         self.pg_processor = PostgresDBProcessor(
             host=host,
             port=port,
@@ -27,7 +27,7 @@ class PostgresSourceMetadataExtractor(SourceMetadataExtractor):
             database=database
         )
         self.default_database = database
-        super().__init__(account_id, connector_id, Source.POSTGRES)
+        super().__init__(request_id, connector_name, Source.POSTGRES)
 
     @log_function_call
     def extract_tables(self, database=None, save_to_db=False):

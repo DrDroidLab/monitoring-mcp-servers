@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 class PosthogSourceMetadataExtractor(SourceMetadataExtractor):
 
-    def __init__(self, posthog_host, personal_api_key, project_id, account_id=None, connector_id=None):
+    def __init__(self, request_id: str, connector_name: str, posthog_host, personal_api_key, project_id):
         self.posthog_processor = PosthogApiProcessor(posthog_host, personal_api_key, project_id)
         self.project_id = project_id
-        super().__init__(account_id, connector_id, Source.POSTHOG)
+        super().__init__(request_id, connector_name, Source.POSTHOG)
 
     @log_function_call
     def extract_property_definitions(self, save_to_db=False):

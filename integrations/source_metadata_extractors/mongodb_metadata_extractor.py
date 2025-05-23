@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 class MongoDBSourceMetadataExtractor(SourceMetadataExtractor):
     """MongoDB metadata extractor that extracts databases and collections."""
 
-    def __init__(self, connection_string, account_id=None, connector_id=None):
+    def __init__(self, request_id, connector_name, connection_string):
         """Initialize MongoDB metadata extractor with connection string."""
         self.mongodb_processor = MongoDBProcessor(connection_string)
-        super().__init__(account_id, connector_id, Source.MONGODB)
+        super().__init__(request_id, connector_name, Source.MONGODB)
 
     @log_function_call
     def extract_mongodb_data(self, save_to_db=False):

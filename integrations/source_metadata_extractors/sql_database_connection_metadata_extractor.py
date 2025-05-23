@@ -20,9 +20,9 @@ class SqlDatabaseConnectionMetadataExtractor(SourceMetadataExtractor):
     - SQL Server: mssql+pyodbc://username:password@host:port/database?driver=ODBC+Driver+17+for+SQL+Server
     """
 
-    def __init__(self, connection_string, account_id=None, connector_id=None):
+    def __init__(self, request_id: str, connector_name: str, connection_string: str):
         self.db_processor = DBConnectionStringProcessor(connection_string=connection_string)
-        super().__init__(account_id, connector_id, Source.SQL_DATABASE_CONNECTION)
+        super().__init__(request_id, connector_name, Source.SQL_DATABASE_CONNECTION)
 
     @log_function_call
     def extract_tables(self):

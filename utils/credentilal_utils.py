@@ -755,6 +755,46 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
             key_type=SourceKeyType.NEWRELIC_API_DOMAIN,
             key=StringValue(value=credential_yaml['api_domain'])
         ))
+    elif c_type == 'GCM':
+        if 'project_id' not in credential_yaml or 'service_account_json' not in credential_yaml:
+            raise Exception(f'Project id or service account json not found in credential yaml for gcm source in connector: {connector_name}')
+        c_source = Source.GCM
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GCM_PROJECT_ID,
+            key=StringValue(value=credential_yaml['project_id'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GCM_SERVICE_ACCOUNT_JSON,
+            key=StringValue(value=credential_yaml['service_account_json'])
+        ))
+    elif c_type == 'AZURE':
+        if 'client_id' not in credential_yaml or 'client_secret' not in credential_yaml or 'tenant_id' not in credential_yaml or 'subscription_id' not in credential_yaml:
+            raise Exception(f'Client id, client secret, tenant id or subscription id not found in credential yaml for azure source in connector: {connector_name}')
+        c_source = Source.AZURE
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.AZURE_CLIENT_ID,
+            key=StringValue(value=credential_yaml['client_id'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.AZURE_CLIENT_SECRET,
+            key=StringValue(value=credential_yaml['client_secret'])
+        ))  
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.AZURE_TENANT_ID,
+            key=StringValue(value=credential_yaml['tenant_id'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.AZURE_SUBSCRIPTION_ID,
+            key=StringValue(value=credential_yaml['subscription_id'])
+        ))
+    elif c_type == 'GITHUB_ACTIONS':
+        if 'token' not in credential_yaml:
+            raise Exception(f'Token not found in credential yaml for github actions source in connector: {connector_name}')
+        c_source = Source.GITHUB_ACTIONS
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.GITHUB_ACTIONS_TOKEN,
+            key=StringValue(value=credential_yaml['token'])
+        ))
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     
