@@ -12,12 +12,14 @@ message Datadog {
     google.protobuf.StringValue metric_family = 3;
     google.protobuf.StringValue metric = 4;
     repeated uint32 timeseries_offsets = 5;
+    google.protobuf.UInt64Value interval = 6;
   }
 
   message QueryMetricExecutionTask {
     repeated string queries = 1;
     google.protobuf.StringValue formula = 2;
     repeated uint32 timeseries_offsets = 3;
+    uint32 interval = 4;
   }
 
   message QueryDashboardWidgetMetricTask {

@@ -9,7 +9,8 @@ from integrations.source_manangers.bash_source_manager import BashSourceManager
 from integrations.source_manangers.big_query_source_manager import BigQuerySourceManager
 from integrations.source_manangers.clickhouse_source_manager import ClickhouseSourceManager
 from integrations.source_manangers.cloudwatch_source_manager import CloudwatchSourceManager
-from integrations.source_manangers.datadog_oauth_soruce_manager import DatadogSourceManager
+from integrations.source_manangers.datadog_source_manager import DatadogSourceManager
+from integrations.source_manangers.datadog_oauth_soruce_manager import DatadogSourceManager as DatadogOauthSourceManager
 from integrations.source_manangers.documentation_source_manager import DocumentationSourceManager
 from integrations.source_manangers.eks_source_manager import EksSourceManager
 from integrations.source_manangers.elastic_search_source_manager import ElasticSearchSourceManager
@@ -85,6 +86,7 @@ source_facade = SourceFacade()
 source_facade.register(Source.CLOUDWATCH, CloudwatchSourceManager())
 source_facade.register(Source.EKS, EksSourceManager())
 source_facade.register(Source.DATADOG, DatadogSourceManager())
+source_facade.register(Source.DATADOG_OAUTH, DatadogOauthSourceManager())
 source_facade.register(Source.NEW_RELIC, NewRelicSourceManager())
 source_facade.register(Source.GRAFANA, GrafanaSourceManager())
 source_facade.register(Source.GRAFANA_MIMIR, MimirSourceManager())
