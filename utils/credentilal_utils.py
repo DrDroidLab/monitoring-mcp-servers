@@ -169,6 +169,8 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['protocol'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.ELASTIC_SEARCH_HOST:
                 credentials_dict['host'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.KIBANA_HOST:
+                credentials_dict['kibana_host'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.ELASTIC_SEARCH_PORT:
                 credentials_dict['port'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.ELASTIC_SEARCH_API_KEY_ID:
