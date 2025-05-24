@@ -40,7 +40,7 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         super().__init__(request_id, connector_name, Source.GRAFANA)
 
     @log_function_call
-    def extract_data_source(self, save_to_db=False):
+    def extract_data_source(self):
         model_type = SourceModelType.GRAFANA_DATASOURCE
         try:
             datasources = self.__grafana_api_processor.fetch_data_sources()
@@ -53,12 +53,12 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         for ds in datasources:
             datasource_id = ds['uid']
             model_data[datasource_id] = ds
-            if save_to_db:
-                self.create_or_update_model_metadata(model_type, datasource_id, ds)
-        return model_data
+        
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data) 
 
     @log_function_call
-    def extract_prometheus_data_source(self, save_to_db=False):
+    def extract_prometheus_data_source(self):
         model_type = SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE
         try:
             all_data_sources = self.__grafana_api_processor.fetch_data_sources()
@@ -72,12 +72,11 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
         for ds in all_promql_data_sources:
             datasource_id = ds['uid']
             model_data[datasource_id] = ds
-            if save_to_db:
-                self.create_or_update_model_metadata(model_type, datasource_id, ds)
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data) 
 
     @log_function_call
-    def extract_dashboards(self, save_to_db=False):
+    def extract_dashboards(self):
         model_type = SourceModelType.GRAFANA_DASHBOARD
         try:
             all_dashboards = self.__grafana_api_processor.fetch_dashboards()
@@ -101,12 +100,11 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
             if not dashboard_details:
                 continue
             model_data[uid] = dashboard_details
-            if save_to_db:
-                self.create_or_update_model_metadata(model_type, uid, dashboard_details)
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data) 
 
     @log_function_call
-    def extract_dashboard_target_metric_promql(self, save_to_db=False):
+    def extract_dashboard_target_metric_promql(self):
         model_type = SourceModelType.GRAFANA_TARGET_METRIC_PROMQL
         try:
             all_data_sources = self.__grafana_api_processor.fetch_data_sources()
@@ -227,9 +225,8 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                     if label_value_options:
                                                         model_data[model_uid][
                                                             'optional_label_options'] = label_value_options
-                                    if save_to_db:
-                                        self.create_or_update_model_metadata(model_type, model_uid,
-                                                                             model_data[model_uid])
+                            if len(model_data) > 0:
+                                self.create_or_update_model_metadata(model_type, model_data)
                 if 'dashboard' in dashboard_details and 'rows' in dashboard_details['dashboard']:
                     rows = dashboard_details['dashboard']['rows']
                     for r in rows:
@@ -324,9 +321,8 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                             if label_value_options:
                                                                 model_data[model_uid][
                                                                     'optional_label_options'] = label_value_options
-                                            if save_to_db:
-                                                self.create_or_update_model_metadata(model_type, model_uid,
-                                                                                     model_data[model_uid])
+                            if len(model_data) > 0:
+                                self.create_or_update_model_metadata(model_type, model_data)
                 if 'dashboard' in dashboard_details and 'panels' in dashboard_details['dashboard']:
                     panels = dashboard_details['dashboard']['panels']
                     for panel in panels:
@@ -421,15 +417,14 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                                                             if label_value_options:
                                                                 model_data[model_uid][
                                                                     'optional_label_options'] = label_value_options
-                                            if save_to_db:
-                                                self.create_or_update_model_metadata(model_type, model_uid,
-                                                                                     model_data[model_uid])
+                            if len(model_data) > 0:
+                                self.create_or_update_model_metadata(model_type, model_data)
             except Exception as e:
                 logger.error(f'Error extracting grafana target metric promql: {e}')
         return model_data
 
     @log_function_call
-    def extract_alert_rules(self, save_to_db=False):
+    def extract_alert_rules(self):
         model_type = SourceModelType.GRAFANA_ALERT_RULE
         try:
             alert_rules = self.__grafana_api_processor.fetch_alert_rules()
@@ -449,7 +444,5 @@ class GrafanaSourceMetadataExtractor(SourceMetadataExtractor):
                 'alert_rule_json': alert_rule
             }
 
-            if save_to_db:
-                self.create_or_update_model_metadata(model_type, alert_uid, model_data[alert_uid])
-
-        return model_data
+        if len(model_data) > 0:
+            self.create_or_update_model_metadata(model_type, model_data)
