@@ -811,3 +811,78 @@ class ElasticSearchApiProcessor(Processor):
         
         return query
     
+######################################################### FOR METADATA EXTRACTION #########################################################
+    def list_all_dashboards(self) -> List[Dict[str, Any]]:
+        """
+        List all dashboards with their basic information
+        Returns a list of dictionaries containing dashboard id, title, and description
+        """
+        url = f"https://{self.kibana_host}/api/saved_objects/_find"
+        params = {
+            "type": "dashboard",
+            "fields": ["title", "description"],
+            "per_page": 1000
+        }
+        
+        try:
+            response = requests.get(url, headers=self.kibana_headers, params=params)
+            response.raise_for_status()
+            
+            dashboards = []
+            for obj in response.json().get('saved_objects', []):
+                dashboard = {
+                    'id': obj.get('id'),
+                    'title': obj.get('attributes', {}).get('title'),
+                    'description': obj.get('attributes', {}).get('description', '')
+                }
+                if dashboard['id'] and dashboard['title']:
+                    dashboards.append(dashboard)
+            
+            return dashboards
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error listing dashboards: {str(e)}")
+            return []
+
+    def list_all_services(self) -> List[Dict[str, Any]]:
+        """
+        List all services from APM indices
+        Returns a list of dictionaries containing service name and document count
+        """
+        try:
+            client = self.get_connection()
+            result = client.search(
+                index="traces-apm-*",
+                body={
+                    "size": 0,
+                    "aggs": {
+                        "services": {
+                            "terms": {
+                                "field": "service.name",
+                                "size": 1000
+                            }
+                        }
+                    }
+                }
+            )
+            client.close()
+
+            # Convert response to dict
+            if hasattr(result, 'body'):
+                result = result.body
+            elif hasattr(result, 'meta'):
+                result = dict(result)
+
+            services = []
+            if 'aggregations' in result:
+                for bucket in result['aggregations']['services']['buckets']:
+                    services.append({
+                        'name': bucket['key'],
+                        'count': bucket['doc_count']
+                    })
+            
+            return services
+
+        except Exception as e:
+            logger.error(f"Error listing services: {str(e)}")
+            return []
