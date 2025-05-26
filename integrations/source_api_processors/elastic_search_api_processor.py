@@ -431,7 +431,7 @@ class ElasticSearchApiProcessor(Processor):
                             latency_p99 = bucket['latency_p99']['values']['99.0']
                             
                             # Calculate metrics for this interval
-                            interval_seconds = timedelta(interval).total_seconds()#pd.Timedelta(interval).total_seconds()
+                            interval_seconds = timedelta(interval).total_seconds()
                             metrics = {
                                 "timestamp": timestamp,
                                 "throughput": round(total_requests / interval_seconds, 2),  # requests per second
