@@ -834,7 +834,15 @@ class ElasticSearchSourceManager(SourceManager):
                         series_to_plot.append((label, per_interval))
                 else:
                     per_interval = aggs.get('per_interval', {}).get('buckets', [])
-                    series_to_plot.append(('all', per_interval))
+                    splits = widget.get('configuration', {}).get('splits', [])
+                    query = ''
+                    if splits:
+                        split = splits[0]
+                        params = split.get('params', {})
+                        filters = params.get('filters', [])
+                        if filters:
+                            query = filters[0].get('input', {}).get('query', '')
+                    series_to_plot.append((query, per_interval)) if query else series_to_plot.append(('all', per_interval))
 
                 for service_label, per_interval in series_to_plot:
                     datapoints = []
