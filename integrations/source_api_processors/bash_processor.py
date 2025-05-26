@@ -173,8 +173,27 @@ class BashProcessor(Processor):
                     sftp.put(script_file_path, remote_script_path)  # Upload script
                     sftp.chmod(remote_script_path, 0o755)  # Make script executable
                     stdin, stdout, stderr = client.exec_command(exec_command)
-                    # Wait for execution
-                    exit_status = stdout.channel.recv_exit_status()
+                    # Wait for execution with timeout
+                    timeout = 100  # seconds
+                    start_time = time.time()
+                    channel = stdout.channel
+
+                    while not channel.exit_status_ready():
+                        if time.time() - start_time > timeout:
+                            logger.error(
+                                "BashProcessor.execute_command:: Error: Command execution timed out after 100s.")
+                            raise TimeoutError(
+                                "BashProcessor.execute_command:: Error: Command execution timed out after 100s.")
+                        time.sleep(0.5)  # Avoid busy waiting
+                    exit_status = channel.recv_exit_status()
+                    # Check if the script executed successfully
+                    if exit_status != 0:
+                        error_output = stderr.read().decode().strip()
+                        logger.error(f"BashProcessor.execute_command:: Script failed with exit status {exit_status}. "
+                                     f"Error output:\n{error_output}")
+                        raise Exception(
+                            f"BashProcessor.execute_command:: Script failed with exit status {exit_status}. "
+                            f"Error output:\n{error_output}")
                     try:
                         with sftp.open(remote_output_path, "r") as file:
                             output = file.read().decode()
