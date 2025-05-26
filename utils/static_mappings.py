@@ -414,6 +414,12 @@ integrations_connector_type_connector_keys_map = {
             SourceKeyType.JIRA_DOMAIN,
         ]
     ],
+    Source.SENTRY: [
+        [
+            SourceKeyType.SENTRY_API_KEY,
+            SourceKeyType.SENTRY_ORG_SLUG
+        ]
+    ],
 }
 integrations_connector_type_display_name_map = {
     Source.SLACK: 'SLACK',
