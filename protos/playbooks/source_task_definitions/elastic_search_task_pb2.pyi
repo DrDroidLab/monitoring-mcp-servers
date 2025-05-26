@@ -34,6 +34,8 @@ class ElasticSearch(google.protobuf.message.Message):
         CAT_INDICES: ElasticSearch._TaskType.ValueType  # 4
         CAT_THREAD_POOL_SEARCH: ElasticSearch._TaskType.ValueType  # 5
         MONITORING_CLUSTER_STATS: ElasticSearch._TaskType.ValueType  # 6
+        GET_METRIC_FOR_SERVICE: ElasticSearch._TaskType.ValueType  # 7
+        GET_DASHBOARD: ElasticSearch._TaskType.ValueType  # 8
 
     class TaskType(_TaskType, metaclass=_TaskTypeEnumTypeWrapper): ...
     UNKNOWN: ElasticSearch.TaskType.ValueType  # 0
@@ -43,6 +45,8 @@ class ElasticSearch(google.protobuf.message.Message):
     CAT_INDICES: ElasticSearch.TaskType.ValueType  # 4
     CAT_THREAD_POOL_SEARCH: ElasticSearch.TaskType.ValueType  # 5
     MONITORING_CLUSTER_STATS: ElasticSearch.TaskType.ValueType  # 6
+    GET_METRIC_FOR_SERVICE: ElasticSearch.TaskType.ValueType  # 7
+    GET_DASHBOARD: ElasticSearch.TaskType.ValueType  # 8
 
     @typing_extensions.final
     class QueryLogs(google.protobuf.message.Message):
@@ -138,6 +142,40 @@ class ElasticSearch(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["interval", b"interval", "widget_name", b"widget_name"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["interval", b"interval", "widget_name", b"widget_name"]) -> None: ...
 
+    @typing_extensions.final
+    class GetMetricForService(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        SERVICE_NAME_FIELD_NUMBER: builtins.int
+        INTERVAL_FIELD_NUMBER: builtins.int
+        @property
+        def service_name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        @property
+        def interval(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        def __init__(
+            self,
+            *,
+            service_name: google.protobuf.wrappers_pb2.StringValue | None = ...,
+            interval: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["interval", b"interval", "service_name", b"service_name"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["interval", b"interval", "service_name", b"service_name"]) -> None: ...
+
+    @typing_extensions.final
+    class GetDashboard(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        DASHBOARD_NAME_FIELD_NUMBER: builtins.int
+        @property
+        def dashboard_name(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        def __init__(
+            self,
+            *,
+            dashboard_name: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["dashboard_name", b"dashboard_name"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["dashboard_name", b"dashboard_name"]) -> None: ...
+
     TYPE_FIELD_NUMBER: builtins.int
     QUERY_LOGS_FIELD_NUMBER: builtins.int
     CHECK_CLUSTER_HEALTH_FIELD_NUMBER: builtins.int
@@ -145,6 +183,8 @@ class ElasticSearch(google.protobuf.message.Message):
     CAT_INDICES_FIELD_NUMBER: builtins.int
     CAT_THREAD_POOL_SEARCH_FIELD_NUMBER: builtins.int
     MONITORING_CLUSTER_STATS_FIELD_NUMBER: builtins.int
+    GET_METRIC_FOR_SERVICE_FIELD_NUMBER: builtins.int
+    GET_DASHBOARD_FIELD_NUMBER: builtins.int
     type: global___ElasticSearch.TaskType.ValueType
     @property
     def query_logs(self) -> global___ElasticSearch.QueryLogs: ...
@@ -158,6 +198,10 @@ class ElasticSearch(google.protobuf.message.Message):
     def cat_thread_pool_search(self) -> global___ElasticSearch.CatThreadPoolSearch: ...
     @property
     def monitoring_cluster_stats(self) -> global___ElasticSearch.MonitoringClusterStats: ...
+    @property
+    def get_metric_for_service(self) -> global___ElasticSearch.GetMetricForService: ...
+    @property
+    def get_dashboard(self) -> global___ElasticSearch.GetDashboard: ...
     def __init__(
         self,
         *,
@@ -168,9 +212,11 @@ class ElasticSearch(google.protobuf.message.Message):
         cat_indices: global___ElasticSearch.CatIndices | None = ...,
         cat_thread_pool_search: global___ElasticSearch.CatThreadPoolSearch | None = ...,
         monitoring_cluster_stats: global___ElasticSearch.MonitoringClusterStats | None = ...,
+        get_metric_for_service: global___ElasticSearch.GetMetricForService | None = ...,
+        get_dashboard: global___ElasticSearch.GetDashboard | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["cat_indices", b"cat_indices", "cat_thread_pool_search", b"cat_thread_pool_search", "check_cluster_health", b"check_cluster_health", "monitoring_cluster_stats", b"monitoring_cluster_stats", "node_stats", b"node_stats", "query_logs", b"query_logs", "task", b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["cat_indices", b"cat_indices", "cat_thread_pool_search", b"cat_thread_pool_search", "check_cluster_health", b"check_cluster_health", "monitoring_cluster_stats", b"monitoring_cluster_stats", "node_stats", b"node_stats", "query_logs", b"query_logs", "task", b"task", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["query_logs", "check_cluster_health", "node_stats", "cat_indices", "cat_thread_pool_search", "monitoring_cluster_stats"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["cat_indices", b"cat_indices", "cat_thread_pool_search", b"cat_thread_pool_search", "check_cluster_health", b"check_cluster_health", "get_dashboard", b"get_dashboard", "get_metric_for_service", b"get_metric_for_service", "monitoring_cluster_stats", b"monitoring_cluster_stats", "node_stats", b"node_stats", "query_logs", b"query_logs", "task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cat_indices", b"cat_indices", "cat_thread_pool_search", b"cat_thread_pool_search", "check_cluster_health", b"check_cluster_health", "get_dashboard", b"get_dashboard", "get_metric_for_service", b"get_metric_for_service", "monitoring_cluster_stats", b"monitoring_cluster_stats", "node_stats", b"node_stats", "query_logs", b"query_logs", "task", b"task", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["query_logs", "check_cluster_health", "node_stats", "cat_indices", "cat_thread_pool_search", "monitoring_cluster_stats", "get_metric_for_service", "get_dashboard"] | None: ...
 
 global___ElasticSearch = ElasticSearch

@@ -1,4 +1,6 @@
 import json
+from datetime import datetime, timedelta
+import pytz
 from google.protobuf.wrappers_pb2 import StringValue, UInt64Value, Int64Value, DoubleValue
 
 from integrations.source_api_processors.elastic_search_api_processor import ElasticSearchApiProcessor
@@ -98,6 +100,38 @@ class ElasticSearchSourceManager(SourceManager):
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.TEXT_FT,
                               is_optional=True),
+                ]
+            },
+            ElasticSearchProto.TaskType.GET_METRIC_FOR_SERVICE: {
+                'executor': self.execute_get_metric_for_service,
+                'model_types': [SourceModelType.ELASTIC_SEARCH_SERVICES],
+                'result_type': PlaybookTaskResultType.LOGS,
+                'display_name': 'Get Elasticsearch Metrics for a Service',
+                'category': 'Logs',
+                'form_fields': [
+                    FormField(key_name=StringValue(value="service_name"),
+                              display_name=StringValue(value="Service Name"),
+                              description=StringValue(value="Enter Service Name"),
+                              data_type=LiteralType.STRING,
+                              form_field_type=FormFieldType.TEXT_FT),
+                    FormField(key_name=StringValue(value="interval"),
+                              display_name=StringValue(value="Interval (Ex. 5m, 1h, 1d)"),
+                              description=StringValue(value="Enter Interval"),
+                              data_type=LiteralType.STRING,
+                              form_field_type=FormFieldType.TEXT_FT),
+                ]
+            },
+            ElasticSearchProto.TaskType.GET_DASHBOARD: {
+                'executor': self.execute_get_dashboard,
+                'model_types': [SourceModelType.ELASTIC_SEARCH_DASHBOARDS],
+                'result_type': PlaybookTaskResultType.LOGS,
+                'display_name': 'Get Elasticsearch Dashboard',
+                'form_fields': [
+                    FormField(key_name=StringValue(value="dashboard_name"),
+                              display_name=StringValue(value="Dashboard Name"),
+                              description=StringValue(value="Enter Dashboard Name"),
+                              data_type=LiteralType.STRING,
+                              form_field_type=FormFieldType.TEXT_FT),
                 ]
             },
         }
@@ -558,3 +592,321 @@ class ElasticSearchSourceManager(SourceManager):
 
         except Exception as e:
             raise Exception(f"Error while fetching ElasticSearch monitoring cluster stats: {e}")
+        
+    ######################################################## APM TASKS ########################################################
+    def execute_get_metric_for_service(self, time_range: TimeRange, es_task: ElasticSearchProto,
+                                      es_connector: ConnectorProto):
+        try:
+            if not es_connector:
+                raise Exception("Task execution Failed:: No ElasticSearch source found")
+
+            service_name = es_task.get_metric_for_service.service_name.value
+            interval = es_task.get_metric_for_service.interval.value
+
+            if not service_name:
+                raise Exception("Task execution Failed:: No service name provided")
+
+            es_client = self.get_connector_processor(es_connector)
+
+            # Convert time range to datetime objects
+            start_time = datetime.fromtimestamp(time_range.time_geq, tz=pytz.UTC)
+            end_time = datetime.fromtimestamp(time_range.time_lt, tz=pytz.UTC)
+
+            # Get metrics from Elasticsearch
+            metrics_data = es_client.get_time_series_metrics(
+                service_name=service_name,
+                time_window="1h",  # This will be ignored since we're providing start/end times
+                start_time=start_time,
+                end_time=end_time,
+                interval=interval
+            )
+
+            if not metrics_data:
+                return [PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=f"No metrics data found for service: {service_name}")),
+                    source=self.source)]
+
+            final_result = []
+
+            # Process throughput metrics
+            throughput_datapoints = []
+            for metric in metrics_data:
+                timestamp = int(datetime.strptime(metric['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()) * 1000 # Convert to milliseconds, else frontend won't render properly
+                throughput_datapoints.append(
+                    TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                        timestamp=timestamp,
+                        value=DoubleValue(value=metric['throughput'])
+                    )
+                )
+
+            if throughput_datapoints:
+                throughput_timeseries = TimeseriesResult(
+                    metric_name=StringValue(value=f'Service Throughput - {service_name}'),
+                    metric_expression=StringValue(value=f'Throughput metrics for service: {service_name}'),
+                    labeled_metric_timeseries=[
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Throughput'))
+                            ],
+                            unit=StringValue(value='tps'),
+                            datapoints=throughput_datapoints
+                        )
+                    ]
+                )
+                final_result.append(PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TIMESERIES,
+                    source=self.source,
+                    timeseries=throughput_timeseries
+                ))
+
+            # Process error rate metrics
+            error_rate_datapoints = []
+            for metric in metrics_data:
+                timestamp = int(datetime.strptime(metric['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()) * 1000 # Convert to milliseconds, else frontend won't render properly
+                error_rate_datapoints.append(
+                    TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                        timestamp=timestamp,
+                        value=DoubleValue(value=metric['error_rate'])
+                    )
+                )
+
+            if error_rate_datapoints:
+                error_rate_timeseries = TimeseriesResult(
+                    metric_name=StringValue(value=f'Service Error Rate - {service_name}'),
+                    metric_expression=StringValue(value=f'Error rate metrics for service: {service_name}'),
+                    labeled_metric_timeseries=[
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Error Rate'))
+                            ],
+                            unit=StringValue(value='%'),
+                            datapoints=error_rate_datapoints
+                        )
+                    ]
+                )
+                final_result.append(PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TIMESERIES,
+                    source=self.source,
+                    timeseries=error_rate_timeseries
+                ))
+
+            # Process latency P95 metrics
+            latency_p95_datapoints = []
+            for metric in metrics_data:
+                timestamp = int(datetime.strptime(metric['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()) * 1000 # Convert to milliseconds, else frontend won't render properly
+                latency_p95_datapoints.append(
+                    TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                        timestamp=timestamp,
+                        value=DoubleValue(value=metric['latency_p95'])
+                    )
+                )
+
+            if latency_p95_datapoints:
+                latency_p95_timeseries = TimeseriesResult(
+                    metric_name=StringValue(value=f'Service Latency P95 - {service_name}'),
+                    metric_expression=StringValue(value=f'Latency P95 metrics for service: {service_name}'),
+                    labeled_metric_timeseries=[
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Latency P95'))
+                            ],
+                            unit=StringValue(value='ms'),
+                            datapoints=latency_p95_datapoints
+                        )
+                    ]
+                )
+                final_result.append(PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TIMESERIES,
+                    source=self.source,
+                    timeseries=latency_p95_timeseries
+                ))
+
+            # Process latency P99 metrics
+            latency_p99_datapoints = []
+            for metric in metrics_data:
+                timestamp = int(datetime.strptime(metric['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()) * 1000 # Convert to milliseconds, else frontend won't render properly
+                latency_p99_datapoints.append(
+                    TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                        timestamp=timestamp,
+                        value=DoubleValue(value=metric['latency_p99'])
+                    )
+                )
+
+            if latency_p99_datapoints:
+                latency_p99_timeseries = TimeseriesResult(
+                    metric_name=StringValue(value=f'Service Latency P99 - {service_name}'),
+                    metric_expression=StringValue(value=f'Latency P99 metrics for service: {service_name}'),
+                    labeled_metric_timeseries=[
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Latency P99'))
+                            ],
+                            unit=StringValue(value='ms'),
+                            datapoints=latency_p99_datapoints
+                        )
+                    ]
+                )
+                final_result.append(PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TIMESERIES,
+                    source=self.source,
+                    timeseries=latency_p99_timeseries
+                ))
+
+            # Process total requests metrics
+            total_requests_datapoints = []
+            for metric in metrics_data:
+                timestamp = int(datetime.strptime(metric['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()) * 1000 # Convert to milliseconds, else frontend won't render properly
+                total_requests_datapoints.append(
+                    TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                        timestamp=timestamp,
+                        value=DoubleValue(value=metric['total_requests'])
+                    )
+                )
+
+            if total_requests_datapoints:
+                total_requests_timeseries = TimeseriesResult(
+                    metric_name=StringValue(value=f'Service Total Requests - {service_name}'),
+                    metric_expression=StringValue(value=f'Total requests for service: {service_name}'),
+                    labeled_metric_timeseries=[
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='metric'), value=StringValue(value='Total Requests'))
+                            ],
+                            unit=StringValue(value='req'),
+                            datapoints=total_requests_datapoints
+                        )
+                    ]
+                )
+                final_result.append(PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TIMESERIES,
+                    source=self.source,
+                    timeseries=total_requests_timeseries
+                ))
+
+            return final_result
+
+        except Exception as e:
+            raise Exception(f"Error while fetching metrics for service {service_name}: {e}")
+
+    def execute_get_dashboard(self, time_range: TimeRange, es_task: ElasticSearchProto,
+                           es_connector: ConnectorProto):
+        try:
+            if not es_connector:
+                raise Exception("Task execution Failed:: No ElasticSearch source found")
+
+            get_dashboard = es_task.get_dashboard
+            dashboard_name = get_dashboard.dashboard_name.value
+            if not dashboard_name:
+                raise Exception("Task execution Failed:: No dashboard name provided")
+
+            es_client = self.get_connector_processor(es_connector)
+
+            # Get dashboard data
+            dashboard_data = es_client.get_dashboard_widget_data(dashboard_name, time_range)
+            if not dashboard_data or not dashboard_data[0].get('data'):
+                return [PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=f"No data returned from Elastic Search for dashboard: {dashboard_name}")),
+                    source=self.source
+                )]
+
+            # Process each widget based on its type
+            results = []
+            
+            for widget in dashboard_data:
+                yaxis = widget.get('configuration', {}).get('yaxis', [])
+                y_label = yaxis[0]['label'] if yaxis and 'label' in yaxis[0] else 'Value'
+                y_field = yaxis[0]['field'] if yaxis and 'field' in yaxis[0] else None
+                y_operation = yaxis[0]['operation'] if yaxis and 'operation' in yaxis[0] else None
+                y_percent = str(yaxis[0].get('percent', '50.0')) if yaxis and 'percent' in yaxis[0] else None
+
+                data = widget.get('data', {})
+                aggs = data.get('aggregations', {})
+                labeled_metric_timeseries = []
+
+                # Build a list of (service_label, per_interval_buckets) pairs
+                series_to_plot = []
+                if 'services' in aggs:
+                    for service_bucket in aggs['services'].get('buckets', []):
+                        label = service_bucket.get('key', 'unknown')
+                        per_interval = service_bucket.get('per_interval', {}).get('buckets', [])
+                        series_to_plot.append((label, per_interval))
+                else:
+                    per_interval = aggs.get('per_interval', {}).get('buckets', [])
+                    splits = widget.get('configuration', {}).get('splits', [])
+                    query = ''
+                    if splits:
+                        split = splits[0]
+                        params = split.get('params', {})
+                        filters = params.get('filters', [])
+                        if filters:
+                            query = filters[0].get('input', {}).get('query', '')
+                    series_to_plot.append((query, per_interval)) if query else series_to_plot.append(('all', per_interval))
+
+                for service_label, per_interval in series_to_plot:
+                    datapoints = []
+                    for interval in per_interval:
+                        timestamp = interval.get('key')
+                        metric = None
+                        if y_operation and y_field:
+                            metric_key = f"{y_operation}_{y_field.replace('.', '_')}"
+                            metric = interval.get(metric_key)
+                        if not metric:
+                            metric = interval.get('median_transaction_duration_us')
+                        value = None
+                        if metric and 'values' in metric:
+                            if y_operation in ('percentile', 'median'):
+                                if y_percent and y_percent in metric['values']:
+                                    value = metric['values'][y_percent]
+                                elif len(metric['values']) > 0:
+                                    value = next(iter(metric['values'].values()))
+                            else:
+                                value = next(iter(metric['values'].values())) if len(metric['values']) > 0 else None
+                        elif metric and 'value' in metric:
+                            value = metric['value']
+                        if value is not None and timestamp is not None:
+                            datapoints.append(
+                                TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                                    timestamp=timestamp,
+                                    value=DoubleValue(value=value)
+                                )
+                            )
+                    labeled_metric_timeseries.append(
+                        TimeseriesResult.LabeledMetricTimeseries(
+                            metric_label_values=[
+                                LabelValuePair(name=StringValue(value='service'), value=StringValue(value=service_label))
+                            ],
+                            unit=StringValue(value=self.get_unit(y_operation, y_field)),
+                            datapoints=datapoints
+                        )
+                    )
+
+                timeseries_result = TimeseriesResult(
+                    metric_name=StringValue(value=y_label),
+                    metric_expression=StringValue(value=y_field if y_field else y_label),
+                    labeled_metric_timeseries=labeled_metric_timeseries
+                )
+                results.append(
+                    PlaybookTaskResult(
+                        type=PlaybookTaskResultType.TIMESERIES,
+                        timeseries=timeseries_result,
+                        source=self.source
+                    )
+                )
+            return results
+
+        except Exception as e:
+            raise Exception(f"Error while executing ElasticSearch dashboard task: {e}")
+
+    def get_unit(self, y_operation, y_field):
+        if y_operation in ('median', 'percentile', 'avg', 'max', 'min'):
+            if 'duration' in (y_field or ''):
+                return 'ms'
+            if 'bytes' in (y_field or ''):
+                return 'bytes'
+        if y_operation == 'count':
+            return 'count'
+        if y_operation == 'sum':
+            return 'sum'
+        return ''

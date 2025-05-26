@@ -379,6 +379,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ELASTIC_SEARCH_PORT: _SourceKeyType.ValueType  # 66
     ELASTIC_SEARCH_API_KEY_ID: _SourceKeyType.ValueType  # 67
     ELASTIC_SEARCH_API_KEY: _SourceKeyType.ValueType  # 68
+    KIBANA_HOST: _SourceKeyType.ValueType  # 114
     GRAFANA_LOKI_PROTOCOL: _SourceKeyType.ValueType  # 69
     GRAFANA_LOKI_HOST: _SourceKeyType.ValueType  # 70
     GRAFANA_LOKI_PORT: _SourceKeyType.ValueType  # 71
@@ -497,6 +498,7 @@ ELASTIC_SEARCH_HOST: SourceKeyType.ValueType  # 65
 ELASTIC_SEARCH_PORT: SourceKeyType.ValueType  # 66
 ELASTIC_SEARCH_API_KEY_ID: SourceKeyType.ValueType  # 67
 ELASTIC_SEARCH_API_KEY: SourceKeyType.ValueType  # 68
+KIBANA_HOST: SourceKeyType.ValueType  # 114
 GRAFANA_LOKI_PROTOCOL: SourceKeyType.ValueType  # 69
 GRAFANA_LOKI_HOST: SourceKeyType.ValueType  # 70
 GRAFANA_LOKI_PORT: SourceKeyType.ValueType  # 71
@@ -616,6 +618,8 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """Pagerduty Models"""
     ELASTIC_SEARCH_INDEX: _SourceModelType.ValueType  # 1601
     """Elastic Search Models"""
+    ELASTIC_SEARCH_SERVICES: _SourceModelType.ValueType  # 1602
+    ELASTIC_SEARCH_DASHBOARDS: _SourceModelType.ValueType  # 1603
     GCM_METRIC: _SourceModelType.ValueType  # 1701
     """GCM Models"""
     GCM_DASHBOARD: _SourceModelType.ValueType  # 1702
@@ -736,6 +740,8 @@ PAGERDUTY_INCIDENT: SourceModelType.ValueType  # 1501
 """Pagerduty Models"""
 ELASTIC_SEARCH_INDEX: SourceModelType.ValueType  # 1601
 """Elastic Search Models"""
+ELASTIC_SEARCH_SERVICES: SourceModelType.ValueType  # 1602
+ELASTIC_SEARCH_DASHBOARDS: SourceModelType.ValueType  # 1603
 GCM_METRIC: SourceModelType.ValueType  # 1701
 """GCM Models"""
 GCM_DASHBOARD: SourceModelType.ValueType  # 1702

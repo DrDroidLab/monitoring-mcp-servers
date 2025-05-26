@@ -169,6 +169,8 @@ def generate_credentials_dict(connector_type, connector_keys):
                 credentials_dict['protocol'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.ELASTIC_SEARCH_HOST:
                 credentials_dict['host'] = conn_key.key.value
+            elif conn_key.key_type == SourceKeyType.KIBANA_HOST:
+                credentials_dict['kibana_host'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.ELASTIC_SEARCH_PORT:
                 credentials_dict['port'] = conn_key.key.value
             elif conn_key.key_type == SourceKeyType.ELASTIC_SEARCH_API_KEY_ID:
@@ -681,6 +683,10 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.ELASTIC_SEARCH_HOST,
             key=StringValue(value=credential_yaml['host'])
+        ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.KIBANA_HOST,
+            key=StringValue(value=credential_yaml['kibana_host'])
         ))
         c_keys.append(ConnectorKey(
             key_type=SourceKeyType.ELASTIC_SEARCH_API_KEY_ID,

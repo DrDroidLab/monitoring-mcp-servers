@@ -250,6 +250,15 @@ integrations_connector_type_connector_keys_map = {
         [
             SourceKeyType.ELASTIC_SEARCH_PROTOCOL,
             SourceKeyType.ELASTIC_SEARCH_HOST,
+            SourceKeyType.KIBANA_HOST,
+            SourceKeyType.ELASTIC_SEARCH_PORT,
+            SourceKeyType.ELASTIC_SEARCH_API_KEY_ID,
+            SourceKeyType.ELASTIC_SEARCH_API_KEY,
+            SourceKeyType.SSL_VERIFY,
+        ],
+        [
+            SourceKeyType.ELASTIC_SEARCH_PROTOCOL,
+            SourceKeyType.ELASTIC_SEARCH_HOST,
             SourceKeyType.ELASTIC_SEARCH_API_KEY_ID,
             SourceKeyType.ELASTIC_SEARCH_API_KEY,
         ],
