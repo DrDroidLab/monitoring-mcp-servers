@@ -23,6 +23,8 @@ message ElasticSearch {
     CAT_INDICES = 4;
     CAT_THREAD_POOL_SEARCH = 5;
     MONITORING_CLUSTER_STATS = 6;
+    GET_METRIC_FOR_SERVICE = 7;
+    GET_DASHBOARD = 8;
   }
 
   message ClusterHealth {
@@ -46,6 +48,15 @@ message ElasticSearch {
     google.protobuf.StringValue interval = 2;
   }
 
+  message GetMetricForService {
+    google.protobuf.StringValue service_name = 1;
+    google.protobuf.StringValue interval = 2;
+  }
+
+  message GetDashboard {
+    google.protobuf.StringValue dashboard_name = 1;
+  }
+
   TaskType type = 1;
   oneof task {
     QueryLogs query_logs = 2;
@@ -54,5 +65,7 @@ message ElasticSearch {
     CatIndices cat_indices = 5;
     CatThreadPoolSearch cat_thread_pool_search = 6;
     MonitoringClusterStats monitoring_cluster_stats = 7;
+    GetMetricForService get_metric_for_service = 8;
+    GetDashboard get_dashboard = 9;
   }
 }

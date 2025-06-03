@@ -44,6 +44,7 @@ class PromQl(google.protobuf.message.Message):
         PROMQL_EXPRESSION_FIELD_NUMBER: builtins.int
         TIMESERIES_OFFSETS_FIELD_NUMBER: builtins.int
         INTERVAL_FIELD_NUMBER: builtins.int
+        QUERY_TYPE_FIELD_NUMBER: builtins.int
         @property
         def datasource_uid(self) -> google.protobuf.wrappers_pb2.StringValue: ...
         @property
@@ -52,6 +53,8 @@ class PromQl(google.protobuf.message.Message):
         def timeseries_offsets(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
         @property
         def interval(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
+        @property
+        def query_type(self) -> google.protobuf.wrappers_pb2.StringValue: ...
         def __init__(
             self,
             *,
@@ -59,9 +62,10 @@ class PromQl(google.protobuf.message.Message):
             promql_expression: google.protobuf.wrappers_pb2.StringValue | None = ...,
             timeseries_offsets: collections.abc.Iterable[builtins.int] | None = ...,
             interval: google.protobuf.wrappers_pb2.UInt64Value | None = ...,
+            query_type: google.protobuf.wrappers_pb2.StringValue | None = ...,
         ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["datasource_uid", b"datasource_uid", "interval", b"interval", "promql_expression", b"promql_expression"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["datasource_uid", b"datasource_uid", "interval", b"interval", "promql_expression", b"promql_expression", "timeseries_offsets", b"timeseries_offsets"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["datasource_uid", b"datasource_uid", "interval", b"interval", "promql_expression", b"promql_expression", "query_type", b"query_type"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["datasource_uid", b"datasource_uid", "interval", b"interval", "promql_expression", b"promql_expression", "query_type", b"query_type", "timeseries_offsets", b"timeseries_offsets"]) -> None: ...
 
     TYPE_FIELD_NUMBER: builtins.int
     PROMQL_METRIC_EXECUTION_FIELD_NUMBER: builtins.int

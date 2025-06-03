@@ -224,6 +224,8 @@ class _SourceEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTyp
     DRD_ALERT_WEBHOOK: _Source.ValueType  # 66
     ROLLBAR: _Source.ValueType  # 67
     LAMBDA: _Source.ValueType  # 68
+    POSTHOG: _Source.ValueType  # 70
+    SIGNOZ: _Source.ValueType  # 72
 
 class Source(_Source, metaclass=_SourceEnumTypeWrapper): ...
 
@@ -295,6 +297,8 @@ ARGOCD: Source.ValueType  # 65
 DRD_ALERT_WEBHOOK: Source.ValueType  # 66
 ROLLBAR: Source.ValueType  # 67
 LAMBDA: Source.ValueType  # 68
+POSTHOG: Source.ValueType  # 70
+SIGNOZ: Source.ValueType  # 72
 global___Source = Source
 
 class _SourceKeyType:
@@ -375,6 +379,7 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ELASTIC_SEARCH_PORT: _SourceKeyType.ValueType  # 66
     ELASTIC_SEARCH_API_KEY_ID: _SourceKeyType.ValueType  # 67
     ELASTIC_SEARCH_API_KEY: _SourceKeyType.ValueType  # 68
+    KIBANA_HOST: _SourceKeyType.ValueType  # 114
     GRAFANA_LOKI_PROTOCOL: _SourceKeyType.ValueType  # 69
     GRAFANA_LOKI_HOST: _SourceKeyType.ValueType  # 70
     GRAFANA_LOKI_PORT: _SourceKeyType.ValueType  # 71
@@ -413,6 +418,11 @@ class _SourceKeyTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._
     ARGOCD_SERVER: _SourceKeyType.ValueType  # 106
     ARGOCD_TOKEN: _SourceKeyType.ValueType  # 107
     ROLLBAR_ACCESS_TOKEN: _SourceKeyType.ValueType  # 108
+    POSTHOG_API_KEY: _SourceKeyType.ValueType  # 121
+    POSTHOG_APP_HOST: _SourceKeyType.ValueType  # 122
+    POSTHOG_PROJECT_ID: _SourceKeyType.ValueType  # 123
+    SIGNOZ_API_URL: _SourceKeyType.ValueType  # 136
+    SIGNOZ_API_TOKEN: _SourceKeyType.ValueType  # 137
 
 class SourceKeyType(_SourceKeyType, metaclass=_SourceKeyTypeEnumTypeWrapper): ...
 
@@ -488,6 +498,7 @@ ELASTIC_SEARCH_HOST: SourceKeyType.ValueType  # 65
 ELASTIC_SEARCH_PORT: SourceKeyType.ValueType  # 66
 ELASTIC_SEARCH_API_KEY_ID: SourceKeyType.ValueType  # 67
 ELASTIC_SEARCH_API_KEY: SourceKeyType.ValueType  # 68
+KIBANA_HOST: SourceKeyType.ValueType  # 114
 GRAFANA_LOKI_PROTOCOL: SourceKeyType.ValueType  # 69
 GRAFANA_LOKI_HOST: SourceKeyType.ValueType  # 70
 GRAFANA_LOKI_PORT: SourceKeyType.ValueType  # 71
@@ -526,6 +537,11 @@ CUSTOM_STRATEGIES_ACCOUNT_ID: SourceKeyType.ValueType  # 104
 ARGOCD_SERVER: SourceKeyType.ValueType  # 106
 ARGOCD_TOKEN: SourceKeyType.ValueType  # 107
 ROLLBAR_ACCESS_TOKEN: SourceKeyType.ValueType  # 108
+POSTHOG_API_KEY: SourceKeyType.ValueType  # 121
+POSTHOG_APP_HOST: SourceKeyType.ValueType  # 122
+POSTHOG_PROJECT_ID: SourceKeyType.ValueType  # 123
+SIGNOZ_API_URL: SourceKeyType.ValueType  # 136
+SIGNOZ_API_TOKEN: SourceKeyType.ValueType  # 137
 global___SourceKeyType = SourceKeyType
 
 class _SourceModelType:
@@ -542,6 +558,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     NEW_RELIC_ENTITY_DASHBOARD: _SourceModelType.ValueType  # 4
     NEW_RELIC_ENTITY_APPLICATION: _SourceModelType.ValueType  # 5
     NEW_RELIC_NRQL: _SourceModelType.ValueType  # 6
+    NEW_RELIC_ENTITY_DASHBOARD_V2: _SourceModelType.ValueType  # 7
     DATADOG_MONITOR: _SourceModelType.ValueType  # 101
     """Datadog Models"""
     DATADOG_DASHBOARD: _SourceModelType.ValueType  # 102
@@ -555,6 +572,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     DATADOG_SERVICE: _SourceModelType.ValueType  # 110
     DATADOG_METRIC: _SourceModelType.ValueType  # 111
     DATADOG_QUERY: _SourceModelType.ValueType  # 112
+    DATADOG_APM: _SourceModelType.ValueType  # 113
     CLOUDWATCH_METRIC: _SourceModelType.ValueType  # 201
     """Cloudwatch Models"""
     CLOUDWATCH_LOG_GROUP: _SourceModelType.ValueType  # 202
@@ -570,6 +588,7 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     GRAFANA_ALERT_RULE: _SourceModelType.ValueType  # 305
     CLICKHOUSE_DATABASE: _SourceModelType.ValueType  # 401
     """Clickhouse Models"""
+    CLICKHOUSE_TABLE: _SourceModelType.ValueType  # 402
     SLACK_CHANNEL: _SourceModelType.ValueType  # 501
     """Slack Models"""
     MARKDOWN: _SourceModelType.ValueType  # 601
@@ -577,10 +596,12 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     IFRAME: _SourceModelType.ValueType  # 602
     POSTGRES_QUERY: _SourceModelType.ValueType  # 701
     """Postgres Models"""
+    POSTGRES_TABLE: _SourceModelType.ValueType  # 702
     EKS_CLUSTER: _SourceModelType.ValueType  # 801
     """EKS Models"""
     SQL_DATABASE_CONNECTION_RAW_QUERY: _SourceModelType.ValueType  # 901
     """Sql Database Connection Models"""
+    SQL_DATABASE_TABLE: _SourceModelType.ValueType  # 902
     AZURE_WORKSPACE: _SourceModelType.ValueType  # 1001
     """Azure Models"""
     AZURE_RESOURCE: _SourceModelType.ValueType  # 1002
@@ -597,8 +618,12 @@ class _SourceModelTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper
     """Pagerduty Models"""
     ELASTIC_SEARCH_INDEX: _SourceModelType.ValueType  # 1601
     """Elastic Search Models"""
+    ELASTIC_SEARCH_SERVICES: _SourceModelType.ValueType  # 1602
+    ELASTIC_SEARCH_DASHBOARDS: _SourceModelType.ValueType  # 1603
     GCM_METRIC: _SourceModelType.ValueType  # 1701
     """GCM Models"""
+    GCM_DASHBOARD: _SourceModelType.ValueType  # 1702
+    GCM_CLOUD_RUN_SERVICE_DASHBOARD: _SourceModelType.ValueType  # 1703
     ZENDUTY_INCIDENT: _SourceModelType.ValueType  # 1801
     """Zen Duty Models"""
     ROOTLY_INCIDENT: _SourceModelType.ValueType  # 1901
@@ -660,6 +685,7 @@ NEW_RELIC_ENTITY: SourceModelType.ValueType  # 3
 NEW_RELIC_ENTITY_DASHBOARD: SourceModelType.ValueType  # 4
 NEW_RELIC_ENTITY_APPLICATION: SourceModelType.ValueType  # 5
 NEW_RELIC_NRQL: SourceModelType.ValueType  # 6
+NEW_RELIC_ENTITY_DASHBOARD_V2: SourceModelType.ValueType  # 7
 DATADOG_MONITOR: SourceModelType.ValueType  # 101
 """Datadog Models"""
 DATADOG_DASHBOARD: SourceModelType.ValueType  # 102
@@ -673,6 +699,7 @@ DATADOG_LIVE_INTEGRATION_CONFLUENT: SourceModelType.ValueType  # 109
 DATADOG_SERVICE: SourceModelType.ValueType  # 110
 DATADOG_METRIC: SourceModelType.ValueType  # 111
 DATADOG_QUERY: SourceModelType.ValueType  # 112
+DATADOG_APM: SourceModelType.ValueType  # 113
 CLOUDWATCH_METRIC: SourceModelType.ValueType  # 201
 """Cloudwatch Models"""
 CLOUDWATCH_LOG_GROUP: SourceModelType.ValueType  # 202
@@ -688,6 +715,7 @@ GRAFANA_PROMETHEUS_DATASOURCE: SourceModelType.ValueType  # 304
 GRAFANA_ALERT_RULE: SourceModelType.ValueType  # 305
 CLICKHOUSE_DATABASE: SourceModelType.ValueType  # 401
 """Clickhouse Models"""
+CLICKHOUSE_TABLE: SourceModelType.ValueType  # 402
 SLACK_CHANNEL: SourceModelType.ValueType  # 501
 """Slack Models"""
 MARKDOWN: SourceModelType.ValueType  # 601
@@ -695,10 +723,12 @@ MARKDOWN: SourceModelType.ValueType  # 601
 IFRAME: SourceModelType.ValueType  # 602
 POSTGRES_QUERY: SourceModelType.ValueType  # 701
 """Postgres Models"""
+POSTGRES_TABLE: SourceModelType.ValueType  # 702
 EKS_CLUSTER: SourceModelType.ValueType  # 801
 """EKS Models"""
 SQL_DATABASE_CONNECTION_RAW_QUERY: SourceModelType.ValueType  # 901
 """Sql Database Connection Models"""
+SQL_DATABASE_TABLE: SourceModelType.ValueType  # 902
 AZURE_WORKSPACE: SourceModelType.ValueType  # 1001
 """Azure Models"""
 AZURE_RESOURCE: SourceModelType.ValueType  # 1002
@@ -715,8 +745,12 @@ PAGERDUTY_INCIDENT: SourceModelType.ValueType  # 1501
 """Pagerduty Models"""
 ELASTIC_SEARCH_INDEX: SourceModelType.ValueType  # 1601
 """Elastic Search Models"""
+ELASTIC_SEARCH_SERVICES: SourceModelType.ValueType  # 1602
+ELASTIC_SEARCH_DASHBOARDS: SourceModelType.ValueType  # 1603
 GCM_METRIC: SourceModelType.ValueType  # 1701
 """GCM Models"""
+GCM_DASHBOARD: SourceModelType.ValueType  # 1702
+GCM_CLOUD_RUN_SERVICE_DASHBOARD: SourceModelType.ValueType  # 1703
 ZENDUTY_INCIDENT: SourceModelType.ValueType  # 1801
 """Zen Duty Models"""
 ROOTLY_INCIDENT: SourceModelType.ValueType  # 1901

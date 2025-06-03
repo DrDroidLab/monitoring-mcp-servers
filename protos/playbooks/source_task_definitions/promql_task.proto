@@ -10,6 +10,7 @@ message PromQl {
     google.protobuf.StringValue promql_expression = 2;
     repeated uint32 timeseries_offsets = 3;
     google.protobuf.UInt64Value interval = 4;
+    google.protobuf.StringValue query_type = 5;
   }
 
   enum TaskType {
