@@ -18,9 +18,35 @@ message OpenSearch {
     google.protobuf.StringValue index = 1;
   }
 
-  message GetNodeStats {}
+  message GetNodeStats {
+  }
 
-  message GetIndexStats {}
+  message GetIndexStats {
+  }
+
+  message GetClusterHealth {
+  }
+
+  message GetClusterSettings {
+  }
+
+  message GetClusterStats {
+  }
+
+  message GetIndexAndShardRecoveries {
+  }
+
+  message GetIndices {
+  }
+
+  message GetPendingTasks {
+  }
+
+  message GetShards {
+  }
+
+  message GetTasks {
+  }
 
   enum TaskType {
     UNKNOWN = 0;
@@ -28,6 +54,14 @@ message OpenSearch {
     DELETE_INDEX = 2;
     GET_NODE_STATS = 3;
     GET_INDEX_STATS = 4;
+    GET_CLUSTER_HEALTH = 5;
+    GET_CLUSTER_SETTINGS = 6;
+    GET_CLUSTER_STATS = 7;
+    GET_INDEX_AND_SHARD_RECOVERIES = 8;
+    GET_INDICES = 9;
+    GET_PENDING_TASKS = 10;
+    GET_SHARDS = 11;
+    GET_TASKS = 12;
   }
 
   TaskType type = 1;
@@ -36,5 +70,13 @@ message OpenSearch {
     DeleteIndex delete_index = 102;
     GetNodeStats get_node_stats = 103;
     GetIndexStats get_index_stats = 104;
+    GetClusterHealth get_cluster_health = 105;
+    GetClusterSettings get_cluster_settings = 106;
+    GetClusterStats get_cluster_stats = 107;
+    GetIndexAndShardRecoveries get_index_and_shard_recoveries = 108;
+    GetIndices get_indices = 109;
+    GetPendingTasks get_pending_tasks = 110;
+    GetShards get_shards = 111;
+    GetTasks get_tasks = 112;
   }
 }

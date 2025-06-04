@@ -80,6 +80,70 @@ class OpenSearchSourceManager(SourceManager):
                 'category': 'Metrics',
                 'form_fields': []
             },
+            OpenSearch.TaskType.GET_CLUSTER_HEALTH: {
+                'executor': self.execute_get_cluster_health,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Cluster Health',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_CLUSTER_SETTINGS: {
+                'executor': self.execute_get_cluster_settings,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Cluster Settings',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_CLUSTER_STATS: {
+                'executor': self.execute_get_cluster_stats,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Cluster Stats',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_INDEX_AND_SHARD_RECOVERIES: {
+                'executor': self.execute_get_index_and_shard_recoveries,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Index and Shard Recoveries',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_INDICES: {
+                'executor': self.execute_get_indices,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Indices',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_PENDING_TASKS: {
+                'executor': self.execute_get_pending_tasks,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Pending Tasks',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_SHARDS: {
+                'executor': self.execute_get_shards,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Shards',
+                'category': 'Metrics',
+                'form_fields': []
+            },
+            OpenSearch.TaskType.GET_TASKS: {
+                'executor': self.execute_get_tasks,
+                'model_types': [],
+                'result_type': PlaybookTaskResultType.API_RESPONSE,
+                'display_name': 'Get OpenSearch Tasks',
+                'category': 'Metrics',
+                'form_fields': []
+            }
         }
 
     def get_connector_processor(self, os_connector, **kwargs):
@@ -223,3 +287,147 @@ class OpenSearchSourceManager(SourceManager):
         except Exception as e:
             raise Exception(
                 f"OpenSearchSourceManager.execute_get_index_stats:: Error while executing OpenSearch task: {str(e)}")
+        
+    # cluster health task functions
+    def execute_get_cluster_health(self, time_range: TimeRange, os_task: OpenSearch,
+                                   os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_cluster_health:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_cluster_health()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_cluster_health:: Error while executing OpenSearch task: {str(e)}")
+        
+    # cluster settings task functions
+    def execute_get_cluster_settings(self, time_range: TimeRange, os_task: OpenSearch,
+                                     os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_cluster_settings:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_cluster_settings()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_cluster_settings:: Error while executing OpenSearch task: {str(e)}")
+
+    # cluster stats task functions
+    def execute_get_cluster_stats(self, time_range: TimeRange, os_task: OpenSearch,
+                                  os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_cluster_stats:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_cluster_stats()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_cluster_stats:: Error while executing OpenSearch task: {str(e)}")
+
+    # index and shard recoveries task functions
+    def execute_get_index_and_shard_recoveries(self, time_range: TimeRange, os_task: OpenSearch,
+                                               os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_index_and_shard_recoveries:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_index_and_shard_recoveries()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_index_and_shard_recoveries:: Error while executing OpenSearch task: {str(e)}")
+
+    # indices task functions
+    def execute_get_indices(self, time_range: TimeRange, os_task: OpenSearch,
+                            os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_indices:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_indices()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_indices:: Error while executing OpenSearch task: {str(e)}")
+
+    # pending tasks task functions
+    def execute_get_pending_tasks(self, time_range: TimeRange, os_task: OpenSearch,
+                                  os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_pending_tasks:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_pending_tasks()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_pending_tasks:: Error while executing OpenSearch task: {str(e)}")
+
+    # shards task functions
+    def execute_get_shards(self, time_range: TimeRange, os_task: OpenSearch,
+                           os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_shards:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_shards()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_shards:: Error while executing OpenSearch task: {str(e)}")
+
+    # tasks task functions
+    def execute_get_tasks(self, time_range: TimeRange, os_task: OpenSearch,
+                          os_connector: ConnectorProto):
+        try:
+            if not os_connector:
+                raise ValueError("OpenSearchSourceManager.execute_get_tasks:: Task execution Failed:: "
+                                 "No OpenSearch source found")
+
+            os_client = self.get_connector_processor(os_connector)
+            result = os_client.get_tasks()
+            result_struct = dict_to_proto(result, Struct)
+            api_response = ApiResponseResult(response_body=result_struct)
+            return PlaybookTaskResult(type=PlaybookTaskResultType.API_RESPONSE, api_response=api_response,
+                                      source=self.source)
+        except Exception as e:
+            raise Exception(
+                f"OpenSearchSourceManager.execute_get_tasks:: Error while executing OpenSearch task: {str(e)}")

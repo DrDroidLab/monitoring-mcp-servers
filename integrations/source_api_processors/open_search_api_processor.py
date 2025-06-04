@@ -96,3 +96,85 @@ class OpenSearchApiProcessor(Processor):
             logger.error(f"OpenSearchApiProcessor.delete_index:: Exception occurred while deleting index: {index} from "
                          f"host: {self.base_url} with error: {e}")
             raise e
+
+    # cluster health
+    def get_cluster_health(self):
+        try:
+            result = self._make_request("GET", "_cluster/health")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_cluster_health:: Exception occurred while fetching cluster health "
+                         f"for host: {self.base_url} with error: {e}")
+            raise e
+        
+    # cluster settings
+    def get_cluster_settings(self):
+        try:
+            result = self._make_request("GET", "_cluster/settings")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_cluster_settings:: Exception occurred while fetching cluster settings "
+                         f"for host: {self.base_url} with error: {e}")
+            raise e
+        
+    # cluster stats
+    def get_cluster_stats(self):
+        try:
+            result = self._make_request("GET", "_cluster/stats")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_cluster_stats:: Exception occurred while fetching cluster stats "
+                         f"for host: {self.base_url} with error: {e}")
+            raise e
+        
+    # list index and shard recoveries
+    def get_index_and_shard_recoveries(self):
+        try:
+            result = self._make_request("GET", "_recovery")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_index_and_shard_recoveries:: Exception occurred while fetching index and shard recoveries "
+                         f"for host: {self.base_url} with error: {e}")
+            raise e
+    
+    # list indices
+    def get_indices(self):
+        try:
+            result = self._make_request("GET", "_cat/indices?format=json")
+            response = {"api_response": result}
+            return response
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_indices:: Exception occurred while fetching indices for host: "
+                         f"{self.base_url} with error: {e}")
+            raise e
+        
+    # list pending tasks
+    def get_pending_tasks(self):
+        try:
+            result = self._make_request("GET", "_cluster/pending_tasks")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_pending_tasks:: Exception occurred while fetching pending tasks for "
+                         f"host: {self.base_url} with error: {e}")
+            raise e
+        
+    # list shards
+    def get_shards(self):
+        try:
+            result = self._make_request("GET", "_cat/shards?format=json")
+            response = {"api_response": result}
+            return response
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_shards:: Exception occurred while fetching shards for host: "
+                         f"{self.base_url} with error: {e}")
+            raise e
+        
+    # list tasks
+    def get_tasks(self):
+        try:
+            result = self._make_request("GET", "_tasks")
+            return result
+        except Exception as e:
+            logger.error(f"OpenSearchApiProcessor.get_tasks:: Exception occurred while fetching tasks for "
+                         f"host: {self.base_url} with error: {e}")
+            raise e
