@@ -45,6 +45,10 @@ message Grafana {
     google.protobuf.StringValue label_name = 2;
   }
 
+  message FetchDashboardVariablesTask {
+    google.protobuf.StringValue dashboard_uid = 1;
+  }
+
   enum TaskType {
     UNKNOWN = 0;
     PROMQL_METRIC_EXECUTION = 1;
@@ -52,6 +56,7 @@ message Grafana {
     QUERY_DASHBOARD_PANEL_METRIC = 3;
     EXECUTE_ALL_DASHBOARD_PANELS = 4;
     FETCH_DASHBOARD_VARIABLE_LABEL_VALUES = 5;
+    FETCH_DASHBOARD_VARIABLES = 6;
   }
 
   TaskType type = 1;
@@ -61,5 +66,6 @@ message Grafana {
     QueryDashboardPanelMetricTask query_dashboard_panel_metric = 5;
     ExecuteAllDashboardPanelsTask execute_all_dashboard_panels = 6;
     FetchDashboardVariableLabelValuesTask fetch_dashboard_variable_label_values = 7;
+    FetchDashboardVariablesTask fetch_dashboard_variables = 8;
   }
 }
