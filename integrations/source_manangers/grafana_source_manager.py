@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import string
@@ -52,6 +53,7 @@ class GrafanaSourceManager(SourceManager):
         self.task_type_callable_map = {
             Grafana.TaskType.PROMETHEUS_DATASOURCE_METRIC_EXECUTION: {
                 "executor": self.execute_prometheus_datasource_metric_execution,
+                "asset_descriptor": self.execute_prometheus_datasource_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your Prometheus Data Sources from Grafana",
@@ -95,6 +97,7 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.QUERY_DASHBOARD_PANEL_METRIC: {
                 "executor": self.execute_query_dashboard_panel_metric_execution,
+                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your dashboard panels from Grafana",
@@ -194,6 +197,23 @@ class GrafanaSourceManager(SourceManager):
                         description=StringValue(value="Enter the label name to fetch values for"),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                ],
+            },
+            Grafana.TaskType.FETCH_DASHBOARD_VARIABLES: {
+                "executor": self.execute_fetch_dashboard_variables,
+                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
+                "model_types": [SourceModelType.GRAFANA_DASHBOARD],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetch all variables and their values from a Grafana Dashboard",
+                "category": "Metrics",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="dashboard_uid"),
+                        display_name=StringValue(value="Dashboard UID"),
+                        description=StringValue(value="Select Dashboard UID to fetch variables from"),
+                        data_type=LiteralType.STRING,
+                        form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
                 ],
             },
@@ -298,6 +318,63 @@ class GrafanaSourceManager(SourceManager):
             return task_result
         except Exception as e:
             raise Exception(f"Error while executing Grafana fetch dashboard variable label values task: {e}") from e
+
+    def execute_fetch_dashboard_variables(self, time_range: TimeRange, grafana_task: Grafana,
+                                         grafana_connector: ConnectorProto):
+        try:
+            if not grafana_connector:
+                raise Exception("Task execution Failed:: No Grafana source found")
+
+            # Access the task using the correct attribute name from the proto
+            if hasattr(grafana_task, 'fetch_dashboard_variables'):
+                task = grafana_task.fetch_dashboard_variables
+            else:
+                # Fallback for proto generation issues
+                logger.warning("fetch_dashboard_variables attribute not found, trying alternative access")
+                # Try to access by index in the oneof if the attribute is not available
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value="Task type not properly configured in proto")),
+                    source=self.source,
+                )
+            
+            dashboard_uid = task.dashboard_uid.value
+
+            grafana_api_processor = self.get_connector_processor(grafana_connector)
+
+            print(
+                f"Playbook Task Downstream Request: Type -> Grafana FETCH_DASHBOARD_VARIABLES, Dashboard_UID -> {dashboard_uid}",
+                flush=True,
+            )
+
+            variables_data = grafana_api_processor.get_dashboard_variables(dashboard_uid)
+
+            if not variables_data or not variables_data.get('variables'):
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=f"No variables found for dashboard: {dashboard_uid}")),
+                    source=self.source,
+                )
+
+            # Ensure we have a proper Struct instance
+            if isinstance(variables_data, dict):
+                response_struct = Struct()
+                response_struct.update(variables_data)
+            else:
+                response_struct = dict_to_proto(variables_data, Struct)
+            
+            output = ApiResponseResult(response_body=response_struct)
+
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
+            return task_result
+        except Exception as e:
+            logger.error(f"Error while executing Grafana fetch dashboard variables task: {e}")
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TEXT,
+                text=TextResult(output=StringValue(value=f"Error executing dashboard variables task: {str(e)}")),
+                source=self.source,
+            )
 
     def execute_query_dashboard_panel_metric_execution(self, time_range: TimeRange, grafana_task: Grafana,
                                                        grafana_connector: ConnectorProto):
