@@ -1,26 +1,17 @@
-import json
 import logging
 import re
 import string
-import requests
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 from google.protobuf.struct_pb2 import Struct
-from google.protobuf.wrappers_pb2 import BoolValue, DoubleValue, StringValue
+from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 
-from alert_ops_engine.utils.string_utils import is_partial_match
-from connectors.utils import generate_credentials_dict
 from integrations.source_api_processors.grafana_api_processor import GrafanaApiProcessor
-from integrations.source_asset_managers.asset_manager_facade import asset_manager_facade
-from playbooks_engine.executor.playbook_source_manager import PlaybookSourceManager
-from protos.event.assets.asset_pb2 import AccountConnectorAssets, AccountConnectorAssetsModelFilters
-from protos.event.base_pb2 import TimeRange
-from protos.event.connectors_pb2 import Connector as ConnectorProto
-from protos.event.connectors_pb2 import ConnectorKey as SourceKeyType
-from protos.event.connectors_pb2 import ConnectorMetadataModelType as SourceModelType
-from protos.event.connectors_pb2 import ConnectorType as Source
-from protos.event.literal_pb2 import Literal, LiteralType
-from protos.event.playbooks.playbook_commons_pb2 import (
+from integrations.source_manager import SourceManager
+from protos.base_pb2 import Source, SourceModelType, TimeRange
+from protos.connectors.connector_pb2 import Connector as ConnectorProto
+from protos.literal_pb2 import Literal, LiteralType
+from protos.playbooks.playbook_commons_pb2 import (
     ApiResponseResult,
     LabelValuePair,
     PlaybookTaskResult,
@@ -28,20 +19,15 @@ from protos.event.playbooks.playbook_commons_pb2 import (
     TextResult,
     TimeseriesResult,
 )
-from protos.event.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
-from protos.event.ui_definition_pb2 import FormField, FormFieldType
+from protos.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
+from protos.ui_definition_pb2 import FormField, FormFieldType
+from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import dict_to_proto, proto_to_dict
-from utils.constants import *
-from connectors.utils import get_connector_key_type_string
-
-if TYPE_CHECKING:
-    from protos.event.assets.grafana_asset_pb2 import GrafanaAssetModel, GrafanaDashboardAssetModel, \
-        GrafanaDatasourceAssetModel
 
 logger = logging.getLogger(__name__)
 
 
-class GrafanaSourceManager(PlaybookSourceManager):
+class GrafanaSourceManager(SourceManager):
     # Constants for dynamic interval calculation
     MAX_DATA_POINTS = 70
     MIN_STEP_SIZE_SECONDS = 60  # Minimum interval is 1 minute
