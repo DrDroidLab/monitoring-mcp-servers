@@ -33,6 +33,20 @@ class GrafanaApiProcessor(Processor):
             logger.error(f"Exception occurred while fetching grafana data sources with error: {e}")
             raise e
 
+    def check_api_health(self):
+        try:
+            url = '{}/api/health'.format(self.__host)
+            response = requests.get(url, headers=self.headers, verify=self.__ssl_verify, timeout=20)
+            if response and response.status_code == 200:
+                return response.json()
+            else:
+                status_code = response.status_code if response else None
+                raise Exception(
+                    f"Failed to connect with Grafana. Status Code: {status_code}. Response Text: {response.text}")
+        except Exception as e:
+            logger.error(f"Exception occurred while checking grafana api health with error: {e}")
+            raise e
+
     def fetch_data_sources(self):
         try:
             url = '{}/api/datasources'.format(self.__host)
@@ -112,6 +126,19 @@ class GrafanaApiProcessor(Processor):
             logger.error(f"Exception occurred while fetching grafana alert rules with error: {e}")
             raise e
 
+    def fetch_dashboard_variable_label_values(self, promql_datasource_uid, label_name):
+        try:
+            url = f'{self.__host}/api/datasources/proxy/uid/{promql_datasource_uid}/api/v1/label/{label_name}/values'
+            response = requests.get(url, headers=self.headers, verify=self.__ssl_verify)
+            if response and response.status_code == 200:
+                return response.json().get('data', [])
+            else:
+                logger.error(f"Failed to fetch label values for {label_name}. Status: {response.status_code}, Body: {response.text}")
+                return []
+        except Exception as e:
+            logger.error(f"Exception occurred while fetching promql metric labels for {label_name} with error: {e}")
+            return []
+
     def panel_query_datasource_api(self, tr: TimeRange, queries, interval_ms=300000):
         try:
             if not queries or len(queries) == 0:
@@ -132,15 +159,17 @@ class GrafanaApiProcessor(Processor):
             }
 
             response = requests.post(url, headers=self.headers, json=payload)
+
             if response.status_code == 429:
                 logger.info("Grafana query API responded with 429 (rate limited). Headers: %s", response.headers)
                 return None
-            elif response.status_code == 200:
-                return response.json()
-            else:
-                logger.error("Grafana query API error: status code %s, response: %s", response.status_code,
-                             response.text)
-                return response.json()
+
+            response.raise_for_status()
+
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            logger.error("Grafana query API error: status code %s, response: %s", e.response.status_code, e.response.text)
+            raise e
         except Exception as e:
             logger.error("Exception occurred while querying Grafana datasource: %s", e)
             raise e

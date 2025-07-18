@@ -1,8 +1,8 @@
 syntax = "proto3";
-package protos.playbooks;
+package protos.event.playbooks;
 
 import "google/protobuf/wrappers.proto";
-import "protos/playbooks/source_task_definitions/promql_task.proto";
+import "protos/event/playbooks/source_task_definitions/promql_task.proto";
 
 
 message Grafana {
@@ -37,6 +37,12 @@ message Grafana {
     google.protobuf.StringValue dashboard_uid = 1;
     google.protobuf.StringValue panel_ids = 2;
     google.protobuf.UInt64Value interval = 3;
+    google.protobuf.StringValue template_variables = 4;
+  }
+
+  message FetchDashboardVariableLabelValuesTask {
+    google.protobuf.StringValue datasource_uid = 1;
+    google.protobuf.StringValue label_name = 2;
   }
 
   enum TaskType {
@@ -45,6 +51,7 @@ message Grafana {
     PROMETHEUS_DATASOURCE_METRIC_EXECUTION = 2;
     QUERY_DASHBOARD_PANEL_METRIC = 3;
     EXECUTE_ALL_DASHBOARD_PANELS = 4;
+    FETCH_DASHBOARD_VARIABLE_LABEL_VALUES = 5;
   }
 
   TaskType type = 1;
@@ -53,5 +60,6 @@ message Grafana {
     PromQl.PromQlMetricExecution prometheus_datasource_metric_execution = 4;
     QueryDashboardPanelMetricTask query_dashboard_panel_metric = 5;
     ExecuteAllDashboardPanelsTask execute_all_dashboard_panels = 6;
+    FetchDashboardVariableLabelValuesTask fetch_dashboard_variable_label_values = 7;
   }
 }
