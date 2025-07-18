@@ -1,8 +1,8 @@
 syntax = "proto3";
-package protos.event.playbooks;
+package protos.playbooks;
 
 import "google/protobuf/wrappers.proto";
-import "protos/event/playbooks/source_task_definitions/promql_task.proto";
+import "protos/playbooks/source_task_definitions/promql_task.proto";
 
 
 message Grafana {
