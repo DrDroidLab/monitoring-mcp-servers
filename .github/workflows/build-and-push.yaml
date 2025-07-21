@@ -74,25 +74,33 @@ jobs:
       - name: Build and Tag
         env:
           IMAGE_TAG_SHA: ${{ needs.setup.outputs.SHORT_SHA }}
-          IMAGE_TAG_BRANCH: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}-${{needs.setup.outputs.EPOCH_TIMESTAMP}}
+          IMAGE_TAG_BRANCH: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}-${{ needs.setup.outputs.EPOCH_TIMESTAMP }}
           IMAGE_TAG_BRANCH_ORIG: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}
           IMAGE_TAG_EPOCH_TIMESTAMP: ${{ needs.setup.outputs.EPOCH_TIMESTAMP }}
+          REPO_NAME: ${{ secrets.REPO_NAME }}
         run: |
           echo "Building for repository"
+      
+          if [ "${{ github.event_name }}" = "push" ]; then
+            EXPORT_FLAG="--push"
+          else
+            EXPORT_FLAG="--load"
+          fi
+      
+          docker buildx build \
+            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 \
+            --tag ${REPO_NAME}:$IMAGE_TAG_SHA \
+            --tag ${REPO_NAME}:$IMAGE_TAG_EPOCH_TIMESTAMP \
+            --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH_ORIG \
+            --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --file Dockerfile \
+            $EXPORT_FLAG \
+            .
 
-          REPO_NAME=${{ secrets.REPO_NAME }}
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile \
-          --build-arg BUILDKIT_INLINE_CACHE=1 \
-          --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 \
-          --cache-from ${REPO_NAME}:$IMAGE_TAG_BRANCH \
-          --tag ${REPO_NAME}:$IMAGE_TAG_SHA \
-          --tag ${REPO_NAME}:$IMAGE_TAG_EPOCH_TIMESTAMP \
-          --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH_ORIG \
-          --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH .
-
-      - name: Push to ECR
-        if: github.event_name == 'push'
-        run: |
-          echo "Pushing to repository"
-          REPO_NAME=${{ secrets.REPO_NAME }}
-          docker push ${REPO_NAME} --all-tags
+      # - name: Push to ECR
+      #   if: github.event_name == 'push'
+      #   run: |
+      #     echo "Pushing to repository"
+      #     REPO_NAME=${{ secrets.REPO_NAME }}
+      #     docker push ${REPO_NAME} --all-tags
