@@ -78,17 +78,20 @@ jobs:
           IMAGE_TAG_BRANCH_ORIG: ${{ needs.setup.outputs.CLEAN_BRANCH_NAME }}
           IMAGE_TAG_EPOCH_TIMESTAMP: ${{ needs.setup.outputs.EPOCH_TIMESTAMP }}
           REPO_NAME: ${{ secrets.REPO_NAME }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           echo "Building for repository"
       
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "$EVENT_NAME" = "push" ]; then
             EXPORT_FLAG="--push"
+            PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8"
           else
             EXPORT_FLAG="--load"
+            PLATFORMS="linux/amd64"
           fi
       
           docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 \
+            --platform $PLATFORMS \
             --tag ${REPO_NAME}:$IMAGE_TAG_SHA \
             --tag ${REPO_NAME}:$IMAGE_TAG_EPOCH_TIMESTAMP \
             --tag ${REPO_NAME}:$IMAGE_TAG_BRANCH_ORIG \
