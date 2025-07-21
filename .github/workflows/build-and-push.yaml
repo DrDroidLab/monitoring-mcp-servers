@@ -1,5 +1,5 @@
 name: "VPC Agent build"
-run-name: "VPC Agent updated by ${{ github.actor }} and run by ${{ github.triggering_actor }}"
+#run-name: "VPC Agent updated by ${{ github.actor }} and run by ${{ github.triggering_actor }}"
 
 on:
   pull_request:
