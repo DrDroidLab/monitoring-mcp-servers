@@ -35,7 +35,8 @@ RUN chown -R www-data:www-data /code
 
 # Install dependenciess
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel \
+ && pip install -r requirements.txt
 
 COPY scripts/start-celery-worker.sh .
 RUN sed -i 's/\r$//g' start-celery-worker.sh
