@@ -31,7 +31,8 @@ WORKDIR /code
 
 # Install dependenciess
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel \
+ && pip install -r requirements.txt
 
 # Copy project
 COPY . /code

@@ -2,25 +2,17 @@ import json
 import logging
 import re
 import string
-import requests
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 from google.protobuf.struct_pb2 import Struct
-from google.protobuf.wrappers_pb2 import BoolValue, DoubleValue, StringValue
+from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 
-from alert_ops_engine.utils.string_utils import is_partial_match
-from connectors.utils import generate_credentials_dict
 from integrations.source_api_processors.grafana_api_processor import GrafanaApiProcessor
-from integrations.source_asset_managers.asset_manager_facade import asset_manager_facade
-from playbooks_engine.executor.playbook_source_manager import PlaybookSourceManager
-from protos.event.assets.asset_pb2 import AccountConnectorAssets, AccountConnectorAssetsModelFilters
-from protos.event.base_pb2 import TimeRange
-from protos.event.connectors_pb2 import Connector as ConnectorProto
-from protos.event.connectors_pb2 import ConnectorKey as SourceKeyType
-from protos.event.connectors_pb2 import ConnectorMetadataModelType as SourceModelType
-from protos.event.connectors_pb2 import ConnectorType as Source
-from protos.event.literal_pb2 import Literal, LiteralType
-from protos.event.playbooks.playbook_commons_pb2 import (
+from integrations.source_manager import SourceManager
+from protos.base_pb2 import Source, SourceModelType, TimeRange
+from protos.connectors.connector_pb2 import Connector as ConnectorProto
+from protos.literal_pb2 import Literal, LiteralType
+from protos.playbooks.playbook_commons_pb2 import (
     ApiResponseResult,
     LabelValuePair,
     PlaybookTaskResult,
@@ -28,20 +20,15 @@ from protos.event.playbooks.playbook_commons_pb2 import (
     TextResult,
     TimeseriesResult,
 )
-from protos.event.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
-from protos.event.ui_definition_pb2 import FormField, FormFieldType
+from protos.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
+from protos.ui_definition_pb2 import FormField, FormFieldType
+from utils.credentilal_utils import generate_credentials_dict
 from utils.proto_utils import dict_to_proto, proto_to_dict
-from utils.constants import *
-from connectors.utils import get_connector_key_type_string
-
-if TYPE_CHECKING:
-    from protos.event.assets.grafana_asset_pb2 import GrafanaAssetModel, GrafanaDashboardAssetModel, \
-        GrafanaDatasourceAssetModel
 
 logger = logging.getLogger(__name__)
 
 
-class GrafanaSourceManager(PlaybookSourceManager):
+class GrafanaSourceManager(SourceManager):
     # Constants for dynamic interval calculation
     MAX_DATA_POINTS = 70
     MIN_STEP_SIZE_SECONDS = 60  # Minimum interval is 1 minute
@@ -66,6 +53,7 @@ class GrafanaSourceManager(PlaybookSourceManager):
         self.task_type_callable_map = {
             Grafana.TaskType.PROMETHEUS_DATASOURCE_METRIC_EXECUTION: {
                 "executor": self.execute_prometheus_datasource_metric_execution,
+                "asset_descriptor": self.execute_prometheus_datasource_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your Prometheus Data Sources from Grafana",
@@ -109,6 +97,7 @@ class GrafanaSourceManager(PlaybookSourceManager):
             },
             Grafana.TaskType.QUERY_DASHBOARD_PANEL_METRIC: {
                 "executor": self.execute_query_dashboard_panel_metric_execution,
+                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your dashboard panels from Grafana",
@@ -208,6 +197,23 @@ class GrafanaSourceManager(PlaybookSourceManager):
                         description=StringValue(value="Enter the label name to fetch values for"),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                ],
+            },
+            Grafana.TaskType.FETCH_DASHBOARD_VARIABLES: {
+                "executor": self.execute_fetch_dashboard_variables,
+                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
+                "model_types": [SourceModelType.GRAFANA_DASHBOARD],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetch all variables and their values from a Grafana Dashboard",
+                "category": "Metrics",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="dashboard_uid"),
+                        display_name=StringValue(value="Dashboard UID"),
+                        description=StringValue(value="Select Dashboard UID to fetch variables from"),
+                        data_type=LiteralType.STRING,
+                        form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
                 ],
             },
@@ -312,6 +318,63 @@ class GrafanaSourceManager(PlaybookSourceManager):
             return task_result
         except Exception as e:
             raise Exception(f"Error while executing Grafana fetch dashboard variable label values task: {e}") from e
+
+    def execute_fetch_dashboard_variables(self, time_range: TimeRange, grafana_task: Grafana,
+                                         grafana_connector: ConnectorProto):
+        try:
+            if not grafana_connector:
+                raise Exception("Task execution Failed:: No Grafana source found")
+
+            # Access the task using the correct attribute name from the proto
+            if hasattr(grafana_task, 'fetch_dashboard_variables'):
+                task = grafana_task.fetch_dashboard_variables
+            else:
+                # Fallback for proto generation issues
+                logger.warning("fetch_dashboard_variables attribute not found, trying alternative access")
+                # Try to access by index in the oneof if the attribute is not available
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value="Task type not properly configured in proto")),
+                    source=self.source,
+                )
+            
+            dashboard_uid = task.dashboard_uid.value
+
+            grafana_api_processor = self.get_connector_processor(grafana_connector)
+
+            print(
+                f"Playbook Task Downstream Request: Type -> Grafana FETCH_DASHBOARD_VARIABLES, Dashboard_UID -> {dashboard_uid}",
+                flush=True,
+            )
+
+            variables_data = grafana_api_processor.get_dashboard_variables(dashboard_uid)
+
+            if not variables_data or not variables_data.get('variables'):
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=f"No variables found for dashboard: {dashboard_uid}")),
+                    source=self.source,
+                )
+
+            # Ensure we have a proper Struct instance
+            if isinstance(variables_data, dict):
+                response_struct = Struct()
+                response_struct.update(variables_data)
+            else:
+                response_struct = dict_to_proto(variables_data, Struct)
+            
+            output = ApiResponseResult(response_body=response_struct)
+
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
+            return task_result
+        except Exception as e:
+            logger.error(f"Error while executing Grafana fetch dashboard variables task: {e}")
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TEXT,
+                text=TextResult(output=StringValue(value=f"Error executing dashboard variables task: {str(e)}")),
+                source=self.source,
+            )
 
     def execute_query_dashboard_panel_metric_execution(self, time_range: TimeRange, grafana_task: Grafana,
                                                        grafana_connector: ConnectorProto):
