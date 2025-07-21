@@ -29,14 +29,14 @@ ENV PYTHONUNBUFFERED 1
 # Set work directory
 WORKDIR /code
 
-# Copy project
-COPY . /code
-RUN chown -R www-data:www-data /code
-
 # Install dependenciess
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel \
  && pip install -r requirements.txt
+
+# Copy project
+COPY . /code
+RUN chown -R www-data:www-data /code
 
 COPY scripts/start-celery-worker.sh .
 RUN sed -i 's/\r$//g' start-celery-worker.sh
