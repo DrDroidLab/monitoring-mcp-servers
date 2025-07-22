@@ -29,10 +29,10 @@ ENV PYTHONUNBUFFERED 1
 # Set work directory
 WORKDIR /code
 
-# Install dependenciess
+# Install dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip setuptools wheel \
- && pip install -r requirements.txt
+RUN pip install uv
+RUN uv pip sync requirements.txt --system
 
 # Copy project
 COPY . /code
