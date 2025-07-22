@@ -3,17 +3,17 @@ name: "VPC Agent build"
 
 on:
   pull_request:
-    branches:
-      - main
     paths:
       - .github/workflows/build-and-push.yaml
       - "**"
+    branches:
+      - "main"
   push:
-    branches:
-      - main
     paths:
       - .github/workflows/build-and-push.yaml
       - "**"
+    branches:
+      - "main"
 
 permissions: write-all
 
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x-spot
     outputs:
       SHORT_SHA: ${{ steps.setup.outputs.SHORT_SHA }}
       EPOCH_TIMESTAMP: ${{ steps.setup.outputs.EPOCH_TIMESTAMP }}
