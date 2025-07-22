@@ -84,7 +84,7 @@ jobs:
       
           if [ "$EVENT_NAME" = "push" ]; then
             EXPORT_FLAG="--push"
-            PLATFORMS="linux/amd64,linux/arm64,linux/arm/v8"
+            PLATFORMS="linux/amd64,linux/arm64"
           else
             EXPORT_FLAG="--load"
             PLATFORMS="linux/amd64"
