@@ -12,6 +12,9 @@ from integrations.source_manager import SourceManager
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import Literal, LiteralType
+from protos.assets.grafana_asset_pb2 import GrafanaAssetModel, GrafanaDashboardAssetModel, \
+    GrafanaDashboardAssetOptions
+from protos.assets.asset_pb2 import AccountConnectorAssets, AccountConnectorAssetsModelFilters
 from protos.playbooks.playbook_commons_pb2 import (
     ApiResponseResult,
     LabelValuePair,
@@ -352,9 +355,73 @@ class GrafanaSourceManager(SourceManager):
             if not variables_data or not variables_data.get('variables'):
                 return PlaybookTaskResult(
                     type=PlaybookTaskResultType.TEXT,
-                    text=TextResult(output=StringValue(value=f"No variables found for dashboard: {dashboard_uid}")),
+                    text=TextResult(output=StringValue(value=f"No variables found for dashboard: {dashboard_uid}. Send an empty dictionary for template variables")),
                     source=self.source,
                 )
+
+            # Also get current values from dashboard assets to supplement the API response
+            try:
+                dashboard_asset_filter = AccountConnectorAssetsModelFilters(
+                    grafana_dashboard_model_filters=GrafanaDashboardAssetOptions(
+                        dashboards=[GrafanaDashboardAssetOptions.GrafanaDashboardOptions(
+                            dashboard_uid=StringValue(value=dashboard_uid)
+                        )]
+                    )
+                )
+                
+                assets_result: AccountConnectorAssets = asset_manager_facade.get_asset_model_values(
+                    grafana_connector,
+                    SourceModelType.GRAFANA_DASHBOARD,
+                    dashboard_asset_filter
+                )
+
+                # Extract current values from dashboard assets if available
+                current_values_from_assets = {}
+                if assets_result and assets_result[0].grafana and assets_result[0].grafana.assets:
+                    dashboard_asset_model: GrafanaAssetModel = assets_result[0].grafana.assets[0]
+                    dashboard_data: GrafanaDashboardAssetModel = dashboard_asset_model.grafana_dashboard
+                    
+                    # Convert the dashboard JSON struct to dict
+                    dashboard_dict = proto_to_dict(dashboard_data.dashboard_json)
+                    
+                    # Extract current values from stored dashboard JSON
+                    dashboard_templating = dashboard_dict.get("templating", {})
+                    if isinstance(dashboard_templating, dict) and "list" in dashboard_templating:
+                        template_vars = dashboard_templating.get("list", [])
+                        print("Template vars", template_vars)
+                        for var in template_vars:
+                            if not isinstance(var, dict):
+                                continue
+                            
+                            var_name = var.get("name", "")
+                            if not var_name:
+                                continue
+                            
+                            current = var.get("current", {})
+                            if isinstance(current, dict):
+                                current_values_from_assets[var_name] = {
+                                    "current_value": current.get("value"),
+                                    "current_text": current.get("text")
+                                }
+                print("Current values from assets", current_values_from_assets)
+                # Enhance the API response with current values from assets
+                api_variables = variables_data.get('variables', {})
+                enhanced_variables = {}
+                for var_name, var_info in api_variables.items():
+                    print("Var name", var_name)
+                    print("Var info", var_info)
+                    enhanced_variables[var_name] = {}
+                    enhanced_variables[var_name]['allowed_values'] = var_info
+                    if var_name in current_values_from_assets:
+                        # Add current values from assets to the API response
+                        enhanced_variables[var_name]['current_value'] = current_values_from_assets[var_name]['current_value']
+                
+                # Also add a summary of current values
+                variables_data['variables'] = enhanced_variables
+                
+            except Exception as asset_error:
+                logger.warning(f"Failed to get current values from dashboard assets: {asset_error}")
+                variables_data['asset_retrieval_error'] = str(asset_error)
 
             # Ensure we have a proper Struct instance
             if isinstance(variables_data, dict):
