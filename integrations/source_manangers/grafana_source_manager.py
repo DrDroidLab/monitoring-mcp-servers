@@ -269,6 +269,22 @@ class GrafanaSourceManager(SourceManager):
                     source=self.source,
                 )
 
+            # --- TimeseriesResult logic ---
+            # Build a minimal panel_ref_map for the single query
+            panel_ref_map = {
+                "A": {
+                    "panel_id": "prometheus_query",
+                    "panel_title": metric_query,
+                    "original_expr": metric_query,
+                }
+            }
+            # Use the same timeseries parsing logic as dashboard panels
+            timeseries_results = self._parse_grafana_response_frames(response, panel_ref_map)
+            if timeseries_results:
+                # Only one query, so return the first result
+                return timeseries_results[0]
+
+            # Fallback: return API response if no timeseries data found
             response_struct = dict_to_proto(response, Struct)
             output = ApiResponseResult(response_body=response_struct)
 
