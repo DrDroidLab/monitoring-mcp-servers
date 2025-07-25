@@ -58,7 +58,6 @@ class GrafanaSourceManager(SourceManager):
         self.task_type_callable_map = {
             Grafana.TaskType.PROMETHEUS_DATASOURCE_METRIC_EXECUTION: {
                 "executor": self.execute_prometheus_datasource_metric_execution,
-                "asset_descriptor": self.execute_prometheus_datasource_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your Prometheus Data Sources from Grafana",
@@ -102,7 +101,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.QUERY_DASHBOARD_PANEL_METRIC: {
                 "executor": self.execute_query_dashboard_panel_metric_execution,
-                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your dashboard panels from Grafana",
@@ -183,7 +181,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.FETCH_DASHBOARD_VARIABLE_LABEL_VALUES: {
                 "executor": self.execute_fetch_dashboard_variable_label_values,
-                "asset_descriptor": self.execute_prometheus_datasource_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Fetch label values for dashboard variables from Prometheus Datasource",
@@ -207,7 +204,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.FETCH_DASHBOARD_VARIABLES: {
                 "executor": self.execute_fetch_dashboard_variables,
-                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Fetch all variables and their values from a Grafana Dashboard",
