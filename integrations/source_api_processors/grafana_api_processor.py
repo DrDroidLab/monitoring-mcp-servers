@@ -1,4 +1,5 @@
 import logging
+import re
 
 import requests
 
@@ -70,9 +71,7 @@ class GrafanaApiProcessor(Processor):
     def fetch_dashboard_details(self, uid):
         try:
             url = '{}/api/dashboards/uid/{}'.format(self.__host, uid)
-            print(url)
             response = requests.get(url, headers=self.headers, verify=self.__ssl_verify)
-            print(response.text)
             if response and response.status_code == 200:
                 return response.json()
         except Exception as e:
@@ -128,10 +127,15 @@ class GrafanaApiProcessor(Processor):
             logger.error(f"Exception occurred while fetching grafana alert rules with error: {e}")
             raise e
 
-    def fetch_dashboard_variable_label_values(self, promql_datasource_uid, label_name):
+    def fetch_dashboard_variable_label_values(self, promql_datasource_uid, label_name, metric_match_filter=None):
         try:
             url = f'{self.__host}/api/datasources/proxy/uid/{promql_datasource_uid}/api/v1/label/{label_name}/values'
-            response = requests.get(url, headers=self.headers, verify=self.__ssl_verify)
+            params = {}
+
+            if metric_match_filter:
+                params['match[]'] = metric_match_filter
+
+            response = requests.get(url, headers=self.headers, params=params, verify=self.__ssl_verify)
             if response and response.status_code == 200:
                 return response.json().get('data', [])
             else:
@@ -267,6 +271,26 @@ class GrafanaApiProcessor(Processor):
             logger.error(f"Exception fetching datasources: {e}")
             return []
 
+    def _get_label_match_filter(self, query_string):
+        """
+        Convert label_values queries by replacing variable references with regex wildcards.
+        """
+        label_values_pattern = r'label_values\(([^)]+),\s*[^)]+\)'
+        
+        match = re.search(label_values_pattern, query_string)
+        if not match:
+            return query_string
+        
+        # Extract the metric part (everything before the last comma)
+        full_match = match.group(1)
+        
+        # Replace all variable references ($variable) with ".*"
+        # This pattern matches $followed by word characters (letters, digits, underscore)
+        variable_pattern = r'\"\$\w+\"'
+        converted_metric = re.sub(variable_pattern, '".*"', full_match)
+
+        return converted_metric
+
     def _resolve_query_variable(self, var, resolved_variables):
         """
         Resolves a 'query' type variable.
@@ -306,7 +330,7 @@ class GrafanaApiProcessor(Processor):
         label_values_match = re.search(r'label_values\((?:.*\s*,\s*)?(\w+)\)', query)
         if label_values_match:
             label = label_values_match.group(1)
-            return self.fetch_dashboard_variable_label_values(ds_uid, label)
+            return self.fetch_dashboard_variable_label_values(ds_uid, label, self._get_label_match_filter(query))
 
         # Case 2: metrics(pattern) -> label_values(__name__)
         if re.match(r'metrics\(.*\)', query):

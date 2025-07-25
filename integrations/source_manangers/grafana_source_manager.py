@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import string
+import requests
 from typing import Optional, Union
 
 from google.protobuf.struct_pb2 import Struct
@@ -26,6 +27,7 @@ from protos.playbooks.playbook_commons_pb2 import (
 from protos.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
+from utils.playbooks_client import PrototypeClient
 from utils.proto_utils import dict_to_proto, proto_to_dict
 
 logger = logging.getLogger(__name__)
@@ -56,7 +58,6 @@ class GrafanaSourceManager(SourceManager):
         self.task_type_callable_map = {
             Grafana.TaskType.PROMETHEUS_DATASOURCE_METRIC_EXECUTION: {
                 "executor": self.execute_prometheus_datasource_metric_execution,
-                "asset_descriptor": self.execute_prometheus_datasource_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your Prometheus Data Sources from Grafana",
@@ -100,7 +101,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.QUERY_DASHBOARD_PANEL_METRIC: {
                 "executor": self.execute_query_dashboard_panel_metric_execution,
-                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Query any of your dashboard panels from Grafana",
@@ -181,7 +181,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.FETCH_DASHBOARD_VARIABLE_LABEL_VALUES: {
                 "executor": self.execute_fetch_dashboard_variable_label_values,
-                "asset_descriptor": self.execute_prometheus_datasource_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Fetch label values for dashboard variables from Prometheus Datasource",
@@ -205,7 +204,6 @@ class GrafanaSourceManager(SourceManager):
             },
             Grafana.TaskType.FETCH_DASHBOARD_VARIABLES: {
                 "executor": self.execute_fetch_dashboard_variables,
-                "asset_descriptor": self.query_dashboard_panel_metric_asset_descriptor,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
                 "display_name": "Fetch all variables and their values from a Grafana Dashboard",
@@ -385,16 +383,18 @@ class GrafanaSourceManager(SourceManager):
                     )
                 )
                 
-                assets_result: AccountConnectorAssets = asset_manager_facade.get_asset_model_values(
-                    grafana_connector,
+                prototype_client = PrototypeClient()
+                assets_result: AccountConnectorAssets = prototype_client.get_connector_assets(
+                    "GRAFANA",
+                    grafana_connector.id.value,
                     SourceModelType.GRAFANA_DASHBOARD,
-                    dashboard_asset_filter
+                    proto_to_dict(dashboard_asset_filter)
                 )
 
                 # Extract current values from dashboard assets if available
                 current_values_from_assets = {}
-                if assets_result and assets_result[0].grafana and assets_result[0].grafana.assets:
-                    dashboard_asset_model: GrafanaAssetModel = assets_result[0].grafana.assets[0]
+                if assets_result and assets_result.grafana and assets_result.grafana.assets:
+                    dashboard_asset_model: GrafanaAssetModel = assets_result.grafana.assets[0]
                     dashboard_data: GrafanaDashboardAssetModel = dashboard_asset_model.grafana_dashboard
                     
                     # Convert the dashboard JSON struct to dict
@@ -941,240 +941,6 @@ class GrafanaSourceManager(SourceManager):
                 text=TextResult(output=StringValue(value=error_message))
             )
             return [error_result]
-
-    @staticmethod
-    def query_dashboard_panel_metric_asset_descriptor(grafana_connector: ConnectorProto,
-                                                      filters: Optional[dict] = None):
-        try:
-            assets: AccountConnectorAssets = asset_manager_facade.get_asset_model_values(
-                grafana_connector, SourceModelType.GRAFANA_DASHBOARD, AccountConnectorAssetsModelFilters()
-            )
-            if not assets:
-                logger.warning(
-                    f"GrafanaSourceManager.query_dashboard_panel_metric_asset_descriptor:: No assets "
-                    f"found for account: {grafana_connector.account_id.value}, connector: {grafana_connector.id.value}"
-                )
-                return ""
-            assets = assets[0]
-            grafana_assets: list[GrafanaAssetModel] = assets.grafana.assets
-            all_dashboard_asset: list[GrafanaDashboardAssetModel] = [
-                grafana_asset.grafana_dashboard for grafana_asset in grafana_assets if
-                grafana_asset.type == SourceModelType.GRAFANA_DASHBOARD
-            ]
-            asset_list_string = ""
-            filtered_list = ""
-            for asset in all_dashboard_asset:
-                dashboard_dict = proto_to_dict(asset.dashboard_json)
-                dashboard_id = asset.dashboard_id.value
-                dashboard_title = dashboard_dict.get("title", "")
-                dashboard_uid = dashboard_dict.get("uid", "")
-
-                # Start building the asset description for this dashboard
-                asset_string = f"Dashboard Title: `{dashboard_title}`, Dashboard ID: `{dashboard_id}`, Dashboard UID: `{dashboard_uid}`\n"
-                # Extract and format template variables section
-                template_vars_section = ""
-                template_vars_dict = {}  # Dictionary to store template variable values
-                dashboard_templating = dashboard_dict.get("templating", {})
-                if isinstance(dashboard_templating, dict) and "list" in dashboard_templating:
-                    template_vars = dashboard_templating.get("list", [])
-                    if template_vars:
-                        template_vars_section = "Template Variables:\n"
-                        for var in template_vars:
-                            if not isinstance(var, dict):
-                                continue
-
-                            var_name = var.get("name", "")
-                            if not var_name:
-                                continue
-
-                            var_type = var.get("type", "")
-                            current = var.get("current", {})
-
-                            if isinstance(current, dict):
-                                current_value = current.get("value")
-
-                                # Store the variable value in our dictionary
-                                template_vars_dict[var_name] = current_value
-
-                                # Format the current value for display in the asset descriptor
-                                value_display = ""
-                                if isinstance(current_value, list):
-                                    value_display = ", ".join(str(v) for v in current_value)
-                                else:
-                                    value_display = str(current_value) if current_value is not None else "null"
-
-                                template_vars_section += f"  - ${var_name}: {value_display} (type: {var_type})\n"
-
-                                # Include reference format
-                                template_vars_section += f"    Usage in queries: ${{{var_name}}}\n"
-
-                        template_vars_section += "\n"
-
-                if template_vars_section:
-                    asset_string += template_vars_section
-
-                # Process panels
-                panels = dashboard_dict.get("panels", [])
-                for panel in panels:
-                    panel_id = panel.get("id") if "id" in panel else 0
-                    panel_title = panel.get("title", "unnamed panel")
-                    targets = panel.get("targets")
-                    if targets:
-                        query_exprs = []
-                        data_sources = []
-
-                        for target in targets:
-                            query = target.get("query", "")
-                            expr = target.get("expr", "")
-                            datasource = target.get("datasource", {})
-
-                            # Handle datasource format variations
-                            datasource_info = {}
-                            if isinstance(datasource, dict) and "uid" in datasource:
-                                # Get the datasource UID and resolve any template variables
-                                uid = datasource.get("uid", "")
-                                # Resolve template variables in the UID if present
-                                if uid and isinstance(uid, str) and "${" in uid and "}" in uid:
-                                    # Extract variable name from ${varname} format
-                                    var_name = uid.replace("${", "").replace("}", "")
-                                    if var_name in template_vars_dict:
-                                        uid = template_vars_dict[var_name]
-
-                                datasource_info = {"uid": uid}
-                            elif isinstance(datasource, str):
-                                # For backward compatibility with older Grafana versions
-                                datasource_name = datasource
-                                if "${" in datasource_name and "}" in datasource_name:
-                                    var_name = datasource_name.replace("${", "").replace("}", "")
-                                    if var_name in template_vars_dict:
-                                        datasource_name = template_vars_dict[var_name]
-                                        if isinstance(datasource_name, list) and datasource_name:
-                                            datasource_name = datasource_name[0]  # Take first value if it's a list
-
-                                datasource_info = {"name": datasource_name}
-
-                            # Also resolve template variables in expressions
-                            if expr:
-                                var_refs = re.findall(r"\$\{([^}]+)\}", expr)
-                                resolved_expr = expr
-                                for var_ref in var_refs:
-                                    if var_ref in template_vars_dict:
-                                        var_value = template_vars_dict[var_ref]
-                                        if isinstance(var_value, list) and var_value:
-                                            var_value = var_value[0]  # Take first value if it's a list
-                                        resolved_expr = resolved_expr.replace(f"${{{var_ref}}}", str(var_value))
-                                expr = resolved_expr
-
-                                query_exprs.append(
-                                    {
-                                        "expr": expr,
-                                    }
-                                )
-
-                            if query:
-                                var_refs = re.findall(r"\$\{([^}]+)\}", query)
-                                resolved_query = query
-                                for var_ref in var_refs:
-                                    if var_ref in template_vars_dict:
-                                        var_value = template_vars_dict[var_ref]
-                                        if isinstance(var_value, list) and var_value:
-                                            var_value = var_value[0]  # Take first value if it's a list
-                                        resolved_query = resolved_query.replace(f"${{{var_ref}}}", str(var_value))
-                                query = resolved_query
-                                query_exprs.append(
-                                    {
-                                        "query": query,
-                                    }
-                                )
-
-                            data_sources.append(
-                                {
-                                    "datasource": datasource_info,
-                                }
-                            )
-
-                        query_exprs_str = json.dumps(query_exprs, indent=2)
-                        data_sources_str = json.dumps(data_sources, indent=2)
-                    else:
-                        query_exprs_str = ""
-                        data_sources_str = ""
-
-                    if query_exprs_str:
-                        asset_string += f"Panel Title: `{panel_title}`, Panel ID: `{panel_id}`\n"
-                        asset_string += f"  - Queries: {query_exprs_str}\n" if query_exprs_str else ""
-                        asset_string += f"  - Query Data Sources: {data_sources_str}\n" if data_sources_str else ""
-                        asset_string += "\n"
-
-                asset_string += "\n"
-                # Apply filters if specified
-                if filters and "dashboard_title" in filters:
-                    if filters["dashboard_title"].lower() in dashboard_title.lower():
-                        filtered_list += asset_string
-                elif filters and "dashboard_titles" in filters and is_partial_match(dashboard_title,
-                                                                                    filters["dashboard_titles"]):
-                    filtered_list += asset_string
-
-                asset_list_string += asset_string
-
-            result = filtered_list if filtered_list else asset_list_string
-            return result
-        except Exception as e:
-            logger.error(
-                f"GrafanaSourceManager.query_dashboard_panel_metric_asset_descriptor:: Error while "
-                f"generating asset descriptor for account: {grafana_connector.account_id.value}, connector: "
-                f"{grafana_connector.id.value} with error: {e}"
-            )
-        return ""
-
-    @staticmethod
-    def execute_prometheus_datasource_metric_asset_descriptor(grafana_connector: ConnectorProto,
-                                                              filters: Optional[dict] = None):
-        try:
-            assets: AccountConnectorAssets = asset_manager_facade.get_asset_model_values(
-                grafana_connector, SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE, AccountConnectorAssetsModelFilters()
-            )
-            if not assets:
-                logger.warning(
-                    f"GrafanaSourceManager.execute_prometheus_datasource_metric_asset_descriptor:: No assets "
-                    f"found for account: {grafana_connector.account_id.value}, and "
-                    f"Connector: {grafana_connector.id.value}"
-                )
-            assets = assets[0]
-            grafana_assets: list[GrafanaAssetModel] = assets.datadog.assets
-            all_datasource_asset: list[GrafanaDatasourceAssetModel] = [
-                grafana_asset.grafana_prometheus_datasource
-                for grafana_asset in grafana_assets
-                if grafana_asset.type == SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE
-            ]
-
-            asset_list_string = ""
-            filtered_list = ""
-            for asset in all_datasource_asset:
-                datasource_id = asset.datasource_id.value
-                datasource_uid = asset.datasource_uid.value
-                datasource_name = asset.datasource_name.value
-                datasource_type = asset.datasource_type.value
-                datasource_orgId = asset.datasource_orgId.value
-                datasource_url = asset.datasource_url.value
-
-                if (
-                        (filters and "datasource_name" in filters and filters["datasource_name"] in datasource_name)
-                        or (filters and "datasource_uid" in filters and filters["datasource_uid"] in datasource_uid)
-                        or (filters and "datasource_id" in filters and filters["datasource_id"] in datasource_id)
-                ):
-                    filtered_list += f"Datasource Name: `{datasource_name}`, Datasource ID: `{datasource_id}`, Datasource UID: {datasource_uid}, Datasource Type: {datasource_type}, Dashboard URL: {datasource_url}, Datasource orgId: {datasource_orgId} \n\n "
-                asset_list_string += f"Datasource Name: `{datasource_name}`, Datasource ID: `{datasource_id}`, Datasource UID: {datasource_uid}, Datasource Type: {datasource_type}, Dashboard URL: {datasource_url}, Datasource orgId: {datasource_orgId} \n\n "
-
-            # Return the filtered list if available, otherwise return the full list
-            return filtered_list if filtered_list else asset_list_string
-
-        except Exception as e:
-            logger.error(
-                f"GrafanaSourceManager.execute_prometheus_datasource_metric_asset_descriptor:: Error while "
-                f"generating asset descriptor for account: {grafana_connector.account_id.value} and connector: "
-                f"{grafana_connector.id.value} with error: {e}"
-            )
-        return None
 
     def _calculate_bucket_size_seconds(self, total_seconds):
         """Calculate appropriate bucket size based on duration, aiming for < MAX_DATA_POINTS buckets."""
