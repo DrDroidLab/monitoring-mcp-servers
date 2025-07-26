@@ -29,10 +29,12 @@ class Kubectl(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UNKNOWN: Kubectl._TaskType.ValueType  # 0
         COMMAND: Kubectl._TaskType.ValueType  # 1
+        K8S_WRITE_COMMAND: Kubectl._TaskType.ValueType  # 2
 
     class TaskType(_TaskType, metaclass=_TaskTypeEnumTypeWrapper): ...
     UNKNOWN: Kubectl.TaskType.ValueType  # 0
     COMMAND: Kubectl.TaskType.ValueType  # 1
+    K8S_WRITE_COMMAND: Kubectl.TaskType.ValueType  # 2
 
     @typing_extensions.final
     class Command(google.protobuf.message.Message):
@@ -49,19 +51,38 @@ class Kubectl(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["command", b"command"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["command", b"command"]) -> None: ...
 
+    @typing_extensions.final
+    class WriteCommand(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        COMMAND_FIELD_NUMBER: builtins.int
+        @property
+        def command(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+        def __init__(
+            self,
+            *,
+            command: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["command", b"command"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["command", b"command"]) -> None: ...
+
     TYPE_FIELD_NUMBER: builtins.int
     COMMAND_FIELD_NUMBER: builtins.int
+    K8S_WRITE_COMMAND_FIELD_NUMBER: builtins.int
     type: global___Kubectl.TaskType.ValueType
     @property
     def command(self) -> global___Kubectl.Command: ...
+    @property
+    def k8s_write_command(self) -> global___Kubectl.WriteCommand: ...
     def __init__(
         self,
         *,
         type: global___Kubectl.TaskType.ValueType = ...,
         command: global___Kubectl.Command | None = ...,
+        k8s_write_command: global___Kubectl.WriteCommand | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["command", b"command", "task", b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["command", b"command", "task", b"task", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["command"] | None: ...
+    def HasField(self, field_name: typing_extensions.Literal["command", b"command", "k8s_write_command", b"k8s_write_command", "task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["command", b"command", "k8s_write_command", b"k8s_write_command", "task", b"task", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["task", b"task"]) -> typing_extensions.Literal["command", "k8s_write_command"] | None: ...
 
 global___Kubectl = Kubectl
