@@ -40,7 +40,6 @@ class KubernetesSourceManager(SourceManager):
                     FormField(key_name=StringValue(value="command"),
                               display_name=StringValue(value="Kubectl Write Command"),
                               description=StringValue(value='e.g. "kubectl apply -f deployment.yaml", "kubectl scale deployment nginx --replicas=3", "kubectl delete pod my-pod -n default"'),
-                              helper_text=StringValue(value="Enter the kubectl command that will modify the cluster state"),
                               data_type=LiteralType.STRING,
                               form_field_type=FormFieldType.MULTILINE_FT),
                 ]
