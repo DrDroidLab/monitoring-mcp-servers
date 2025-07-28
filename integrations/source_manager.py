@@ -75,6 +75,18 @@ class SourceManager:
         connector_proto: ConnectorProto = credential_yaml_to_connector_proto(connector_name,
                                                                              loaded_connections[connector_name], connector_id)
         return connector_proto
+    
+    def get_all_active_connectors(self):
+        loaded_connections = settings.LOADED_CONNECTIONS
+        if not loaded_connections:
+            raise Exception("No loaded connections found")
+        print("KEKW loads", loaded_connections)
+        all_active_connections = []
+        for c, metadata in loaded_connections.items():
+            print(c, metadata)
+            connector_proto = credential_yaml_to_connector_proto(c, metadata)
+            all_active_connections.append(connector_proto)
+        return all_active_connections
 
     def get_resolved_task(self, global_variable_set: Struct, input_task: PlaybookTask):
         source = input_task.source

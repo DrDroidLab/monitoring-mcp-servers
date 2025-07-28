@@ -113,3 +113,21 @@ def account_get_api():
         return wrapper
 
     return decorator
+
+
+def mcp_api():
+    """
+    Decorator for MCP endpoints that handles JSON-RPC 2.0 requests with AccountApiToken authentication.
+    Similar to account_data_api but for raw HTTP requests instead of protobuf.
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        @csrf_exempt
+        @api_view(['POST', 'GET'])
+        @api_auth_check
+        def wrapper(request):
+            return func(request)
+
+        return wrapper
+
+    return decorator
