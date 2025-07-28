@@ -204,9 +204,15 @@ def generate_mcp_tools_for_connectors() -> Tuple[List[Dict[str, Any]], Dict[str,
 
     # Get loaded connections from settings
     loaded_connections = settings.LOADED_CONNECTIONS
-    if not loaded_connections:
-        logger.info("No credentials found in secrets.yaml, no tools will be generated")
+    
+    # If no connections but native k8s mode is enabled, we still want to provide k8s tools
+    if not loaded_connections and not settings.NATIVE_KUBERNETES_API_MODE:
+        logger.info("No credentials found in secrets.yaml and native k8s mode disabled, no tools will be generated")
         return all_tools, tool_to_task_mapping
+    
+    # Ensure we have an empty dict if no connections but native k8s mode is enabled
+    if not loaded_connections:
+        loaded_connections = {}
 
     # Create mapping from credential type to source enum
     from protos.base_pb2 import Source
@@ -246,6 +252,18 @@ def generate_mcp_tools_for_connectors() -> Tuple[List[Dict[str, Any]], Dict[str,
         'GITHUB_ACTIONS': Source.GITHUB_ACTIONS,
         'EKS': Source.EKS
     }
+
+    # Add native Kubernetes connector if NATIVE_KUBERNETES_API_MODE is enabled
+    if settings.NATIVE_KUBERNETES_API_MODE:
+        # Check if we already have a Kubernetes connector in loaded_connections
+        has_k8s_connector = any(config.get('type') == 'KUBERNETES' for config in loaded_connections.values())
+        
+        if not has_k8s_connector:
+            # Add a native Kubernetes connector
+            api_token_identifier = settings.DRD_CLOUD_API_TOKEN[-3:] if settings.DRD_CLOUD_API_TOKEN else "xxx"
+            native_k8s_connector_name = f'native_k8_connection_{api_token_identifier}'
+            loaded_connections[native_k8s_connector_name] = {'type': 'KUBERNETES'}
+            logger.info(f"Added native Kubernetes connector: {native_k8s_connector_name}")
 
     # Process each connector from loaded connections
     for connector_name, connector_config in loaded_connections.items():
@@ -456,7 +474,16 @@ def build_playbook_task_from_mcp_args_with_connector(source: Any, task_type: Any
         print(f"Building task with source_name: {source_name}, task_type: {task_type}, task_type_name: {task_type_name}, connector_name: {connector_name}")
 
         # Get connector proto from credentials using connector name
-        loaded_connections = settings.LOADED_CONNECTIONS
+        loaded_connections = settings.LOADED_CONNECTIONS or {}
+        
+        # Add native Kubernetes connector if NATIVE_KUBERNETES_API_MODE is enabled and not already present
+        if settings.NATIVE_KUBERNETES_API_MODE:
+            has_k8s_connector = any(config.get('type') == 'KUBERNETES' for config in loaded_connections.values())
+            if not has_k8s_connector:
+                api_token_identifier = settings.DRD_CLOUD_API_TOKEN[-3:] if settings.DRD_CLOUD_API_TOKEN else "xxx"
+                native_k8s_connector_name = f'native_k8_connection_{api_token_identifier}'
+                loaded_connections[native_k8s_connector_name] = {'type': 'KUBERNETES'}
+        
         if connector_name not in loaded_connections:
             raise ValueError(f"Connector {connector_name} not found in loaded connections")
 
