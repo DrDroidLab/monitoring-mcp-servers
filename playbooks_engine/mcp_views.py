@@ -42,6 +42,7 @@ def _get_all_tools_and_mappings():
     _tool_mappings_cache['global'] = result
     return result
 
+
 def _clear_tools_cache():
     """Clear the tools cache for a specific account or all accounts"""
     global _tool_mappings_cache

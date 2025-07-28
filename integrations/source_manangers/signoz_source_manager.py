@@ -12,12 +12,11 @@ from google.protobuf.wrappers_pb2 import (
 
 from integrations.source_api_processors.signoz_api_processor import SignozApiProcessor
 from integrations.source_manager import SourceManager
-from protos.assets.asset_pb2 import (
-    AccountConnectorAssetsModelFilters,
-    AccountConnectorAssets,
-)
+from integrations.source_metadata_extractors.signoz_metadata_extractor import SignozSourceMetadataExtractor
 from protos.assets.signoz_asset_pb2 import (
     SignozDashboardModel,
+    SignozDashboardPanelModel,
+    SignozDashboardVariableModel,
 )
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import (
@@ -36,7 +35,6 @@ from protos.playbooks.playbook_commons_pb2 import (
 from protos.playbooks.source_task_definitions.signoz_task_pb2 import Signoz
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
-from utils.playbooks_client import PrototypeClient
 from utils.proto_utils import dict_to_proto, proto_to_dict
 from utils.time_utils import calculate_timeseries_bucket_size
 
@@ -864,30 +862,42 @@ class SignozSourceManager(SourceManager):
             logger.error(f"Error executing queries for panel '{panel_info.get('panel_title', 'UNKNOWN')}': {e}", exc_info=True)
             return None  # Indicate error for this panel
 
-    def _find_dashboard_asset(self, signoz_connector: ConnectorProto, dashboard_name: str) -> typing.Optional["SignozDashboardModel"]:
-        """Finds a specific dashboard asset by name."""
+    def _convert_dict_to_dashboard_proto(self, dashboard_dict: dict) -> SignozDashboardModel:
+        """Converts raw dashboard dictionary to SignozDashboardModel proto using utils."""
+        return dict_to_proto(dashboard_dict, SignozDashboardModel)
+
+    def _find_dashboard_asset(self, signoz_connector: ConnectorProto, dashboard_name: str) -> typing.Optional[SignozDashboardModel]:
+        """Finds a specific dashboard by name using metadata extractor."""
         try:
-            prototype_client = PrototypeClient()
-            assets:AccountConnectorAssets = prototype_client.get_connector_assets(
-                "SIGNOZ",
-                signoz_connector.id.value,
-                SourceModelType.SIGNOZ_DASHBOARD,
-                proto_to_dict(AccountConnectorAssetsModelFilters()),  # Pass filters if possible later
+            # Get connector credentials
+            generated_credentials = generate_credentials_dict(signoz_connector.type, signoz_connector.keys)
+            
+            # Create metadata extractor instance
+            signoz_metadata_extractor = SignozSourceMetadataExtractor(
+                request_id="dashboard_find_request",
+                connector_name=signoz_connector.name.value,
+                signoz_api_url=generated_credentials.get('signoz_api_url'),
+                signoz_api_token=generated_credentials.get('signoz_api_token')
             )
-            if not assets or not assets.signoz or not assets.signoz.assets:
-                logger.warning(f"No Signoz dashboard assets found for connector {signoz_connector.id.value}")
+
+            # Extract dashboards directly without saving to database
+            dashboards_data = signoz_metadata_extractor.extract_dashboards(save_to_db=False)
+            
+            if not dashboards_data:
+                logger.warning(f"No Signoz dashboards found for connector {signoz_connector.id.value}")
                 return None
 
-            for asset in assets.signoz.assets:
-                if (
-                    asset.type == SourceModelType.SIGNOZ_DASHBOARD
-                    and asset.HasField("signoz_dashboard")
-                    and asset.signoz_dashboard.title.value == dashboard_name
-                ):
-                    return asset.signoz_dashboard
+            # Find dashboard by name and convert to proto
+            for dashboard_id, dashboard in dashboards_data.items():
+                if isinstance(dashboard, dict) and dashboard.get("title") == dashboard_name:
+                    logger.info(f"Found dashboard '{dashboard_name}' with ID: {dashboard_id}")
+                    # Convert raw dict to proto and return
+                    return self._convert_dict_to_dashboard_proto(dashboard)
+            
+            logger.warning(f"Dashboard '{dashboard_name}' not found in available dashboards")
             return None
         except Exception as e:
-            logger.error(f"Error fetching dashboard assets for connector {signoz_connector.id.value}: {e}", exc_info=True)
+            logger.error(f"Error fetching dashboard '{dashboard_name}' for connector {signoz_connector.id.value}: {e}", exc_info=True)
             return None  # Indicate error during fetch
 
     def _parse_dashboard_variables(self, task: Signoz.DashboardDataTask) -> tuple[dict, typing.Optional[PlaybookTaskResult]]:
@@ -909,7 +919,7 @@ class SignozSourceManager(SourceManager):
             )
             return {}, error_result  # Return empty dict and the error
 
-    def _prepare_panel_queries(self, dashboard: "SignozDashboardModel", query_builder: SignozDashboardQueryBuilder) -> dict:
+    def _prepare_panel_queries(self, dashboard: SignozDashboardModel, query_builder: SignozDashboardQueryBuilder) -> dict:
         """Processes panels to build a map of {panel_id: {panel_info}} including built query dicts."""
         panel_queries_map = {}
         for panel in dashboard.panels:
