@@ -6,7 +6,7 @@ from typing import Optional
 from django.conf import settings
 
 from integrations.source_facade import source_facade
-from playbooks_engine.mcp_utils import generate_mcp_tools_for_source_manager, execute_mcp_tool
+from playbooks_engine.mcp_utils import generate_mcp_tools_for_source_manager, execute_mcp_tool, generate_mcp_tools_for_connectors, execute_mcp_tool_with_connector
 from utils.decorators import mcp_api
 from utils.credentilal_utils import credential_yaml_to_connector_proto
 
@@ -29,11 +29,22 @@ _tool_mappings_cache = {}
 
 
 def _get_all_tools_and_mappings():
-    """Get all tools and mappings for all available source managers that have credentials defined"""
+    """Get all tools and mappings for all available connectors from secrets.yaml"""
     # Check cache first
     if 'global' in _tool_mappings_cache:
         return _tool_mappings_cache['global']
 
+    # Use the new connector-based approach
+    all_tools, tool_mappings = generate_mcp_tools_for_connectors()
+
+    # Cache the results
+    result = (all_tools, tool_mappings)
+    _tool_mappings_cache['global'] = result
+    return result
+
+
+def _get_all_tools_and_mappings_legacy():
+    """Get all tools and mappings for all available source managers that have credentials defined (legacy approach)"""
     all_tools = []
     tool_mappings = {}
 
@@ -41,9 +52,7 @@ def _get_all_tools_and_mappings():
     loaded_connections = settings.LOADED_CONNECTIONS
     if not loaded_connections:
         logger.info("No credentials found in secrets.yaml, no tools will be generated")
-        result = (all_tools, tool_mappings)
-        _tool_mappings_cache['global'] = result
-        return result
+        return all_tools, tool_mappings
 
     # Get unique source types from loaded connections
     available_source_types = set()
@@ -152,10 +161,7 @@ def _get_all_tools_and_mappings():
             logger.error(f"Error generating tools for source {source}: {e}")
             continue
 
-    # Cache the results
-    result = (all_tools, tool_mappings)
-    _tool_mappings_cache['global'] = result
-    return result
+    return all_tools, tool_mappings
 
 
 def _clear_tools_cache():
@@ -207,6 +213,46 @@ def mcp_endpoint(request):
                 "id": request_id,
                 "result": {"message": f"Cache cleared"}
             })
+        elif method == "debug/connectors":
+            # Development endpoint to list connectors and their tools
+            try:
+                loaded_connections = settings.LOADED_CONNECTIONS
+                connectors_info = {}
+                
+                for connector_name, connector_config in loaded_connections.items():
+                    connectors_info[connector_name] = {
+                        "type": connector_config.get("type", "unknown"),
+                        "config": {k: "***" if "key" in k.lower() or "password" in k.lower() or "token" in k.lower() else v 
+                                 for k, v in connector_config.items()}
+                    }
+                
+                all_tools, tool_mappings = generate_mcp_tools_for_connectors()
+                
+                return JsonResponse({
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {
+                        "connectors": connectors_info,
+                        "tools_count": len(all_tools),
+                        "tools": [tool["name"] for tool in all_tools],
+                        "tool_mappings": {k: {
+                            "connector_name": v["connector_name"],
+                            "source": str(v["source"]),
+                            "task_type": str(v["task_type"]),
+                            "task_type_name": v["task_type_name"]
+                        } for k, v in tool_mappings.items()}
+                    }
+                })
+            except Exception as e:
+                logger.error(f"Error in debug/connectors: {e}")
+                return JsonResponse({
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "error": {
+                        "code": -32000,
+                        "message": str(e)
+                    }
+                }, status=500)
         else:
             return JsonResponse({
                 "jsonrpc": "2.0",
@@ -322,9 +368,9 @@ def _handle_tools_call(params, request_id, request):
                 }
             }, status=404)
 
-        # Execute the tool
+        # Execute the tool using the new connector-based approach
         try:
-            tool_result = execute_mcp_tool(tool_name, arguments, tool_mappings)
+            tool_result = execute_mcp_tool_with_connector(tool_name, arguments, tool_mappings)
             result = {
                 "content": [
                     {

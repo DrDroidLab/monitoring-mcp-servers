@@ -10,12 +10,11 @@ from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 
 from integrations.source_api_processors.grafana_api_processor import GrafanaApiProcessor
 from integrations.source_manager import SourceManager
+from integrations.source_metadata_extractors.grafana_metadata_extractor import GrafanaSourceMetadataExtractor
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import Literal, LiteralType
-from protos.assets.grafana_asset_pb2 import GrafanaAssetModel, GrafanaDashboardAssetModel, \
-    GrafanaDashboardAssetOptions
-from protos.assets.asset_pb2 import AccountConnectorAssets, AccountConnectorAssetsModelFilters
+
 from protos.playbooks.playbook_commons_pb2 import (
     ApiResponseResult,
     LabelValuePair,
@@ -27,7 +26,6 @@ from protos.playbooks.playbook_commons_pb2 import (
 from protos.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
-from utils.playbooks_client import PrototypeClient
 from utils.proto_utils import dict_to_proto, proto_to_dict
 
 logger = logging.getLogger(__name__)
@@ -285,7 +283,6 @@ class GrafanaSourceManager(SourceManager):
             # Fallback: return API response if no timeseries data found
             response_struct = dict_to_proto(response, Struct)
             output = ApiResponseResult(response_body=response_struct)
-
             task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
                                              api_response=output)
             return task_result
@@ -357,87 +354,40 @@ class GrafanaSourceManager(SourceManager):
             
             dashboard_uid = task.dashboard_uid.value
 
-            grafana_api_processor = self.get_connector_processor(grafana_connector)
-
             print(
                 f"Playbook Task Downstream Request: Type -> Grafana FETCH_DASHBOARD_VARIABLES, Dashboard_UID -> {dashboard_uid}",
                 flush=True,
             )
 
-            variables_data = grafana_api_processor.get_dashboard_variables(dashboard_uid)
+            # Get connector credentials
+            generated_credentials = generate_credentials_dict(grafana_connector.type, grafana_connector.keys)
+            
+            # Create metadata extractor instance
+            grafana_metadata_extractor = GrafanaSourceMetadataExtractor(
+                request_id="dashboard_variables_request",
+                connector_name=grafana_connector.name.value,
+                grafana_host=generated_credentials.get('grafana_host'),
+                grafana_api_key=generated_credentials.get('grafana_api_key'),
+                ssl_verify=generated_credentials.get('ssl_verify', 'true')
+            )
 
-            if not variables_data or not variables_data.get('variables'):
+            # Use metadata extractor to get dashboard variables directly
+            variables_data = grafana_metadata_extractor.extract_dashboard_variables(dashboard_uid)
+
+            if variables_data.get('error'):
                 return PlaybookTaskResult(
                     type=PlaybookTaskResultType.TEXT,
-                    text=TextResult(output=StringValue(value=f"No variables found for dashboard: {dashboard_uid}. Send an empty dictionary for template variables")),
+                    text=TextResult(output=StringValue(value=variables_data['error'])),
                     source=self.source,
                 )
 
-            # Also get current values from dashboard assets to supplement the API response
-            try:
-                dashboard_asset_filter = AccountConnectorAssetsModelFilters(
-                    grafana_dashboard_model_filters=GrafanaDashboardAssetOptions(
-                        dashboards=[GrafanaDashboardAssetOptions.GrafanaDashboardOptions(
-                            dashboard_uid=StringValue(value=dashboard_uid)
-                        )]
-                    )
+            if not variables_data.get('variables'):
+                message = variables_data.get('message', f"No variables found for dashboard: {dashboard_uid}. Send an empty dictionary for template variables")
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=message)),
+                    source=self.source,
                 )
-                
-                prototype_client = PrototypeClient()
-                assets_result: AccountConnectorAssets = prototype_client.get_connector_assets(
-                    "GRAFANA",
-                    grafana_connector.id.value,
-                    SourceModelType.GRAFANA_DASHBOARD,
-                    proto_to_dict(dashboard_asset_filter)
-                )
-
-                # Extract current values from dashboard assets if available
-                current_values_from_assets = {}
-                if assets_result and assets_result.grafana and assets_result.grafana.assets:
-                    dashboard_asset_model: GrafanaAssetModel = assets_result.grafana.assets[0]
-                    dashboard_data: GrafanaDashboardAssetModel = dashboard_asset_model.grafana_dashboard
-                    
-                    # Convert the dashboard JSON struct to dict
-                    dashboard_dict = proto_to_dict(dashboard_data.dashboard_json)
-                    
-                    # Extract current values from stored dashboard JSON
-                    dashboard_templating = dashboard_dict.get("templating", {})
-                    if isinstance(dashboard_templating, dict) and "list" in dashboard_templating:
-                        template_vars = dashboard_templating.get("list", [])
-                        print("Template vars", template_vars)
-                        for var in template_vars:
-                            if not isinstance(var, dict):
-                                continue
-                            
-                            var_name = var.get("name", "")
-                            if not var_name:
-                                continue
-                            
-                            current = var.get("current", {})
-                            if isinstance(current, dict):
-                                current_values_from_assets[var_name] = {
-                                    "current_value": current.get("value"),
-                                    "current_text": current.get("text")
-                                }
-                print("Current values from assets", current_values_from_assets)
-                # Enhance the API response with current values from assets
-                api_variables = variables_data.get('variables', {})
-                enhanced_variables = {}
-                for var_name, var_info in api_variables.items():
-                    print("Var name", var_name)
-                    print("Var info", var_info)
-                    enhanced_variables[var_name] = {}
-                    enhanced_variables[var_name]['allowed_values'] = var_info
-                    if var_name in current_values_from_assets:
-                        # Add current values from assets to the API response
-                        enhanced_variables[var_name]['current_value'] = current_values_from_assets[var_name]['current_value']
-                
-                # Also add a summary of current values
-                variables_data['variables'] = enhanced_variables
-                
-            except Exception as asset_error:
-                logger.warning(f"Failed to get current values from dashboard assets: {asset_error}")
-                variables_data['asset_retrieval_error'] = str(asset_error)
 
             # Ensure we have a proper Struct instance
             if isinstance(variables_data, dict):

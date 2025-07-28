@@ -1,12 +1,14 @@
 import logging
 from typing import Any, Dict, List, Tuple
 from google.protobuf.struct_pb2 import Struct
+from django.conf import settings
 
 from integrations.source_facade import source_facade
 from protos.base_pb2 import TimeRange
 from protos.playbooks.playbook_pb2 import PlaybookTask
 from utils.proto_utils import dict_to_proto, proto_to_dict
 from utils.time_utils import current_epoch_timestamp
+from utils.credentilal_utils import credential_yaml_to_connector_proto
 
 logger = logging.getLogger(__name__)
 
@@ -195,11 +197,194 @@ def generate_mcp_tools_for_source_manager(source_manager: Any) -> Tuple[List[Dic
     return tools, tool_to_task_mapping
 
 
-def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_name: str, arguments: Dict[str, Any], connector_id: int) -> Any:
+def generate_mcp_tools_for_connectors() -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Generate MCP tools and tool-to-task-type mapping for all connectors from secrets.yaml."""
+    all_tools = []
+    tool_to_task_mapping = {}
+
+    # Get loaded connections from settings
+    loaded_connections = settings.LOADED_CONNECTIONS
+    if not loaded_connections:
+        logger.info("No credentials found in secrets.yaml, no tools will be generated")
+        return all_tools, tool_to_task_mapping
+
+    # Create mapping from credential type to source enum
+    from protos.base_pb2 import Source
+    credential_type_to_source = {
+        'CLOUDWATCH': Source.CLOUDWATCH,
+        'DATADOG': Source.DATADOG,
+        'DATADOG_OAUTH': Source.DATADOG_OAUTH,
+        'NEW_RELIC': Source.NEW_RELIC,
+        'GRAFANA': Source.GRAFANA,
+        'GRAFANA_MIMIR': Source.GRAFANA_MIMIR,
+        'AZURE': Source.AZURE,
+        'GKE': Source.GKE,
+        'GCM': Source.GCM,
+        'GRAFANA_LOKI': Source.GRAFANA_LOKI,
+        'POSTGRES': Source.POSTGRES,
+        'CLICKHOUSE': Source.CLICKHOUSE,
+        'SQL_DATABASE_CONNECTION': Source.SQL_DATABASE_CONNECTION,
+        'ELASTIC_SEARCH': Source.ELASTIC_SEARCH,
+        'BIG_QUERY': Source.BIG_QUERY,
+        'MONGODB': Source.MONGODB,
+        'OPEN_SEARCH': Source.OPEN_SEARCH,
+        'API': Source.API,
+        'BASH': Source.BASH,
+        'KUBERNETES': Source.KUBERNETES,
+        'SMTP': Source.SMTP,
+        'SLACK': Source.SLACK,
+        'DOCUMENTATION': Source.DOCUMENTATION,
+        'ROOTLY': Source.ROOTLY,
+        'ZENDUTY': Source.ZENDUTY,
+        'GITHUB': Source.GITHUB,
+        'ARGOCD': Source.ARGOCD,
+        'JIRA_CLOUD': Source.JIRA_CLOUD,
+        'JENKINS': Source.JENKINS,
+        'POSTHOG': Source.POSTHOG,
+        'SIGNOZ': Source.SIGNOZ,
+        'SENTRY': Source.SENTRY,
+        'GITHUB_ACTIONS': Source.GITHUB_ACTIONS,
+        'EKS': Source.EKS
+    }
+
+    # Process each connector from loaded connections
+    for connector_name, connector_config in loaded_connections.items():
+        try:
+            if 'type' not in connector_config:
+                logger.warning(f"No type found for connector {connector_name}, skipping")
+                continue
+
+            connector_type = connector_config['type']
+            
+            # Map credential type to source enum
+            source = credential_type_to_source.get(connector_type)
+            if not source:
+                logger.warning(f"Unknown connector type {connector_type} for connector {connector_name}, skipping")
+                continue
+
+            # Get source manager for this source type
+            source_manager = source_facade.get_source_manager(source)
+            if not source_manager:
+                logger.warning(f"No source manager found for source {source} (connector {connector_name}), skipping")
+                continue
+
+            # Generate tools for this connector
+            connector_tools, connector_mapping = generate_mcp_tools_for_connector(
+                connector_name, source, source_manager
+            )
+            
+            all_tools.extend(connector_tools)
+            tool_to_task_mapping.update(connector_mapping)
+            
+            logger.info(f"Generated {len(connector_tools)} tools for connector {connector_name} (type: {connector_type})")
+
+        except Exception as e:
+            logger.error(f"Error generating tools for connector {connector_name}: {e}")
+            continue
+
+    return all_tools, tool_to_task_mapping
+
+
+def generate_mcp_tools_for_connector(connector_name: str, source: Any, source_manager: Any) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Generate MCP tools and tool-to-task-type mapping for a specific connector."""
+    tools = []
+    tool_to_task_mapping = {}
+
+    try:
+        # Clean connector name for tool naming (remove special characters, make lowercase)
+        clean_connector_name = connector_name.lower().replace(' ', '_').replace('-', '_')
+        # Ensure connector name doesn't exceed reasonable length
+        if len(clean_connector_name) > 30:
+            clean_connector_name = clean_connector_name[:30]
+
+        for task_type, task_info in source_manager.task_type_callable_map.items():
+            try:
+                # Create shorter task type name
+                task_type_name = str(task_type).lower()
+                if hasattr(source_manager, 'task_proto') and source_manager.task_proto:
+                    try:
+                        task_type_name = source_manager.task_proto.TaskType.Name(task_type).lower()
+                        # Remove common prefixes to make it shorter
+                        if task_type_name.startswith('task_type_'):
+                            task_type_name = task_type_name[10:]
+                        elif task_type_name.startswith('task_'):
+                            task_type_name = task_type_name[5:]
+                    except:
+                        pass
+
+                # Create tool name: {connector_name}_{task}
+                tool_name = f"{clean_connector_name}_{task_type_name}"
+
+                # Ensure tool name doesn't exceed 64 characters (common limit for tool names)
+                if len(tool_name) > 64:
+                    # Truncate task type name if needed
+                    max_task_len = 64 - len(clean_connector_name) - 1
+                    if max_task_len > 0:
+                        task_type_name = task_type_name[:max_task_len]
+                        tool_name = f"{clean_connector_name}_{task_type_name}"
+                    else:
+                        # If connector name is too long, truncate both
+                        clean_connector_name = clean_connector_name[:30]
+                        task_type_name = task_type_name[:30]
+                        tool_name = f"{clean_connector_name}_{task_type_name}"
+
+                # Convert form_fields to JSON Schema properties
+                properties = {}
+                required = []
+
+                # Add connector_name as a parameter with default value
+                properties["connector_name"] = {
+                    "type": "string",
+                    "description": f"Name of the connector to use (defaults to {connector_name})",
+                    "default": connector_name
+                }
+
+                for field in task_info.get('form_fields', []):
+                    try:
+                        field_name = field.key_name.value if hasattr(field, 'key_name') else f"field_{len(properties)}"
+                        field_schema = convert_form_field_to_json_schema(field)
+                        properties[field_name] = field_schema
+
+                        if not getattr(field, 'is_optional', True):
+                            required.append(field_name)
+                    except Exception as e:
+                        logger.error(f"Error processing form field: {e}")
+                        continue
+
+                # Create MCP tool definition
+                tool = {
+                    "name": tool_name,
+                    "description": f"{task_info.get('display_name', f'{connector_name} task')} (Connector: {connector_name})",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": properties,
+                        "required": required
+                    }
+                }
+
+                tools.append(tool)
+                tool_to_task_mapping[tool_name] = {
+                    "connector_name": connector_name,
+                    "source": source,
+                    "task_type": task_type,
+                    "task_type_name": task_type_name
+                }
+
+            except Exception as e:
+                logger.error(f"Error creating tool for task type {task_type} in connector {connector_name}: {e}")
+                continue
+
+    except Exception as e:
+        logger.error(f"Error generating tools for connector {connector_name}: {e}")
+
+    return tools, tool_to_task_mapping
+
+
+def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_name: str, arguments: Dict[str, Any], connector_id: int, connector_name: str) -> Any:
     """Build a PlaybookTask proto from MCP arguments."""
     try:
         # Import ConnectorType to get the proper name
-        from protos.connectors.connector_pb2 import Source as ConnectorType
+        from protos.base_pb2 import Source as ConnectorType
 
         # Get source name for task structure - handle enum properly
         source_name = "unknown"
@@ -225,6 +410,7 @@ def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_nam
             "task_connector_sources": [{
                 "id": connector_id,
                 "source": source,
+                "name": connector_name,
             }]
         }
 
@@ -242,6 +428,73 @@ def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_nam
         return task_proto
     except Exception as e:
         logger.error(f"Error building playbook task: {e}")
+        raise
+
+
+def build_playbook_task_from_mcp_args_with_connector(source: Any, task_type: Any, task_type_name: str, arguments: Dict[str, Any], connector_name: str) -> Any:
+    """Build a PlaybookTask proto from MCP arguments using connector name."""
+    try:
+        # Import ConnectorType to get the proper name
+        from protos.base_pb2 import Source as ConnectorType
+
+        # Get source name for task structure - handle enum properly
+        source_name = "unknown"
+        try:
+            # Use ConnectorType.Name to get the proper string name
+            source_name = ConnectorType.Name(source).lower()
+        except:
+            # Fallback to string conversion
+            try:
+                source_name = str(source).lower()
+                if 'source.' in source_name:
+                    source_name = source_name.split('.')[-1]
+                elif '.' in source_name:
+                    source_name = source_name.split('.')[-1]
+            except:
+                raise ValueError(f"Could not determine source name for source: {source}")
+
+        print(f"Building task with source_name: {source_name}, task_type: {task_type}, task_type_name: {task_type_name}, connector_name: {connector_name}")
+
+        # Get connector proto from credentials using connector name
+        loaded_connections = settings.LOADED_CONNECTIONS
+        if connector_name not in loaded_connections:
+            raise ValueError(f"Connector {connector_name} not found in loaded connections")
+
+        connector_config = loaded_connections[connector_name]
+        # Create connector proto without connector_id (since we don't have it in MCP context)
+        connector_proto = credential_yaml_to_connector_proto(connector_name, connector_config)
+        
+        # For the task structure, we'll use a dummy connector_id (0) since it's required for the task structure
+        # but the actual connector proto doesn't need it
+        connector_id = 0
+
+        # Build the task structure
+        task_dict = {
+            "source": source,
+            "task_connector_sources": [{
+                "id": connector_id,
+                "source": source,
+                "name": connector_name,
+            }]
+        }
+
+        # Remove connector_name from arguments since it's not part of the task parameters
+        task_arguments = {k: v for k, v in arguments.items() if k != 'connector_name'}
+
+        # Add task-specific fields
+        task_field = task_type_name.lower()
+        task_dict[source_name] = {
+            "type": task_type
+        }
+        task_dict[source_name][task_field] = task_arguments
+
+        print(f"Task dict structure: {task_dict}")
+
+        # Convert to PlaybookTask proto
+        task_proto = dict_to_proto(task_dict, PlaybookTask)
+        return task_proto, connector_proto
+    except Exception as e:
+        logger.error(f"Error building playbook task with connector: {e}")
         raise
 
 
@@ -267,13 +520,33 @@ def execute_mcp_tool(tool_name: str, arguments: Dict[str, Any], tool_mapping: Di
 
         connector = connectors[0]  # Use first available
 
+        # Get connector name from loaded connections
+        loaded_connections = settings.LOADED_CONNECTIONS
+        connector_name = None
+        print("KEKW loaded_connections", loaded_connections)
+        for c, metadata in loaded_connections.items():
+            if metadata.get('id') == connector.id.value:
+                connector_name = c
+                break
+        
+        if not connector_name:
+            # Fallback: use the first connector name for this source type
+            for c, metadata in loaded_connections.items():
+                if metadata.get('type') == str(source).lower():
+                    connector_name = c
+                    break
+        
+        if not connector_name:
+            raise ValueError(f"Could not determine connector name for connector ID {connector.id.value}")
+
         # Build PlaybookTask proto
         task = build_playbook_task_from_mcp_args(
             source=source,
             task_type=task_type,
             task_type_name=task_type_name,
             arguments=arguments,
-            connector_id=connector.id.value
+            connector_id=connector.id.value,
+            connector_name=connector_name
         )
 
         # Create time range (last 4 hours like in views)
@@ -298,6 +571,72 @@ def execute_mcp_tool(tool_name: str, arguments: Dict[str, Any], tool_mapping: Di
         except Exception as e:
             logger.error(f"Error converting result to dict: {e}")
             return {"result": {"error": str(e)}}
+
+    except Exception as e:
+        logger.error(f"Error executing MCP tool {tool_name}: {e}")
+        return {"error": str(e)} 
+
+
+def execute_mcp_tool_with_connector(tool_name: str, arguments: Dict[str, Any], tool_mapping: Dict[str, Any]) -> Dict[str, Any]:
+    """Execute an MCP tool using connector-based approach."""
+    try:
+        if tool_name not in tool_mapping:
+            raise ValueError(f"Tool {tool_name} not found")
+
+        tool_info = tool_mapping[tool_name]
+        connector_name = tool_info["connector_name"]
+        source = tool_info["source"]
+        task_type = tool_info["task_type"]
+        task_type_name = tool_info["task_type_name"]
+
+        # Use connector name from arguments if provided, otherwise use default from tool info
+        actual_connector_name = arguments.get("connector_name", connector_name)
+
+        # Get source manager for this source
+        source_manager = source_facade.get_source_manager(source)
+        if not source_manager:
+            raise ValueError(f"No source manager found for source {source}")
+
+        # Build PlaybookTask proto with connector
+        task, connector_proto = build_playbook_task_from_mcp_args_with_connector(
+            source=source,
+            task_type=task_type,
+            task_type_name=task_type_name,
+            arguments=arguments,
+            connector_name=actual_connector_name
+        )
+
+        # Create time range (last 4 hours like in views)
+        current_time = current_epoch_timestamp()
+        time_range = TimeRange(time_geq=int(current_time - 14400), time_lt=int(current_time))
+
+        # Execute using source manager directly (similar to source_manager.execute_task but with our connector)
+        try:
+            # Get resolved task
+            resolved_task, resolved_source_task, task_local_variable_map = source_manager.get_resolved_task(
+                Struct(), task
+            )
+
+            # Execute task with our connector proto
+            playbook_task_result = source_manager.task_type_callable_map[task_type]['executor'](
+                time_range, resolved_source_task, connector_proto
+            )
+
+            # Post-process the result
+            from integrations.utils.executor_utils import check_multiple_task_results
+            if check_multiple_task_results(playbook_task_result):
+                task_results = []
+                for result in playbook_task_result:
+                    processed_result = source_manager.postprocess_task_result(result, resolved_task, task_local_variable_map)
+                    task_results.append(processed_result)
+                return {"results": [proto_to_dict(r) for r in task_results]}
+            else:
+                processed_result = source_manager.postprocess_task_result(playbook_task_result, resolved_task, task_local_variable_map)
+                return {"result": proto_to_dict(processed_result)}
+
+        except Exception as e:
+            logger.error(f"Error executing task: {e}")
+            return {"error": str(e)}
 
     except Exception as e:
         logger.error(f"Error executing MCP tool {tool_name}: {e}")
