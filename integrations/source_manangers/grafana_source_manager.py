@@ -55,17 +55,17 @@ class GrafanaSourceManager(SourceManager):
         self.source = Source.GRAFANA
         self.task_proto = Grafana
         self.task_type_callable_map = {
-            Grafana.TaskType.PROMETHEUS_DATASOURCE_METRIC_EXECUTION: {
-                "executor": self.execute_prometheus_datasource_metric_execution,
-                "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
+            Grafana.TaskType.DATASOURCE_QUERY_EXECUTION: {
+                "executor": self.execute_datasource_query_execution,
+                "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE, SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Execute PromQL or Flux queries against Prometheus datasources in Grafana to retrieve metrics data with customizable time intervals",
+                "display_name": "Execute queries against any datasource in Grafana to retrieve metrics data with customizable time intervals",
                 "category": "Metrics",
                 "form_fields": [
                     FormField(
                         key_name=StringValue(value="datasource_uid"),
                         display_name=StringValue(value="Data Source UID"),
-                        description=StringValue(value="The unique identifier (UID) of the Prometheus datasource in Grafana. This is required to identify which datasource to query."),
+                        description=StringValue(value="The unique identifier (UID) of the datasource in Grafana. This is required to identify which datasource to query."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
@@ -80,20 +80,21 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="query_type"),
                         display_name=StringValue(value="Query Type"),
-                        description=StringValue(value="The type of query to execute. PromQL is the standard Prometheus query language, while Flux is an alternative query language for InfluxDB."),
+                        description=StringValue(value="The type of query to execute. PromQL for Prometheus, Flux for InfluxDB, Loki for logs, or any other datasource-specific query language."),
                         data_type=LiteralType.STRING,
                         default_value=Literal(type=LiteralType.STRING, string=StringValue(value="PromQL")),
                         valid_values=[
                             Literal(type=LiteralType.STRING, string=StringValue(value="PromQL")),
                             Literal(type=LiteralType.STRING, string=StringValue(value="Flux")),
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Loki")),
                         ],
                         form_field_type=FormFieldType.DROPDOWN_FT,
                         is_optional=True,
                     ),
                     FormField(
-                        key_name=StringValue(value="promql_expression"),
+                        key_name=StringValue(value="query_expression"),
                         display_name=StringValue(value="Query Expression"),
-                        description=StringValue(value="The PromQL or Flux query expression to execute. Examples: 'up' for service status, 'rate(http_requests_total[5m])' for request rate, 'cpu_usage_percent' for CPU metrics."),
+                        description=StringValue(value="The query expression to execute against the specified datasource. Examples: PromQL: 'up', Flux: 'from(bucket: \"mybucket\")', Loki: '{job=\"varlogs\"}', SQL: 'SELECT * FROM table'."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.MULTILINE_FT,
                     ),
@@ -275,23 +276,24 @@ class GrafanaSourceManager(SourceManager):
         generated_credentials = generate_credentials_dict(grafana_connector.type, grafana_connector.keys)
         return GrafanaApiProcessor(**generated_credentials)
 
-    def execute_prometheus_datasource_metric_execution(self, time_range: TimeRange, grafana_task: Grafana,
+    def execute_datasource_query_execution(self, time_range: TimeRange, grafana_task: Grafana,
                                                        grafana_connector: ConnectorProto):
         try:
             if not grafana_connector:
                 raise Exception("Task execution Failed:: No Grafana source found")
 
-            task = grafana_task.prometheus_datasource_metric_execution
+            task = grafana_task.datasource_query_execution
             datasource_uid = task.datasource_uid.value
             interval = task.interval.value
             if interval is None:
                 interval = 60
             interval_ms = interval * 1000
             query_type = task.query_type.value if task.query_type and task.query_type.value else "PromQL"
-            metric_query = task.promql_expression.value
+            metric_query = task.query_expression.value
 
             grafana_api_processor = self.get_connector_processor(grafana_connector)
 
+            # Build query based on query type
             if query_type == 'Flux':
                 queries = [
                     {"query": metric_query, "datasource": {"uid": datasource_uid}, "refId": "A",
@@ -322,7 +324,7 @@ class GrafanaSourceManager(SourceManager):
             # Build a minimal panel_ref_map for the single query
             panel_ref_map = {
                 "A": {
-                    "panel_id": "prometheus_query",
+                    "panel_id": f"{query_type.lower()}_query",
                     "panel_title": metric_query,
                     "original_expr": metric_query,
                 }

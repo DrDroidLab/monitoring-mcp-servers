@@ -22,6 +22,13 @@ message Grafana {
     repeated uint32 timeseries_offsets = 9;
   }
 
+  message DatasourceQueryExecution {
+    google.protobuf.StringValue datasource_uid = 1;
+    google.protobuf.StringValue query_expression = 2;
+    google.protobuf.UInt64Value interval = 3;
+    google.protobuf.StringValue query_type = 4;
+  }
+
   message QueryDashboardPanelMetricTask {
     message Query {
       google.protobuf.StringValue expr = 1;
@@ -68,7 +75,7 @@ message Grafana {
   enum TaskType {
     UNKNOWN = 0;
     PROMQL_METRIC_EXECUTION = 1;
-    PROMETHEUS_DATASOURCE_METRIC_EXECUTION = 2;
+    DATASOURCE_QUERY_EXECUTION = 2;
     QUERY_DASHBOARD_PANEL_METRIC = 3;
     EXECUTE_ALL_DASHBOARD_PANELS = 4;
     FETCH_DASHBOARD_VARIABLE_LABEL_VALUES = 5;
@@ -82,7 +89,7 @@ message Grafana {
   TaskType type = 1;
   oneof task {
     PromQlMetricExecution promql_metric_execution = 3;
-    PromQl.PromQlMetricExecution prometheus_datasource_metric_execution = 4;
+    DatasourceQueryExecution datasource_query_execution = 4;
     QueryDashboardPanelMetricTask query_dashboard_panel_metric = 5;
     ExecuteAllDashboardPanelsTask execute_all_dashboard_panels = 6;
     FetchDashboardVariableLabelValuesTask fetch_dashboard_variable_label_values = 7;
