@@ -736,6 +736,10 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
             key_type=SourceKeyType.SIGNOZ_API_TOKEN,
             key=StringValue(value=credential_yaml['signoz_api_token'])
         ))
+        c_keys.append(ConnectorKey(
+            key_type=SourceKeyType.SSL_VERIFY,
+            key=StringValue(value=credential_yaml['ssl_verify'])
+        ))
 
     elif c_type == 'SENTRY':
         if 'api_key' not in credential_yaml or 'org_slug' not in credential_yaml:

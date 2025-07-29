@@ -1,7 +1,7 @@
 import json
 import logging
 import typing
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
 
 from google.protobuf.struct_pb2 import Struct
 from google.protobuf.wrappers_pb2 import (
@@ -12,12 +12,7 @@ from google.protobuf.wrappers_pb2 import (
 
 from integrations.source_api_processors.signoz_api_processor import SignozApiProcessor
 from integrations.source_manager import SourceManager
-from integrations.source_metadata_extractors.signoz_metadata_extractor import SignozSourceMetadataExtractor
-from protos.assets.signoz_asset_pb2 import (
-    SignozDashboardModel,
-    SignozDashboardPanelModel,
-    SignozDashboardVariableModel,
-)
+
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import (
     Connector as ConnectorProto,
@@ -290,6 +285,131 @@ class SignozSourceManager(SourceManager):
                             string=StringValue(value="{}"),
                         ),
                         form_field_type=FormFieldType.MULTILINE_FT,  # Use multiline for JSON
+                    ),
+                ],
+            },
+            Signoz.TaskType.FETCH_DASHBOARDS: {
+                "executor": self.execute_fetch_dashboards,
+                "model_types": [],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetch Dashboards",
+                "category": "Dashboard",
+                "form_fields": [],
+            },
+            Signoz.TaskType.FETCH_DASHBOARD_DETAILS: {
+                "executor": self.execute_fetch_dashboard_details,
+                "model_types": [],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetch Dashboard Details",
+                "category": "Dashboard",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="dashboard_id"),
+                        display_name=StringValue(value="Dashboard ID"),
+                        description=StringValue(value="Enter the dashboard ID"),
+                        data_type=LiteralType.STRING,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                ],
+            },
+            Signoz.TaskType.FETCH_SERVICES: {
+                "executor": self.execute_fetch_services,
+                "model_types": [],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetch Services",
+                "category": "Services",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="start_time"),
+                        display_name=StringValue(value="Start Time"),
+                        description=StringValue(value="Start time (RFC3339 or relative like 'now-2h')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="end_time"),
+                        display_name=StringValue(value="End Time"),
+                        description=StringValue(value="End time (RFC3339 or relative like 'now-30m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="duration"),
+                        display_name=StringValue(value="Duration"),
+                        description=StringValue(value="Duration string (e.g., '2h', '90m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                ],
+            },
+            Signoz.TaskType.FETCH_APM_METRICS: {
+                "executor": self.execute_fetch_apm_metrics,
+                "model_types": [],
+                "result_type": PlaybookTaskResultType.TIMESERIES,
+                "display_name": "Fetch APM Metrics",
+                "category": "Metrics",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="service_name"),
+                        display_name=StringValue(value="Service Name"),
+                        description=StringValue(value="Name of the service to fetch metrics for"),
+                        data_type=LiteralType.STRING,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="start_time"),
+                        display_name=StringValue(value="Start Time"),
+                        description=StringValue(value="Start time (RFC3339 or relative like 'now-2h')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="end_time"),
+                        display_name=StringValue(value="End Time"),
+                        description=StringValue(value="End time (RFC3339 or relative like 'now-30m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="window"),
+                        display_name=StringValue(value="Window"),
+                        description=StringValue(value="Time window for aggregation (e.g., '1m', '5m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        default_value=Literal(
+                            type=LiteralType.STRING,
+                            string=StringValue(value="1m"),
+                        ),
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="operation_names"),
+                        display_name=StringValue(value="Operation Names"),
+                        description=StringValue(value="JSON array of operation names to filter by"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.MULTILINE_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="metrics"),
+                        display_name=StringValue(value="Metrics"),
+                        description=StringValue(value="JSON array of metrics to fetch (e.g., ['request_rate', 'error_rate'])"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.MULTILINE_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="duration"),
+                        display_name=StringValue(value="Duration"),
+                        description=StringValue(value="Duration string (e.g., '2h', '90m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
                     ),
                 ],
             },
@@ -686,265 +806,7 @@ class SignozSourceManager(SourceManager):
             logger.error(f"Error while executing Signoz builder query task: {e}")
             raise Exception(f"Error while executing Signoz builder query task: {e!s}") from e
 
-    def _aggregate_panel_graph_results(self, api_query_results: list, panel_title: str, panel_queries: dict) -> typing.Optional[PlaybookTaskResult]:
-        """Aggregates multiple query results for a 'graph' panel into a single TimeseriesResult."""
-        all_labeled_metric_timeseries = []
-        for query_result_item in api_query_results:
-            query_letter = query_result_item.get("queryName")
-            original_query_dict = panel_queries.get(query_letter, {})
-            query_legend = original_query_dict.get("legend", query_letter or "")
 
-            if "series" not in query_result_item:
-                continue
-
-            for series in query_result_item["series"]:
-                datapoints = []
-                if "values" in series:
-                    for value in series["values"]:
-                        if "timestamp" in value and "value" in value:
-                            try:
-                                timestamp_ms = int(value["timestamp"])
-                                value_float = float(value["value"])
-                                datapoints.append(
-                                    TimeseriesResult.LabeledMetricTimeseries.Datapoint(timestamp=timestamp_ms, value=DoubleValue(value=value_float))
-                                )
-                            except (ValueError, TypeError):
-                                continue  # Skip non-numeric
-
-                if not datapoints:
-                    continue  # Don't add series with no valid data
-
-                metric_label_values = []
-                if "labels" in series:
-                    metric_label_values.extend(
-                        [LabelValuePair(name=StringValue(value=k), value=StringValue(value=str(v))) for k, v in series["labels"].items()]
-                    )
-                metric_label_values.append(LabelValuePair(name=StringValue(value="panel_title"), value=StringValue(value=panel_title)))
-                metric_label_values.append(LabelValuePair(name=StringValue(value="metric_legend"), value=StringValue(value=query_legend)))
-
-                all_labeled_metric_timeseries.append(
-                    TimeseriesResult.LabeledMetricTimeseries(
-                        metric_label_values=metric_label_values, unit=StringValue(value=""), datapoints=datapoints
-                    )
-                )
-
-        if all_labeled_metric_timeseries:
-            aggregated_timeseries = TimeseriesResult(
-                metric_name=StringValue(value=panel_title),
-                metric_expression=StringValue(value=f"Aggregated queries for panel: {panel_title}"),
-                labeled_metric_timeseries=all_labeled_metric_timeseries,
-            )
-            return PlaybookTaskResult(type=PlaybookTaskResultType.TIMESERIES, timeseries=aggregated_timeseries, source=self.source)
-        else:
-            logger.warning(f"No timeseries data processed for graph panel '{panel_title}'.")
-            return None
-
-    def _aggregate_panel_table_results(self, api_query_results: list, panel_title: str) -> typing.Optional[PlaybookTaskResult]:
-        """Aggregates multiple query results for a 'table' panel into a single TableResult."""
-        all_rows = []
-        for query_result_item in api_query_results:
-            query_letter = query_result_item.get("queryName", "")
-            if "table" in query_result_item and "rows" in query_result_item["table"]:
-                for row_data in query_result_item["table"]["rows"]:
-                    if "data" in row_data:
-                        columns = [
-                            TableResult.TableColumn(
-                                name=StringValue(value=k), type=StringValue(value=type(v).__name__), value=StringValue(value=str(v))
-                            )
-                            for k, v in row_data["data"].items()
-                        ]
-                        columns.append(
-                            TableResult.TableColumn(
-                                name=StringValue(value="signoz_query_id"), type=StringValue(value="string"), value=StringValue(value=query_letter)
-                            )
-                        )
-                        if columns:
-                            all_rows.append(TableResult.TableRow(columns=columns))
-            elif "series" in query_result_item:  # Convert series to table rows
-                for series in query_result_item["series"]:
-                    if "values" in series:
-                        for value in series["values"]:
-                            if "timestamp" in value and "value" in value:
-                                columns = [
-                                    TableResult.TableColumn(
-                                        name=StringValue(value="timestamp_ms"),
-                                        type=StringValue(value="number"),
-                                        value=StringValue(value=str(value["timestamp"])),
-                                    ),
-                                    TableResult.TableColumn(
-                                        name=StringValue(value="value"),
-                                        type=StringValue(value="string"),
-                                        value=StringValue(value=str(value["value"])),
-                                    ),
-                                ]
-                                if "labels" in series:
-                                    columns.extend(
-                                        [
-                                            TableResult.TableColumn(
-                                                name=StringValue(value=k), type=StringValue(value="string"), value=StringValue(value=str(v))
-                                            )
-                                            for k, v in series["labels"].items()
-                                        ]
-                                    )
-                                columns.append(
-                                    TableResult.TableColumn(
-                                        name=StringValue(value="signoz_query_id"),
-                                        type=StringValue(value="string"),
-                                        value=StringValue(value=query_letter),
-                                    )
-                                )
-                                all_rows.append(TableResult.TableRow(columns=columns))
-
-        if all_rows:
-            aggregated_table = TableResult(
-                raw_query=StringValue(value=f"Aggregated queries for panel: {panel_title}"),
-                rows=all_rows,
-                searchable=BoolValue(value=True),
-            )
-            return PlaybookTaskResult(type=PlaybookTaskResultType.TABLE, table=aggregated_table, source=self.source)
-        else:
-            logger.warning(f"No table data processed for table panel '{panel_title}'.")
-            return None
-
-    def _execute_panel_queries(
-        self,
-        panel_info: dict,
-        time_range: TimeRange,
-        signoz_api_processor: SignozApiProcessor,
-        query_builder: SignozDashboardQueryBuilder,  # Pass builder instance
-    ) -> typing.Optional[PlaybookTaskResult]:
-        """Executes queries for a single panel and aggregates results."""
-        try:
-            panel_type = panel_info["panel_type"]
-            panel_title = panel_info["panel_title"]
-            panel_queries = panel_info["queries"]  # Already built dicts
-
-            if not panel_queries:
-                logger.warning(f"No queries found for panel '{panel_title}'. Skipping.")
-                return None
-
-            # Build the payload using the QueryBuilder instance
-            formatted_payload = query_builder.build_panel_payload(panel_title, panel_type, panel_queries, time_range)
-
-            logger.debug(f"Executing {len(panel_queries)} queries for panel '{panel_title}' (type: {panel_type})")
-            try:
-                result = signoz_api_processor.execute_signoz_query(formatted_payload)
-            except Exception as api_err:
-                logger.error(f"API error executing queries for panel '{panel_title}': {api_err}", exc_info=True)
-                # Return an error result specific to this panel? Or let the main loop handle? Let's return None.
-                return None  # Indicate failure for this panel
-
-            if result and "data" in result and "result" in result["data"] and isinstance(result["data"]["result"], list):
-                api_query_results = result["data"]["result"]
-                logger.info(f"Received {len(api_query_results)} results from composite query for panel '{panel_title}'.")
-
-                if panel_type == "graph":
-                    return self._aggregate_panel_graph_results(api_query_results, panel_title, panel_queries)
-                elif panel_type == "table":
-                    return self._aggregate_panel_table_results(api_query_results, panel_title)
-                else:  # Default to API Response for 'value' or other types, returning the full composite result
-                    try:
-                        response_struct = dict_to_proto(result, Struct)
-                        metadata_struct = dict_to_proto({"panel_title": panel_title, "panel_type": panel_type}, Struct)
-                        return PlaybookTaskResult(
-                            type=PlaybookTaskResultType.API_RESPONSE,
-                            api_response=ApiResponseResult(response_body=response_struct, metadata=metadata_struct),
-                            source=self.source,
-                        )
-                    except Exception as e:
-                        logger.error(f"Failed to convert raw result to API response for panel '{panel_title}': {e}", exc_info=True)
-                        return None  # Indicate failure
-            else:
-                logger.warning(f"No valid result data received for panel '{panel_title}'. Response: {result}")
-                return None
-
-        except Exception as e:
-            logger.error(f"Error executing queries for panel '{panel_info.get('panel_title', 'UNKNOWN')}': {e}", exc_info=True)
-            return None  # Indicate error for this panel
-
-    def _convert_dict_to_dashboard_proto(self, dashboard_dict: dict) -> SignozDashboardModel:
-        """Converts raw dashboard dictionary to SignozDashboardModel proto using utils."""
-        return dict_to_proto(dashboard_dict, SignozDashboardModel)
-
-    def _find_dashboard_asset(self, signoz_connector: ConnectorProto, dashboard_name: str) -> typing.Optional[SignozDashboardModel]:
-        """Finds a specific dashboard by name using metadata extractor."""
-        try:
-            # Get connector credentials
-            generated_credentials = generate_credentials_dict(signoz_connector.type, signoz_connector.keys)
-            
-            # Create metadata extractor instance
-            signoz_metadata_extractor = SignozSourceMetadataExtractor(
-                request_id="dashboard_find_request",
-                connector_name=signoz_connector.name.value,
-                signoz_api_url=generated_credentials.get('signoz_api_url'),
-                signoz_api_token=generated_credentials.get('signoz_api_token')
-            )
-
-            # Extract dashboards directly without saving to database
-            dashboards_data = signoz_metadata_extractor.extract_dashboards(save_to_db=False)
-            
-            if not dashboards_data:
-                logger.warning(f"No Signoz dashboards found for connector {signoz_connector.id.value}")
-                return None
-
-            # Find dashboard by name and convert to proto
-            for dashboard_id, dashboard in dashboards_data.items():
-                if isinstance(dashboard, dict) and dashboard.get("title") == dashboard_name:
-                    logger.info(f"Found dashboard '{dashboard_name}' with ID: {dashboard_id}")
-                    # Convert raw dict to proto and return
-                    return self._convert_dict_to_dashboard_proto(dashboard)
-            
-            logger.warning(f"Dashboard '{dashboard_name}' not found in available dashboards")
-            return None
-        except Exception as e:
-            logger.error(f"Error fetching dashboard '{dashboard_name}' for connector {signoz_connector.id.value}: {e}", exc_info=True)
-            return None  # Indicate error during fetch
-
-    def _parse_dashboard_variables(self, task: Signoz.DashboardDataTask) -> tuple[dict, typing.Optional[PlaybookTaskResult]]:
-        """Parses variables JSON from task input, returning dict and error result if any."""
-        variables_json = task.variables_json.value if task.HasField("variables_json") and task.variables_json.value else "{}"
-        try:
-            variables_dict = json.loads(variables_json) if variables_json.strip() else {}
-
-            if not isinstance(variables_dict, dict):
-                logger.warning(f"Parsed variables JSON is not a dictionary: {variables_json}. Using empty dictionary.")
-                return {}, None  # Return empty dict, no error result needed for this case
-            return variables_dict, None
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse variables JSON: '{variables_json}'. Error: {e}", exc_info=True)
-            error_result = PlaybookTaskResult(
-                type=PlaybookTaskResultType.ERROR,
-                text=TextResult(output=StringValue(value=f"Invalid Variables JSON provided: {e}")),
-                source=self.source,
-            )
-            return {}, error_result  # Return empty dict and the error
-
-    def _prepare_panel_queries(self, dashboard: SignozDashboardModel, query_builder: SignozDashboardQueryBuilder) -> dict:
-        """Processes panels to build a map of {panel_id: {panel_info}} including built query dicts."""
-        panel_queries_map = {}
-        for panel in dashboard.panels:
-            if panel.query and panel.query.builder and panel.query.builder.query_data:
-                panel_type = panel.panel_type.value if panel.panel_type.value else "graph"  # Default type
-                panel_title = panel.title.value if panel.title.value else f"Panel_{panel.id.value}"
-                panel_id = panel.id.value
-
-                built_queries = {}
-                for query_data_proto in panel.query.builder.query_data:
-                    try:
-                        query_letter, query_dict = query_builder.build_query_dict(query_data_proto)
-                        built_queries[query_letter] = query_dict
-                    except Exception as build_err:
-                        logger.error(f"Error building query dict for panel '{panel_title}' (ID: {panel_id}): {build_err}", exc_info=True)
-                        # Decide: skip query, skip panel, or raise? Let's skip the query.
-                        continue
-
-                if built_queries:  # Only add panel if it has successfully built queries
-                    panel_queries_map[panel_id] = {
-                        "panel_title": panel_title,
-                        "panel_type": panel_type,
-                        "queries": built_queries,
-                    }
-        return panel_queries_map
 
     def execute_dashboard_data(
         self,
@@ -952,8 +814,7 @@ class SignozSourceManager(SourceManager):
         signoz_task: Signoz,
         signoz_connector: ConnectorProto,
     ) -> list[PlaybookTaskResult]:
-        """Executes queries for all panels in a specified Signoz dashboard."""
-        task_results = []
+        """Executes queries for all panels in a specified Signoz dashboard using the processor's fetch_dashboard_data method."""
         try:
             if not signoz_connector:
                 return [
@@ -975,95 +836,41 @@ class SignozSourceManager(SourceManager):
                     )
                 ]
 
-            # 1. Parse Variables
-            variables_dict, error_result = self._parse_dashboard_variables(task)
-            if error_result:
-                return [error_result]
+            # Get parameters
+            step = task.step.value if task.HasField("step") else None
+            variables_json = task.variables_json.value if task.HasField("variables_json") else None
 
-            # 2. Find Dashboard Asset
-            dashboard = self._find_dashboard_asset(signoz_connector, dashboard_name)
-            if not dashboard:
-                return [
-                    PlaybookTaskResult(
-                        type=PlaybookTaskResultType.TEXT,
-                        text=TextResult(output=StringValue(value=f"Dashboard '{dashboard_name}' not found.")),
-                        source=self.source,
-                    )
-                ]
+            # Convert time range to start/end times for the processor
+            start_time = datetime.fromtimestamp(time_range.time_geq, tz=timezone.utc).isoformat()
+            end_time = datetime.fromtimestamp(time_range.time_lt, tz=timezone.utc).isoformat()
 
-            # 3. Prepare Panel Queries using QueryBuilder
-            global_step = self._get_step_interval(time_range, task)
-            query_builder = SignozDashboardQueryBuilder(global_step=global_step, variables=variables_dict)
-            panel_queries_map = self._prepare_panel_queries(dashboard, query_builder)
-
-            if not panel_queries_map:
-                return [
-                    PlaybookTaskResult(
-                        type=PlaybookTaskResultType.TEXT,
-                        text=TextResult(output=StringValue(value=f"No builder queries found or prepared for dashboard: {dashboard_name}")),
-                        source=self.source,
-                    )
-                ]
-
-            # 4. Execute Queries Concurrently
             signoz_api_processor = self.get_connector_processor(signoz_connector)
-            futures_map = {}
-            # Consider making max_workers configurable or dynamic
-            max_workers = min(10, len(panel_queries_map))  # Limit workers, but don't exceed number of panels
+            result = signoz_api_processor.fetch_dashboard_data(
+                dashboard_name, start_time, end_time, step, variables_json
+            )
 
-            logger.info(f"Executing queries for {len(panel_queries_map)} panels from dashboard '{dashboard_name}'...")
-
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                for panel_id, panel_info in panel_queries_map.items():
-                    future = executor.submit(
-                        self._execute_panel_queries,  # Pass the QueryBuilder instance
-                        panel_info,
-                        time_range,
-                        signoz_api_processor,
-                        query_builder,
-                    )
-                    futures_map[future] = {"panel_id": panel_id, "panel_title": panel_info["panel_title"]}
-
-                # Collect results
-                for future in as_completed(futures_map):
-                    context = futures_map[future]
-                    try:
-                        panel_result = future.result()  # Returns PlaybookTaskResult or None
-                        if panel_result:
-                            task_results.append(panel_result)
-                        else:
-                            # Logged within _execute_panel_queries if None is returned due to no data/error
-                            pass
-                    except Exception as exc:
-                        # This catches errors *within* the future execution if not handled internally
-                        logger.error(f"Panel execution failed for '{context['panel_title']}' (ID: {context['panel_id']}): {exc}", exc_info=True)
-                        # Optionally add an error task result for this panel
-                        task_results.append(
-                            PlaybookTaskResult(
-                                type=PlaybookTaskResultType.ERROR,
-                                text=TextResult(output=StringValue(value=f"Failed to execute queries for panel '{context['panel_title']}': {exc}")),
-                                source=self.source,
-                            )
-                        )
-
-            logger.info(f"Finished execution. Collected {len(task_results)} results for dashboard '{dashboard_name}'.")
-
-            # Handle case where no panels yielded any processable data after execution
-            if not task_results:
+            if result and result.get("status") == "success":
+                # Convert the result to a structured response
+                response_struct = dict_to_proto(result, Struct)
                 return [
                     PlaybookTaskResult(
-                        type=PlaybookTaskResultType.TEXT,
-                        text=TextResult(output=StringValue(value=f"No data could be processed for any panel in dashboard: {dashboard_name}")),
+                        type=PlaybookTaskResultType.API_RESPONSE,
+                        api_response=ApiResponseResult(response_body=response_struct),
                         source=self.source,
                     )
                 ]
-
-            return task_results
+            else:
+                error_msg = result.get("message", "Failed to fetch dashboard data") if result else "Failed to fetch dashboard data"
+                return [
+                    PlaybookTaskResult(
+                        type=PlaybookTaskResultType.ERROR,
+                        text=TextResult(output=StringValue(value=error_msg)),
+                        source=self.source,
+                    )
+                ]
 
         except Exception as e:
-            logger.error(
-                f"Critical error during Signoz dashboard data task for '{task.dashboard_name.value if task else 'Unknown'}': {e}", exc_info=True
-            )
+            logger.error(f"Error while executing Signoz dashboard data task: {e}", exc_info=True)
             return [
                 PlaybookTaskResult(
                     type=PlaybookTaskResultType.ERROR,
@@ -1071,3 +878,253 @@ class SignozSourceManager(SourceManager):
                     source=self.source,
                 )
             ]
+
+    def execute_fetch_dashboards(
+        self,
+        time_range: TimeRange,
+        signoz_task: Signoz,
+        signoz_connector: ConnectorProto,
+    ) -> PlaybookTaskResult:
+        """Executes fetch dashboards task."""
+        try:
+            if not signoz_connector:
+                raise Exception("Task execution Failed:: No Signoz source found")
+
+            signoz_api_processor = self.get_connector_processor(signoz_connector)
+            result = signoz_api_processor.fetch_dashboards()
+
+            if result:
+                response_struct = dict_to_proto(result, Struct)
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.API_RESPONSE,
+                    api_response=ApiResponseResult(response_body=response_struct),
+                    source=self.source,
+                )
+            else:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value="Failed to fetch dashboards")),
+                    source=self.source,
+                )
+        except Exception as e:
+            logger.error(f"Error while executing Signoz fetch dashboards task: {e}")
+            raise Exception(f"Error while executing Signoz fetch dashboards task: {e}") from e
+
+    def execute_fetch_dashboard_details(
+        self,
+        time_range: TimeRange,
+        signoz_task: Signoz,
+        signoz_connector: ConnectorProto,
+    ) -> PlaybookTaskResult:
+        """Executes fetch dashboard details task."""
+        try:
+            if not signoz_connector:
+                raise Exception("Task execution Failed:: No Signoz source found")
+
+            task = signoz_task.fetch_dashboard_details
+            dashboard_id = task.dashboard_id.value
+            if not dashboard_id:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value="Dashboard ID must be provided.")),
+                    source=self.source,
+                )
+
+            signoz_api_processor = self.get_connector_processor(signoz_connector)
+            result = signoz_api_processor.fetch_dashboard_details(dashboard_id)
+
+            if result:
+                response_struct = dict_to_proto(result, Struct)
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.API_RESPONSE,
+                    api_response=ApiResponseResult(response_body=response_struct),
+                    source=self.source,
+                )
+            else:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value=f"Failed to fetch dashboard details for ID: {dashboard_id}")),
+                    source=self.source,
+                )
+        except Exception as e:
+            logger.error(f"Error while executing Signoz fetch dashboard details task: {e}")
+            raise Exception(f"Error while executing Signoz fetch dashboard details task: {e}") from e
+
+    def execute_fetch_services(
+        self,
+        time_range: TimeRange,
+        signoz_task: Signoz,
+        signoz_connector: ConnectorProto,
+    ) -> PlaybookTaskResult:
+        """Executes fetch services task."""
+        try:
+            if not signoz_connector:
+                raise Exception("Task execution Failed:: No Signoz source found")
+
+            task = signoz_task.fetch_services
+            start_time = task.start_time.value if task.HasField("start_time") else None
+            end_time = task.end_time.value if task.HasField("end_time") else None
+            duration = task.duration.value if task.HasField("duration") else None
+
+            signoz_api_processor = self.get_connector_processor(signoz_connector)
+            result = signoz_api_processor.fetch_services(start_time, end_time, duration)
+
+            if result:
+                response_struct = dict_to_proto(result, Struct)
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.API_RESPONSE,
+                    api_response=ApiResponseResult(response_body=response_struct),
+                    source=self.source,
+                )
+            else:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value="Failed to fetch services")),
+                    source=self.source,
+                )
+        except Exception as e:
+            logger.error(f"Error while executing Signoz fetch services task: {e}")
+            raise Exception(f"Error while executing Signoz fetch services task: {e}") from e
+
+    def execute_fetch_apm_metrics(
+        self,
+        time_range: TimeRange,
+        signoz_task: Signoz,
+        signoz_connector: ConnectorProto,
+    ) -> PlaybookTaskResult:
+        """Executes fetch APM metrics task."""
+        try:
+            if not signoz_connector:
+                raise Exception("Task execution Failed:: No Signoz source found")
+
+            task = signoz_task.fetch_apm_metrics
+            service_name = task.service_name.value
+            if not service_name:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value="Service name must be provided.")),
+                    source=self.source,
+                )
+
+            start_time = task.start_time.value if task.HasField("start_time") else None
+            end_time = task.end_time.value if task.HasField("end_time") else None
+            window = task.window.value if task.HasField("window") else "1m"
+            operation_names = task.operation_names.value if task.HasField("operation_names") else None
+            metrics = task.metrics.value if task.HasField("metrics") else None
+            duration = task.duration.value if task.HasField("duration") else None
+
+            # Parse JSON arrays if provided
+            if operation_names:
+                try:
+                    operation_names = json.loads(operation_names)
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid operation_names JSON: {operation_names}")
+                    operation_names = None
+
+            if metrics:
+                try:
+                    metrics = json.loads(metrics)
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid metrics JSON: {metrics}")
+                    metrics = None
+
+            signoz_api_processor = self.get_connector_processor(signoz_connector)
+            result = signoz_api_processor.fetch_apm_metrics(
+                service_name, start_time, end_time, window, operation_names, metrics, duration
+            )
+
+            if result and "error" not in result:
+                # Convert to timeseries result
+                timeseries_result = self._convert_apm_metrics_to_timeseries(result, service_name)
+                if timeseries_result:
+                    return PlaybookTaskResult(
+                        type=PlaybookTaskResultType.TIMESERIES,
+                        timeseries=timeseries_result,
+                        source=self.source,
+                    )
+                else:
+                    return PlaybookTaskResult(
+                        type=PlaybookTaskResultType.ERROR,
+                        text=TextResult(output=StringValue(value="Failed to convert APM metrics to timeseries format")),
+                        source=self.source,
+                    )
+            else:
+                error_msg = result.get("error", "Failed to fetch APM metrics") if result else "Failed to fetch APM metrics"
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value=error_msg)),
+                    source=self.source,
+                )
+        except Exception as e:
+            logger.error(f"Error while executing Signoz fetch APM metrics task: {e}")
+            raise Exception(f"Error while executing Signoz fetch APM metrics task: {e}") from e
+
+    def _convert_apm_metrics_to_timeseries(self, apm_metrics_result: dict, service_name: str) -> typing.Optional[TimeseriesResult]:
+        """Converts APM metrics result to TimeseriesResult format."""
+        try:
+            if not apm_metrics_result or "data" not in apm_metrics_result:
+                return None
+
+            timeseries_result = TimeseriesResult(
+                metric_name=StringValue(value=f"APM Metrics - {service_name}"),
+                metric_expression=StringValue(value=f"APM metrics for service: {service_name}"),
+            )
+
+            data = apm_metrics_result["data"]
+            if "result" in data and isinstance(data["result"], list):
+                for query_result in data["result"]:
+                    if "series" in query_result:
+                        for series in query_result["series"]:
+                            datapoints = []
+                            if "values" in series:
+                                for value in series["values"]:
+                                    if "timestamp" in value and "value" in value:
+                                        try:
+                                            timestamp_ms = int(value["timestamp"])
+                                            value_float = float(value["value"])
+                                            datapoints.append(
+                                                TimeseriesResult.LabeledMetricTimeseries.Datapoint(
+                                                    timestamp=timestamp_ms,
+                                                    value=DoubleValue(value=value_float),
+                                                )
+                                            )
+                                        except (ValueError, TypeError):
+                                            continue
+
+                            if datapoints:
+                                metric_label_values = []
+                                if "labels" in series:
+                                    for label_key, label_value in series["labels"].items():
+                                        metric_label_values.append(
+                                            LabelValuePair(
+                                                name=StringValue(value=label_key),
+                                                value=StringValue(value=str(label_value)),
+                                            )
+                                        )
+
+                                # Add service name and query info as labels
+                                metric_label_values.append(
+                                    LabelValuePair(
+                                        name=StringValue(value="service_name"),
+                                        value=StringValue(value=service_name),
+                                    )
+                                )
+                                metric_label_values.append(
+                                    LabelValuePair(
+                                        name=StringValue(value="query_name"),
+                                        value=StringValue(value=query_result.get("queryName", "unknown")),
+                                    )
+                                )
+
+                                timeseries_result.labeled_metric_timeseries.append(
+                                    TimeseriesResult.LabeledMetricTimeseries(
+                                        metric_label_values=metric_label_values,
+                                        unit=StringValue(value=""),
+                                        datapoints=datapoints,
+                                    )
+                                )
+
+            return timeseries_result if timeseries_result.labeled_metric_timeseries else None
+        except Exception as e:
+            logger.error(f"Error converting APM metrics to timeseries: {e}", exc_info=True)
+            return None
