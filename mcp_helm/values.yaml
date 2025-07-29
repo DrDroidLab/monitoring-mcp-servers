@@ -1,0 +1,52 @@
+# MCP Mode Configuration
+# This configuration deploys only the Django server for MCP functionality
+
+# Global configuration
+global:
+  # No DRD Cloud token required for MCP mode
+  # Environment variables are defined in mcpServer.env section
+
+# Django MCP Server configuration
+mcpServer:
+  image:
+    repository: dhruvdroidr2/k8s-playground-app
+    tag: test-uv-drd-v16
+    pullPolicy: Always
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    name: mcp-server-service
+  
+  # Pod configuration
+  replicas: 1
+  
+  # Resource limits (optional)
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Environment variables specific to MCP mode
+  env:
+    # Django settings
+    DJANGO_DEBUG: "true"
+    DRD_AGENT_MODE: "mcp"
+    DRD_CLOUD_API_TOKEN: "mcp-mode"
+    NATIVE_KUBERNETES_API_MODE: "true"
+
+# Security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+# Service account (reuse existing RBAC if needed)
+serviceAccount:
+  create: false
+  name: drd-vpc-agent 

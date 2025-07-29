@@ -81,6 +81,9 @@ class SourceFacade:
             logger.error(f'Error while testing source connection: {str(e)}')
             return False, str(e)
 
+    def get_all_available_connector_integrations(self):
+        return self._map.keys()
+
 
 source_facade = SourceFacade()
 source_facade.register(Source.CLOUDWATCH, CloudwatchSourceManager())
