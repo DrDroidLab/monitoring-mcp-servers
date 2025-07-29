@@ -35,21 +35,18 @@ spec:
               containerPort: 8000
               protocol: TCP
           env:
-            - name: DJANGO_DEBUG
-              value: {{ .Values.mcpServer.env.DJANGO_DEBUG | quote }}
-            - name: CELERY_BROKER_URL
-              value: {{ .Values.mcpServer.env.CELERY_BROKER_URL | quote }}
-            - name: CELERY_RESULT_BACKEND
-              value: {{ .Values.mcpServer.env.CELERY_RESULT_BACKEND | quote }}
-            - name: REDIS_URL
-              value: {{ .Values.mcpServer.env.REDIS_URL | quote }}
-            - name: NATIVE_KUBERNETES_API_MODE
-              value: {{ .Values.global.NATIVE_KUBERNETES_API_MODE | quote }}
+            {{- range $key, $value := .Values.global }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- range $key, $value := .Values.mcpServer.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
           volumeMounts:
             - name: credentials-volume
               mountPath: /code/credentials/secrets.yaml
               subPath: secrets.yaml
-              readOnly: true
           resources:
             {{- toYaml .Values.mcpServer.resources | nindent 12 }}
           # Health checks

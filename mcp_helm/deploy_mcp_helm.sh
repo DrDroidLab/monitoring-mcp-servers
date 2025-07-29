@@ -37,9 +37,12 @@ else
     echo "✅ Namespace '$NAMESPACE' already exists"
 fi
 
-# Check if credentials configmap exists
-echo "🔍 Checking credentials setup..."
-if [ ! -f "$CHART_PATH/configmap.yaml" ]; then
+# Apply configmap for credentials
+echo "🔍 Applying credentials configmap..."
+if [ -f "$CHART_PATH/configmap.yaml" ]; then
+    kubectl apply -f "$CHART_PATH/configmap.yaml" -n "$NAMESPACE"
+    echo "✅ Configmap applied successfully"
+else
     echo "⚠️  Warning: configmap.yaml not found. Make sure to configure your credentials."
     echo "   Please add your connector credentials to configmap.yaml before deploying."
     read -p "   Do you want to continue anyway? (y/N): " -n 1 -r
@@ -86,4 +89,4 @@ echo "🗑️  To uninstall:"
 echo "   helm uninstall $RELEASE_NAME -n $NAMESPACE"
 echo ""
 echo "📚 MCP endpoints will be available at:"
-echo "   http://localhost:8000/playbooks/mcp/grafana/" 
+echo "   http://localhost:8000/playbooks/mcp/" 

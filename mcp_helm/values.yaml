@@ -4,14 +4,13 @@
 # Global configuration
 global:
   # No DRD Cloud token required for MCP mode
-  DJANGO_DEBUG: "True"
-  NATIVE_KUBERNETES_API_MODE: "true"
+  # Environment variables are defined in mcpServer.env section
 
 # Django MCP Server configuration
 mcpServer:
   image:
-    repository: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent
-    tag: latest
+    repository: dhruvdroidr2/k8s-playground-app
+    tag: test-uv-drd-v16
     pullPolicy: Always
   
   # Service configuration
@@ -36,11 +35,10 @@ mcpServer:
   # Environment variables specific to MCP mode
   env:
     # Django settings
-    DJANGO_DEBUG: "True"
-    # No Redis/Celery configuration needed
-    CELERY_BROKER_URL: ""
-    CELERY_RESULT_BACKEND: ""
-    REDIS_URL: ""
+    DJANGO_DEBUG: "true"
+    DRD_AGENT_MODE: "mcp"
+    DRD_CLOUD_API_TOKEN: "mcp-mode"
+    NATIVE_KUBERNETES_API_MODE: "true"
 
 # Security context
 podSecurityContext:
