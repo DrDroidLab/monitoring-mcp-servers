@@ -260,8 +260,7 @@ def generate_mcp_tools_for_connectors() -> Tuple[List[Dict[str, Any]], Dict[str,
         
         if not has_k8s_connector:
             # Add a native Kubernetes connector
-            api_token_identifier = settings.DRD_CLOUD_API_TOKEN[-3:] if settings.DRD_CLOUD_API_TOKEN else "xxx"
-            native_k8s_connector_name = f'native_k8_connection_{api_token_identifier}'
+            native_k8s_connector_name = 'native_k8'
             loaded_connections[native_k8s_connector_name] = {'type': 'KUBERNETES'}
             logger.info(f"Added native Kubernetes connector: {native_k8s_connector_name}")
 
