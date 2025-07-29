@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: credentials-config
+  annotations:
+    meta.helm.sh/release-name: "{{ .Release.name }}"
+data:
+  secrets.yaml: | 

@@ -1,0 +1,54 @@
+# MCP Mode Configuration
+# This configuration deploys only the Django server for MCP functionality
+
+# Global configuration
+global:
+  # No DRD Cloud token required for MCP mode
+  DJANGO_DEBUG: "True"
+  NATIVE_KUBERNETES_API_MODE: "true"
+
+# Django MCP Server configuration
+mcpServer:
+  image:
+    repository: public.ecr.aws/y9s1f3r5/drdroid/drd-vpc-agent
+    tag: latest
+    pullPolicy: Always
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    name: mcp-server-service
+  
+  # Pod configuration
+  replicas: 1
+  
+  # Resource limits (optional)
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Environment variables specific to MCP mode
+  env:
+    # Django settings
+    DJANGO_DEBUG: "True"
+    # No Redis/Celery configuration needed
+    CELERY_BROKER_URL: ""
+    CELERY_RESULT_BACKEND: ""
+    REDIS_URL: ""
+
+# Security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+# Service account (reuse existing RBAC if needed)
+serviceAccount:
+  create: false
+  name: drd-vpc-agent 

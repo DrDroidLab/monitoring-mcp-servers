@@ -1,0 +1,9 @@
+apiVersion: v2
+name: drd-vpc-agent-mcp
+description: MCP (Model Context Protocol) mode deployment for DRD VPC Agent
+version: 0.1.0
+appVersion: "1.0.0"
+type: application
+
+# No dependencies - this is a standalone MCP server deployment
+# No Redis, Celery, or other background services required 

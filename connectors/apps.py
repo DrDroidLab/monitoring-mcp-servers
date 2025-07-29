@@ -23,8 +23,9 @@ class ConnectorsConfig(AppConfig):
             return
         drd_cloud_host = settings.DRD_CLOUD_API_HOST
         drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
+        drd_agent_mode = settings.DRD_AGENT_MODE
         loaded_connections = settings.LOADED_CONNECTIONS if settings.LOADED_CONNECTIONS else {}
-        if loaded_connections:
+        if loaded_connections and drd_agent_mode != "mcp":
             register_connectors(drd_cloud_host, drd_cloud_api_token, loaded_connections)
             for c, metadata in loaded_connections.items():
                 connector_proto = credential_yaml_to_connector_proto(c, metadata)

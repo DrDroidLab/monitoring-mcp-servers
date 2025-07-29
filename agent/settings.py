@@ -206,6 +206,7 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8080', 'http://localhost', 'https://ap
 
 SITE_ID = 1
 
+DRD_AGENT_MODE = env.str("DRD_AGENT_MODE", "drd-cloud")
 DRD_CLOUD_API_TOKEN = env.str("DRD_CLOUD_API_TOKEN")
 DRD_CLOUD_API_HOST = env.str("DRD_CLOUD_API_HOST", default="https://agent-api.drdroid.io")
 NATIVE_KUBERNETES_API_MODE = env.bool("NATIVE_KUBERNETES_API_MODE", default=False)

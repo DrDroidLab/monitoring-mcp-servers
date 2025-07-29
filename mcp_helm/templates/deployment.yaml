@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "drd-vpc-agent-mcp.fullname" . }}-mcp-server
+  labels:
+    {{- include "drd-vpc-agent-mcp.labels" . | nindent 4 }}
+    component: mcp-server
+  annotations:
+    meta.helm.sh/release-name: "{{ .Release.Name }}"
+spec:
+  replicas: {{ .Values.mcpServer.replicas }}
+  selector:
+    matchLabels:
+      {{- include "drd-vpc-agent-mcp.selectorLabels" . | nindent 6 }}
+      component: mcp-server
+  template:
+    metadata:
+      labels:
+        {{- include "drd-vpc-agent-mcp.selectorLabels" . | nindent 8 }}
+        component: mcp-server
+      annotations:
+        # Force pod restart on helm upgrade
+        rollme: "{{ now | unixEpoch }}"
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: mcp-server
+          image: "{{ .Values.mcpServer.image.repository }}:{{ .Values.mcpServer.image.tag }}"
+          imagePullPolicy: {{ .Values.mcpServer.image.pullPolicy }}
+          command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: DJANGO_DEBUG
+              value: {{ .Values.mcpServer.env.DJANGO_DEBUG | quote }}
+            - name: CELERY_BROKER_URL
+              value: {{ .Values.mcpServer.env.CELERY_BROKER_URL | quote }}
+            - name: CELERY_RESULT_BACKEND
+              value: {{ .Values.mcpServer.env.CELERY_RESULT_BACKEND | quote }}
+            - name: REDIS_URL
+              value: {{ .Values.mcpServer.env.REDIS_URL | quote }}
+            - name: NATIVE_KUBERNETES_API_MODE
+              value: {{ .Values.global.NATIVE_KUBERNETES_API_MODE | quote }}
+          volumeMounts:
+            - name: credentials-volume
+              mountPath: /code/credentials/secrets.yaml
+              subPath: secrets.yaml
+              readOnly: true
+          resources:
+            {{- toYaml .Values.mcpServer.resources | nindent 12 }}
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: credentials-volume
+          configMap:
+            name: credentials-config
+      restartPolicy: Always 
