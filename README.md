@@ -68,8 +68,10 @@ The Doctor Droid VPC Agent can also run as an MCP (Model Context Protocol) serve
 
 For Helm deployment, the process is the same as the normal Helm deployment:
 
-1. Navigate to the `mcp_helm` directory
-2. Run the deployment script
+```shell
+cd mcp_helm
+./deploy_mcp_helm.sh
+```
 
 ### Local Development (MCP Mode)
 
