@@ -29,7 +29,7 @@ Additional support: Apart from these, there is also support for 30+ other tools.
 
 ### Option A: Docker Compose
 
-1. Add your credentials in `credentials/secrets.yaml`
+1. Add your credentials in `credentials/secrets.yaml`. Sample format can be found in credentials/credentials_template.yaml
 2. Run the MCP server:
    ```shell
    docker compose -f mcp.docker-compose.yaml up --build -d
@@ -49,7 +49,7 @@ Additional support: Apart from these, there is also support for 30+ other tools.
 
 This is the process for Helm deployment:
 
-1. Add the secrets for the integrations in helm/configmap.yaml file.
+1. Add the secrets for the integrations in helm/configmap.yaml file. Sample format can be found in credentials/credentials_template.yaml
    Refer to the image below for a sample:
    <img width="934" alt="Screenshot 2024-12-20 at 14 02 43" src="https://github.com/user-attachments/assets/cadb2b0a-db0c-4128-bef7-fe2a6288b79b" />
 
