@@ -819,7 +819,7 @@ class SignozSourceManager(SourceManager):
             if not signoz_connector:
                 return [
                     PlaybookTaskResult(
-                        type=PlaybookTaskResultType.ERROR,
+                        type=PlaybookTaskResultType.API_RESPONSE,
                         text=TextResult(output=StringValue(value="Signoz connector not found.")),
                         source=self.source,
                     )
@@ -830,7 +830,7 @@ class SignozSourceManager(SourceManager):
             if not dashboard_name:
                 return [
                     PlaybookTaskResult(
-                        type=PlaybookTaskResultType.ERROR,
+                        type=PlaybookTaskResultType.API_RESPONSE,
                         text=TextResult(output=StringValue(value="Dashboard name must be provided.")),
                         source=self.source,
                     )
@@ -863,7 +863,7 @@ class SignozSourceManager(SourceManager):
                 error_msg = result.get("message", "Failed to fetch dashboard data") if result else "Failed to fetch dashboard data"
                 return [
                     PlaybookTaskResult(
-                        type=PlaybookTaskResultType.ERROR,
+                        type=PlaybookTaskResultType.API_RESPONSE,
                         text=TextResult(output=StringValue(value=error_msg)),
                         source=self.source,
                     )
@@ -873,7 +873,7 @@ class SignozSourceManager(SourceManager):
             logger.error(f"Error while executing Signoz dashboard data task: {e}", exc_info=True)
             return [
                 PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value=f"Unexpected error executing dashboard task: {e}")),
                     source=self.source,
                 )
@@ -913,7 +913,7 @@ class SignozSourceManager(SourceManager):
                 )
             else:
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value="Failed to fetch dashboards")),
                     source=self.source,
                 )
@@ -936,7 +936,7 @@ class SignozSourceManager(SourceManager):
             dashboard_id = task.dashboard_id.value
             if not dashboard_id:
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value="Dashboard ID must be provided.")),
                     source=self.source,
                 )
@@ -961,7 +961,7 @@ class SignozSourceManager(SourceManager):
                 )
             else:
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value=f"Failed to fetch dashboard details for ID: {dashboard_id}")),
                     source=self.source,
                 )
@@ -1008,7 +1008,7 @@ class SignozSourceManager(SourceManager):
                 )
             else:
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value="Failed to fetch services")),
                     source=self.source,
                 )
@@ -1031,7 +1031,7 @@ class SignozSourceManager(SourceManager):
             service_name = task.service_name.value
             if not service_name:
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value="Service name must be provided.")),
                     source=self.source,
                 )
@@ -1074,14 +1074,14 @@ class SignozSourceManager(SourceManager):
                     )
                 else:
                     return PlaybookTaskResult(
-                        type=PlaybookTaskResultType.ERROR,
+                        type=PlaybookTaskResultType.API_RESPONSE,
                         text=TextResult(output=StringValue(value="Failed to convert APM metrics to timeseries format")),
                         source=self.source,
                     )
             else:
                 error_msg = result.get("error", "Failed to fetch APM metrics") if result else "Failed to fetch APM metrics"
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value=error_msg)),
                     source=self.source,
                 )
