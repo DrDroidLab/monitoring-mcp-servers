@@ -8,6 +8,7 @@ anyio==4.9.0
 asgiref==3.8.1
 async-timeout==4.0.3
 asyncer==0.0.8
+asyncpg==0.30.0
 attrs==25.3.0
 awscli==1.38.6
 azure-common==1.1.28
