@@ -27,7 +27,7 @@ Additional support: Apart from these, there is also support for 30+ other tools.
 **Note:**
 * If you want the MCP Server to be connected to your k8s cluster without any additional configuration effort, install using the HELM chart.
 
-### Docker Compose
+### Option A: Docker Compose
 
 1. Add your credentials in `credentials/secrets.yaml`
 2. Run the MCP server:
@@ -45,7 +45,7 @@ Additional support: Apart from these, there is also support for 30+ other tools.
    }
    ```
 
-### Helm
+### Option B: Helm
 
 This is the process for Helm deployment:
 
@@ -73,7 +73,7 @@ Note:
   file.
 * Server will have read access to the cluster and will be able to fetch the metrics from the cluster.
 
-### Local Development
+### Option C: Local Development
 
 1. Create and activate a virtual environment:
    ```shell
