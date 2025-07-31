@@ -209,7 +209,7 @@ sqlglotrs==0.3.0
 sqlparse==0.5.1
 starlette==0.37.2
 tenacity==8.5.0
-tiktoken==0.9.0
+tiktoken==0.8.0
 tokenizers==0.21.4
 tqdm==4.66.5
 transformers==4.54.1
