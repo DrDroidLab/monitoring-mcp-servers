@@ -65,7 +65,7 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="datasource_uid"),
                         display_name=StringValue(value="Data Source UID"),
-                        description=StringValue(value="The unique identifier (UID) of the datasource in Grafana. This is required to identify which datasource to query (logs, metrics, traces, SQL, etc.)."),
+                        description=StringValue(value="MANDATORY:The unique identifier (UID) of the datasource in Grafana. This is required to identify which datasource to query (logs, metrics, traces, SQL, etc.)."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
@@ -80,7 +80,7 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="query_type"),
                         display_name=StringValue(value="Query Type"),
-                        description=StringValue(value="The type of query to execute. Use PromQL for Prometheus (metrics), Flux for InfluxDB, Loki for logs, SQL for databases, or any other datasource-specific query language. This task supports querying logs, metrics, traces, or any data type supported by the datasource."),
+                        description=StringValue(value="MANDATORY: The type of query to execute. Use PromQL for Prometheus (metrics), Flux for InfluxDB, Loki for logs, SQL for databases, or any other datasource-specific query language. This task supports querying logs, metrics, traces, or any data type supported by the datasource."),
                         data_type=LiteralType.STRING,
                         default_value=Literal(type=LiteralType.STRING, string=StringValue(value="PromQL")),
                         valid_values=[
@@ -94,7 +94,7 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="query_expression"),
                         display_name=StringValue(value="Query Expression"),
-                        description=StringValue(value="The query expression to execute against the specified datasource. Examples: PromQL: 'up', Flux: 'from(bucket: \"mybucket\")', Loki: '{job=\"varlogs\"}', SQL: 'SELECT * FROM table'. Use the appropriate query for logs, metrics, traces, or any data type supported by the datasource."),
+                        description=StringValue(value="MANDATORY: The query expression to execute against the specified datasource. Examples: PromQL: 'up', Flux: 'from(bucket: \"mybucket\")', Loki: '{job=\"varlogs\"}', SQL: 'SELECT * FROM table'. Use the appropriate query for logs, metrics, traces, or any data type supported by the datasource."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.MULTILINE_FT,
                     ),
@@ -110,7 +110,7 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="dashboard_uid"),
                         display_name=StringValue(value="Dashboard UID"),
-                        description=StringValue(value="The unique identifier (UID) of the Grafana dashboard to execute. This is different from the dashboard ID and is typically a string like 'abc123'."),
+                        description=StringValue(value="MANDATORY: The unique identifier (UID) of the Grafana dashboard to execute. This is different from the dashboard ID and is typically a string like 'abc123'."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
@@ -152,7 +152,7 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="dashboard_uid"),
                         display_name=StringValue(value="Dashboard UID"),
-                        description=StringValue(value="The unique identifier (UID) of the Grafana dashboard to fetch variables from. This will return all template variables defined in the dashboard along with their current values and available options."),
+                        description=StringValue(value="MANDATORY: The unique identifier (UID) of the Grafana dashboard to fetch variables from. This will return all template variables defined in the dashboard along with their current values and available options."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
@@ -162,7 +162,7 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_get_dashboard_config,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Retrieves dashboard configuration details from Grafana, including dashboard metadata, panel configurations, and template variables",
+                "display_name": "MANDATORY: Retrieves dashboard configuration details from Grafana, including dashboard metadata, panel configurations, and template variables",
                 "category": "Configuration",
                 "form_fields": [
                     FormField(
@@ -178,7 +178,7 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_fetch_all_dashboards,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Fetches all dashboards from Grafana with basic information like title, UID, folder, tags, etc.",
+                "display_name": "MANDATORY: Fetches all dashboards from Grafana with basic information like title, UID, folder, tags, etc.",
                 "category": "Configuration",
                 "form_fields": [
                     FormField(
@@ -196,7 +196,7 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_fetch_datasources,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Fetches all datasources from Grafana with their configuration details",
+                "display_name": "MANDATORY: Fetches all datasources from Grafana with their configuration details",
                 "category": "Configuration",
                 "form_fields": [],
             },
@@ -204,7 +204,7 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_fetch_folders,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Fetches all folders from Grafana with their metadata and permissions",
+                "display_name": "MANDATORY: Fetches all folders from Grafana with their metadata and permissions",
                 "category": "Configuration",
                 "form_fields": [],
             },
