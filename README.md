@@ -20,8 +20,8 @@ For sample usage, clone [Slack AI Bot](https://github.com/DrDroidLab/slack-ai-bo
 - Signoz -- Query your OpenTelemetry data directly from Signoz / Clickhouse.
 - Bash Commands -- Run commands on terminal
 
-Additional support: Apart from these, there is also support for 30+ other tools. Browse full list of integrations supported [here](https://github.com/DrDroidLab/drd-vpc-agent/tree/mcp_main/integrations/source_manangers)
 
+Additional support: Apart from these, there is also support for 30+ other tools. Browse full list of integrations supported [here](https://github.com/DrDroidLab/monitoring-mcp-servers/tree/main/integrations/source_manangers)
 ## Installation for MCP Mode
 
 **Note:**
@@ -29,16 +29,16 @@ Additional support: Apart from these, there is also support for 30+ other tools.
 
 ### Docker Compose (MCP Mode)
 
-1. Add your credentials in `credentials/secrets.yaml`
+1. Add your tool credentials in `credentials/secrets.yaml` (E.g. Grafana or Signoz)
 2. Run the MCP server:
    ```shell
    docker compose -f mcp.docker-compose.yaml up --build -d
    ```
-3. Add it to your Cursor using the localhost setup with this `mcp.json` configuration:
+3. Test: Add it to your Cursor using the localhost setup with this `mcp.json` configuration:
    ```json
    {
      "mcpServers": {
-       "droid-vpc-agent": {
+       "monitoring-mcp-server": {
          "url": "http://localhost:8000/playbooks/mcp"
        }
      }
@@ -88,14 +88,6 @@ Note:
    ```shell
    sh start_mcp_server.sh
    ```
-[TODO] -- add instructions on how to port forward and test kubernetes from local.
-
-## Installation -- VPC Mode
-
-Apart from the MCP mode, we also have VPC mode. The integrations accessible are same, but in this mode:
-* No ingress port is required to be open on the machine where this service is deployed. (This operates on a redis + polling model)
-* This is designed for DrDroid Cloud users who want to connect our platform to integrations that are behind their VPC.
-* Read instructions on installation & getting started on [main branch](https://github.com/DrDroidLab/drd-vpc-agent/tree/main/).
 
 ## Support
 
