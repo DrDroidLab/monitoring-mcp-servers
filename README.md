@@ -32,15 +32,7 @@ Releasing soon (reach out to us if you need support for these or any other sourc
 
 - Azure
 
-## Env vars
-
-| Env Var Name        | Description                                    | Required |
-| ------------------- | ---------------------------------------------- | -------- |
-| DRD_CLOUD_API_TOKEN | Authentication token for doctor droid platform | True     |
-
 ## Installation
-
-To get started create an agent authentication token by visiting [site](https://playbooks.drdroid.io/agent-tokens)
 
 ## MCP Mode
 
@@ -90,6 +82,14 @@ cd mcp_helm
    ```
 
 ## Standard Agent Mode
+
+To get started create an agent authentication token by visiting [site](https://playbooks.drdroid.io/agent-tokens)
+
+## Env vars
+
+| Env Var Name        | Description                                    | Required |
+| ------------------- | ---------------------------------------------- | -------- |
+| DRD_CLOUD_API_TOKEN | Authentication token for doctor droid platform | True     |
 
 ### Docker Compose
 
