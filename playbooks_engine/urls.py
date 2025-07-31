@@ -1,5 +1,6 @@
 from django.urls import path
+from . import mcp_views
 
-from . import views as playbooks_engine_views
-
-urlpatterns = []
+urlpatterns = [
+    path('mcp', mcp_views.mcp_endpoint),
+]

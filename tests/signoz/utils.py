@@ -1,0 +1,307 @@
+"""
+Utility functions for robust LLM evaluation using langevals.
+"""
+
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
+
+try:
+    from langevals import expect
+    from langevals_langevals.llm_boolean import (
+        CustomLLMBooleanEvaluator,
+        CustomLLMBooleanSettings,
+    )
+
+    LANGEVALS_AVAILABLE = True
+except ImportError:
+    LANGEVALS_AVAILABLE = False
+    CustomLLMBooleanEvaluator = None
+    CustomLLMBooleanSettings = None
+
+
+class SignozResponseEvaluator:
+    """Evaluator for SigNoz MCP Server responses."""
+
+    def __init__(self, model: str = "gpt-4o"):
+        if not LANGEVALS_AVAILABLE:
+            raise ImportError("langevals not available. Install with: pip install 'langevals[openai]'")
+        self.model = model
+
+    def is_helpful_response(self, prompt: str, response: str) -> bool:
+        """Check if response is helpful and addresses the prompt."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Is this response helpful and does it address the user's question effectively?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def is_structured_response(self, prompt: str, response: str) -> bool:
+        """Check if response is well-structured and clear."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Is this response well-structured, clear, and easy to understand?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_services_info(self, prompt: str, response: str) -> bool:
+        """Check if response contains valid service information."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain specific information about services from SigNoz, including service names like 'Recommendation Service', 'Shipping Service', or 'Email Service'?",
+                model=self.model,
+            )
+        )
+
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_connection_status(self, prompt: str, response: str) -> bool:
+        """Check if response contains connection test information."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain connection status information?",
+                model=self.model,
+            )
+        )
+
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_dashboard_info(self, prompt: str, response: str) -> bool:
+        """Check if response contains dashboard information."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain specific information about dashboards from SigNoz, mentioning dashboard names like 'Python Microservices' or 'Go Microservices'?",
+                model=self.model,
+            )
+        )
+
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_dashboard_data(self, prompt: str, response: str, dashboard_name: str) -> bool:
+        """Check if response contains specific dashboard data."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt=f"Does the response contain specific data for the '{dashboard_name}' dashboard, including metrics like 'Total Calls', 'Latencies', or 'Traces by Service'?",
+                model=self.model,
+            )
+        )
+
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_apm_metrics(self, prompt: str, response: str, service_name: str) -> bool:
+        """Check if response contains APM metrics for a specific service."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt=f"Does the response contain APM metrics for the '{service_name}' service, including metrics like 'Latency', 'Error Rate', 'Request Count', or 'Request Rate'?",
+                model=self.model,
+            )
+        )
+
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_dashboard_details(self, prompt: str, response: str, dashboard_id: str) -> bool:
+        """Check if response contains details for a specific dashboard ID."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt=f"Does the response contain detailed information for the dashboard with ID '{dashboard_id}', such as its name, panels, or description?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_clickhouse_query_result(self, prompt: str, response: str) -> bool:
+        """Check if response contains results from a Clickhouse SQL query."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain results from a Clickhouse SQL query, such as a table of data or a count of records?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_builder_query_result(self, prompt: str, response: str) -> bool:
+        """Check if response contains results from a builder query."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain results from a SigNoz builder query, such as metrics grouped by service or time?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_traces_info(self, prompt: str, response: str) -> bool:
+        """Check if response contains trace information from SigNoz."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain trace information from SigNoz, such as trace IDs, service names, durations, or timestamps?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+    def contains_logs_info(self, prompt: str, response: str) -> bool:
+        """Check if response contains log information from SigNoz."""
+        evaluator = CustomLLMBooleanEvaluator(
+            settings=CustomLLMBooleanSettings(
+                prompt="Does the response contain log information from SigNoz, such as log messages, timestamps, severity, or service names?",
+                model=self.model,
+            )
+        )
+        try:
+            expect(input=prompt, output=response).to_pass(evaluator)
+            return True
+        except AssertionError:
+            return False
+
+
+def create_test_dataset(test_cases: List[Dict[str, Any]]) -> pd.DataFrame:
+    """Create a pandas DataFrame from test cases for evaluation."""
+    return pd.DataFrame(test_cases)
+
+
+def evaluate_response_quality(
+    prompt: str,
+    response: str,
+    evaluator: SignozResponseEvaluator,
+    specific_checks: Optional[List[str]] = None
+) -> Dict[str, bool]:
+    """
+    Evaluate response quality using multiple criteria.
+
+    Args:
+        prompt: The input prompt/question
+        response: The generated response
+        evaluator: SignozResponseEvaluator instance
+        specific_checks: List of specific checks to run
+
+    Returns:
+        Dictionary with evaluation results
+    """
+    if not LANGEVALS_AVAILABLE:
+        return {"evaluation_skipped": True}
+
+    results = {}
+
+    # Always check these basic qualities
+    results["is_helpful"] = evaluator.is_helpful_response(prompt, response)
+    results["is_structured"] = evaluator.is_structured_response(prompt, response)
+
+    # Run specific checks if provided
+    if specific_checks:
+        for check in specific_checks:
+            if check == "services_info":
+                results["contains_services"] = evaluator.contains_services_info(prompt, response)
+            elif check == "connection_status":
+                results["contains_connection"] = evaluator.contains_connection_status(prompt, response)
+            elif check == "dashboard_info":
+                results["contains_dashboards"] = evaluator.contains_dashboard_info(prompt, response)
+            elif check.startswith("dashboard_data:"):
+                dashboard_name = check.split(":", 1)[1]
+                results[f"contains_data_{dashboard_name}"] = evaluator.contains_dashboard_data(
+                    prompt, response, dashboard_name
+                )
+            elif check.startswith("apm_metrics:"):
+                service_name = check.split(":", 1)[1]
+                results[f"contains_apm_{service_name}"] = evaluator.contains_apm_metrics(
+                    prompt, response, service_name
+                )
+            elif check.startswith("dashboard_details:"):
+                dashboard_id = check.split(":", 1)[1]
+                results[f"contains_dashboard_details_{dashboard_id}"] = evaluator.contains_dashboard_details(
+                    prompt, response, dashboard_id
+                )
+            elif check == "clickhouse_query_result":
+                results["contains_clickhouse_query_result"] = evaluator.contains_clickhouse_query_result(prompt, response)
+            elif check == "builder_query_result":
+                results["contains_builder_query_result"] = evaluator.contains_builder_query_result(prompt, response)
+            elif check == "traces_info":
+                results["contains_traces_info"] = evaluator.contains_traces_info(prompt, response)
+            elif check == "logs_info":
+                results["contains_logs_info"] = evaluator.contains_logs_info(prompt, response)
+
+    return results
+
+
+def assert_evaluation_passes(
+    evaluation_results: Dict[str, bool],
+    min_pass_rate: float = 0.8,
+    required_checks: Optional[List[str]] = None
+) -> None:
+    """
+    Assert that evaluation results meet quality standards.
+
+    Args:
+        evaluation_results: Results from evaluate_response_quality
+        min_pass_rate: Minimum percentage of checks that must pass
+        required_checks: Specific checks that must pass (100% requirement)
+    """
+    total_checks = len(evaluation_results)
+    passed_checks = sum(evaluation_results.values())
+    pass_rate = passed_checks / total_checks if total_checks > 0 else 0.0
+
+    # Check required checks first (must be 100%)
+    if required_checks:
+        for check in required_checks:
+            if check in evaluation_results and not evaluation_results[check]:
+                failed_details = [k for k, v in evaluation_results.items() if not v]
+                raise AssertionError(
+                    f"Required check '{check}' failed. "
+                    f"Failed checks: {failed_details}. "
+                    f"Overall pass rate: {pass_rate:.2%}"
+                )
+
+    # Check overall pass rate
+    if pass_rate < min_pass_rate:
+        failed_details = [k for k, v in evaluation_results.items() if not v]
+        raise AssertionError(
+            f"Evaluation pass rate {pass_rate:.2%} below minimum {min_pass_rate:.2%}. "
+            f"Failed checks: {failed_details}"
+        ) 

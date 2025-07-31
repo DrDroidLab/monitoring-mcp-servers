@@ -21,15 +21,15 @@ class AgentConfig(AppConfig):
         self.yaml_data = load_yaml(filepath)
         if not self.yaml_data:
             logger.warning(f'No connections found in {filepath}')
+        if settings.DRD_AGENT_MODE != "mcp":
+            drd_cloud_host = settings.DRD_CLOUD_API_HOST
+            drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
+            if settings.NATIVE_KUBERNETES_API_MODE:
+                logger.info('Native Kubernetes API mode is enabled')
 
-        drd_cloud_host = settings.DRD_CLOUD_API_HOST
-        drd_cloud_api_token = settings.DRD_CLOUD_API_TOKEN
-        if settings.NATIVE_KUBERNETES_API_MODE:
-            logger.info('Native Kubernetes API mode is enabled')
+            # Establish reachability with DRD Cloud
+            response = requests.get(f'{drd_cloud_host}/connectors/proxy/ping',
+                                    headers={'Authorization': f'Bearer {drd_cloud_api_token}'})
 
-        # Establish reachability with DRD Cloud
-        response = requests.get(f'{drd_cloud_host}/connectors/proxy/ping',
-                                headers={'Authorization': f'Bearer {drd_cloud_api_token}'})
-
-        if response.status_code != 200:
-            raise ValueError(f'Failed to connect to DRD Cloud: {response.text}')
+            if response.status_code != 200:
+                raise ValueError(f'Failed to connect to DRD Cloud: {response.text}')

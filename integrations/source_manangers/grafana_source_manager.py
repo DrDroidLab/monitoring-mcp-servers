@@ -3,19 +3,19 @@ import logging
 import re
 import string
 import requests
+import ast
 from typing import Optional, Union
 
 from google.protobuf.struct_pb2 import Struct
-from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
+from google.protobuf.wrappers_pb2 import DoubleValue, StringValue, Int64Value
 
 from integrations.source_api_processors.grafana_api_processor import GrafanaApiProcessor
 from integrations.source_manager import SourceManager
+from integrations.source_metadata_extractors.grafana_metadata_extractor import GrafanaSourceMetadataExtractor
 from protos.base_pb2 import Source, SourceModelType, TimeRange
 from protos.connectors.connector_pb2 import Connector as ConnectorProto
 from protos.literal_pb2 import Literal, LiteralType
-from protos.assets.grafana_asset_pb2 import GrafanaAssetModel, GrafanaDashboardAssetModel, \
-    GrafanaDashboardAssetOptions
-from protos.assets.asset_pb2 import AccountConnectorAssets, AccountConnectorAssetsModelFilters
+
 from protos.playbooks.playbook_commons_pb2 import (
     ApiResponseResult,
     LabelValuePair,
@@ -27,7 +27,6 @@ from protos.playbooks.playbook_commons_pb2 import (
 from protos.playbooks.source_task_definitions.grafana_task_pb2 import Grafana
 from protos.ui_definition_pb2 import FormField, FormFieldType
 from utils.credentilal_utils import generate_credentials_dict
-from utils.playbooks_client import PrototypeClient
 from utils.proto_utils import dict_to_proto, proto_to_dict
 
 logger = logging.getLogger(__name__)
@@ -56,24 +55,24 @@ class GrafanaSourceManager(SourceManager):
         self.source = Source.GRAFANA
         self.task_proto = Grafana
         self.task_type_callable_map = {
-            Grafana.TaskType.PROMETHEUS_DATASOURCE_METRIC_EXECUTION: {
-                "executor": self.execute_prometheus_datasource_metric_execution,
-                "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
+            Grafana.TaskType.DATASOURCE_QUERY_EXECUTION: {
+                "executor": self.execute_datasource_query_execution,
+                "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE, SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Query any of your Prometheus Data Sources from Grafana",
+                "display_name": "Execute queries against any datasource in Grafana to retrieve metrics data with customizable time intervals",
                 "category": "Metrics",
                 "form_fields": [
                     FormField(
                         key_name=StringValue(value="datasource_uid"),
                         display_name=StringValue(value="Data Source UID"),
-                        description=StringValue(value="Select Data Source UID "),
+                        description=StringValue(value="The unique identifier (UID) of the datasource in Grafana. This is required to identify which datasource to query."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
                     FormField(
                         key_name=StringValue(value="interval"),
-                        display_name=StringValue(value="Step Size(Seconds)"),
-                        description=StringValue(value="(Optional)Enter Step Size"),
+                        display_name=StringValue(value="Step Size (Seconds)"),
+                        description=StringValue(value="Optional: Time interval between data points in seconds. Defaults to 60 seconds if not specified. Use smaller values for higher resolution data."),
                         data_type=LiteralType.LONG,
                         form_field_type=FormFieldType.TEXT_FT,
                         is_optional=True,
@@ -81,19 +80,21 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="query_type"),
                         display_name=StringValue(value="Query Type"),
-                        description=StringValue(value='Select Query Type'),
+                        description=StringValue(value="The type of query to execute. PromQL for Prometheus, Flux for InfluxDB, Loki for logs, or any other datasource-specific query language."),
                         data_type=LiteralType.STRING,
                         default_value=Literal(type=LiteralType.STRING, string=StringValue(value="PromQL")),
                         valid_values=[
                             Literal(type=LiteralType.STRING, string=StringValue(value="PromQL")),
                             Literal(type=LiteralType.STRING, string=StringValue(value="Flux")),
+                            Literal(type=LiteralType.STRING, string=StringValue(value="Loki")),
                         ],
                         form_field_type=FormFieldType.DROPDOWN_FT,
                         is_optional=True,
                     ),
                     FormField(
-                        key_name=StringValue(value="promql_expression"),
+                        key_name=StringValue(value="query_expression"),
                         display_name=StringValue(value="Query Expression"),
+                        description=StringValue(value="The query expression to execute against the specified datasource. Examples: PromQL: 'up', Flux: 'from(bucket: \"mybucket\")', Loki: '{job=\"varlogs\"}', SQL: 'SELECT * FROM table'."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.MULTILINE_FT,
                     ),
@@ -103,35 +104,35 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_query_dashboard_panel_metric_execution,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Query any of your dashboard panels from Grafana",
+                "display_name": "Execute specific queries from a Grafana dashboard panel to retrieve metrics data using the panel's configured datasource and query parameters",
                 "category": "Metrics",
                 "is_agent_enabled": False,
                 "form_fields": [
                     FormField(
                         key_name=StringValue(value="dashboard_id"),
-                        display_name=StringValue(value="Dashboard"),
-                        description=StringValue(value="Select Dashboard"),
+                        display_name=StringValue(value="Dashboard ID"),
+                        description=StringValue(value="The numeric ID of the Grafana dashboard containing the panel to query. This identifies which dashboard to access."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.DROPDOWN_FT,
                     ),
                     FormField(
                         key_name=StringValue(value="panel_id"),
-                        display_name=StringValue(value="Panel"),
-                        description=StringValue(value="Select Panel"),
+                        display_name=StringValue(value="Panel ID"),
+                        description=StringValue(value="The numeric ID of the specific panel within the dashboard to query. Each panel in a dashboard has a unique ID."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.DROPDOWN_FT,
                     ),
                     FormField(
                         key_name=StringValue(value="datasource_uid"),
                         display_name=StringValue(value="Datasource UID"),
-                        description=StringValue(value="Datasource UID"),
+                        description=StringValue(value="The unique identifier (UID) of the datasource to use for the query. This should match the datasource configured in the panel."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TEXT_FT,
                     ),
                     FormField(
                         key_name=StringValue(value="queries"),
                         display_name=StringValue(value="Queries"),
-                        description=StringValue(value="Queries"),
+                        description=StringValue(value="Array of query objects to execute. Each query should include the expression and any additional parameters. Format: [{'expr': 'up'}, {'expr': 'rate(http_requests_total[5m])'}]"),
                         data_type=LiteralType.STRING_ARRAY,
                         form_field_type=FormFieldType.MULTILINE_FT,
                         default_value=Literal(type=LiteralType.STRING, string=StringValue(value="[]")),
@@ -142,13 +143,13 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_all_dashboard_panels,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.TIMESERIES,
-                "display_name": "Execute queries for panels in a Grafana Dashboard",
+                "display_name": "Execute all metric queries from all panels in a Grafana dashboard simultaneously, returning comprehensive timeseries data with support for template variables and panel filtering",
                 "category": "Metrics",
                 "form_fields": [
                     FormField(
                         key_name=StringValue(value="dashboard_uid"),
                         display_name=StringValue(value="Dashboard UID"),
-                        description=StringValue(value="Select Dashboard UID"),
+                        description=StringValue(value="The unique identifier (UID) of the Grafana dashboard to execute. This is different from the dashboard ID and is typically a string like 'abc123'."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
@@ -156,15 +157,15 @@ class GrafanaSourceManager(SourceManager):
                         key_name=StringValue(value="panel_ids"),
                         display_name=StringValue(value="Panel IDs (Optional, Comma-separated)"),
                         description=StringValue(
-                            value="Enter comma-separated panel IDs to execute only specific panels. Leave blank to execute all."),
+                            value="Optional: Comma-separated list of specific panel IDs to execute. If not provided, all panels in the dashboard will be executed. Example: '1,3,5' to execute only panels 1, 3, and 5."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TEXT_FT,
                         is_optional=True,
                     ),
                     FormField(
                         key_name=StringValue(value="interval"),
-                        display_name=StringValue(value="Step Size(Seconds)"),
-                        description=StringValue(value="(Optional)Enter Step Size"),
+                        display_name=StringValue(value="Step Size (Seconds)"),
+                        description=StringValue(value="Optional: Time interval between data points in seconds. Defaults to 60 seconds if not specified. Smaller values provide higher resolution but may increase query time."),
                         data_type=LiteralType.LONG,
                         form_field_type=FormFieldType.TEXT_FT,
                         is_optional=True,
@@ -172,7 +173,8 @@ class GrafanaSourceManager(SourceManager):
                     FormField(
                         key_name=StringValue(value="template_variables"),
                         display_name=StringValue(value="Template Variables"),
-                        description=StringValue(value="Template Variables"),
+                        description=StringValue(value="""MANDATORY: JSON of template variables to set the dashboard variables. Set like "{\"var1\": \"val1\", \"var2\": \"val2\"}" - in JSON format.
+                                                Set ALL VARIABLES of the dashboard according to the user query"""),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.MULTILINE_FT,
                         is_optional=True,
@@ -183,20 +185,20 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_fetch_dashboard_variable_label_values,
                 "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Fetch label values for dashboard variables from Prometheus Datasource",
+                "display_name": "Retrieve all available values for a specific label from a Prometheus datasource, useful for populating dashboard template variables or understanding available metric dimensions",
                 "category": "Metrics",
                 "form_fields": [
                     FormField(
                         key_name=StringValue(value="datasource_uid"),
                         display_name=StringValue(value="Data Source UID"),
-                        description=StringValue(value="Select Prometheus Data Source UID"),
+                        description=StringValue(value="The unique identifier (UID) of the Prometheus datasource in Grafana. This datasource will be queried for label values."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
                     FormField(
                         key_name=StringValue(value="label_name"),
                         display_name=StringValue(value="Label Name"),
-                        description=StringValue(value="Enter the label name to fetch values for"),
+                        description=StringValue(value="The name of the label to fetch values for. Common examples include 'instance', 'job', 'service', 'pod', 'namespace', etc. This will return all unique values for this label across all metrics."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TEXT_FT,
                     ),
@@ -206,17 +208,67 @@ class GrafanaSourceManager(SourceManager):
                 "executor": self.execute_fetch_dashboard_variables,
                 "model_types": [SourceModelType.GRAFANA_DASHBOARD],
                 "result_type": PlaybookTaskResultType.API_RESPONSE,
-                "display_name": "Fetch all variables and their values from a Grafana Dashboard",
+                "display_name": "Retrieve all template variables and their current values from a Grafana dashboard, including variable definitions, current selections, and available options for dynamic dashboard configuration",
                 "category": "Metrics",
                 "form_fields": [
                     FormField(
                         key_name=StringValue(value="dashboard_uid"),
                         display_name=StringValue(value="Dashboard UID"),
-                        description=StringValue(value="Select Dashboard UID to fetch variables from"),
+                        description=StringValue(value="The unique identifier (UID) of the Grafana dashboard to fetch variables from. This will return all template variables defined in the dashboard along with their current values and available options."),
                         data_type=LiteralType.STRING,
                         form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
                     ),
                 ],
+            },
+            Grafana.TaskType.GET_DASHBOARD_CONFIG: {
+                "executor": self.execute_get_dashboard_config,
+                "model_types": [SourceModelType.GRAFANA_DASHBOARD],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Retrieves dashboard configuration details from Grafana, including dashboard metadata, panel configurations, and template variables",
+                "category": "Configuration",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="dashboard_uid"),
+                        display_name=StringValue(value="Dashboard UID"),
+                        description=StringValue(value="The unique identifier (UID) of the Grafana dashboard to retrieve configuration details for. This will return the complete dashboard configuration including panels, variables, and metadata."),
+                        data_type=LiteralType.STRING,
+                        form_field_type=FormFieldType.TYPING_DROPDOWN_FT,
+                    ),
+                ],
+            },
+            Grafana.TaskType.FETCH_ALL_DASHBOARDS: {
+                "executor": self.execute_fetch_all_dashboards,
+                "model_types": [SourceModelType.GRAFANA_DASHBOARD],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetches all dashboards from Grafana with basic information like title, UID, folder, tags, etc.",
+                "category": "Configuration",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="limit"),
+                        display_name=StringValue(value="Limit"),
+                        description=StringValue(value="Maximum number of dashboards to return. Defaults to 100 if not specified."),
+                        data_type=LiteralType.LONG,
+                        form_field_type=FormFieldType.TEXT_FT,
+                        is_optional=True,
+                        default_value=Literal(type=LiteralType.LONG, long=Int64Value(value=100)),
+                    ),
+                ],
+            },
+            Grafana.TaskType.FETCH_DATASOURCES: {
+                "executor": self.execute_fetch_datasources,
+                "model_types": [SourceModelType.GRAFANA_PROMETHEUS_DATASOURCE],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetches all datasources from Grafana with their configuration details",
+                "category": "Configuration",
+                "form_fields": [],
+            },
+            Grafana.TaskType.FETCH_FOLDERS: {
+                "executor": self.execute_fetch_folders,
+                "model_types": [SourceModelType.GRAFANA_DASHBOARD],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetches all folders from Grafana with their metadata and permissions",
+                "category": "Configuration",
+                "form_fields": [],
             },
         }
 
@@ -224,23 +276,24 @@ class GrafanaSourceManager(SourceManager):
         generated_credentials = generate_credentials_dict(grafana_connector.type, grafana_connector.keys)
         return GrafanaApiProcessor(**generated_credentials)
 
-    def execute_prometheus_datasource_metric_execution(self, time_range: TimeRange, grafana_task: Grafana,
+    def execute_datasource_query_execution(self, time_range: TimeRange, grafana_task: Grafana,
                                                        grafana_connector: ConnectorProto):
         try:
             if not grafana_connector:
                 raise Exception("Task execution Failed:: No Grafana source found")
 
-            task = grafana_task.prometheus_datasource_metric_execution
+            task = grafana_task.datasource_query_execution
             datasource_uid = task.datasource_uid.value
             interval = task.interval.value
             if interval is None:
                 interval = 60
             interval_ms = interval * 1000
             query_type = task.query_type.value if task.query_type and task.query_type.value else "PromQL"
-            metric_query = task.promql_expression.value
+            metric_query = task.query_expression.value
 
             grafana_api_processor = self.get_connector_processor(grafana_connector)
 
+            # Build query based on query type
             if query_type == 'Flux':
                 queries = [
                     {"query": metric_query, "datasource": {"uid": datasource_uid}, "refId": "A",
@@ -271,7 +324,7 @@ class GrafanaSourceManager(SourceManager):
             # Build a minimal panel_ref_map for the single query
             panel_ref_map = {
                 "A": {
-                    "panel_id": "prometheus_query",
+                    "panel_id": f"{query_type.lower()}_query",
                     "panel_title": metric_query,
                     "original_expr": metric_query,
                 }
@@ -285,7 +338,6 @@ class GrafanaSourceManager(SourceManager):
             # Fallback: return API response if no timeseries data found
             response_struct = dict_to_proto(response, Struct)
             output = ApiResponseResult(response_body=response_struct)
-
             task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
                                              api_response=output)
             return task_result
@@ -357,87 +409,40 @@ class GrafanaSourceManager(SourceManager):
             
             dashboard_uid = task.dashboard_uid.value
 
-            grafana_api_processor = self.get_connector_processor(grafana_connector)
-
             print(
                 f"Playbook Task Downstream Request: Type -> Grafana FETCH_DASHBOARD_VARIABLES, Dashboard_UID -> {dashboard_uid}",
                 flush=True,
             )
 
-            variables_data = grafana_api_processor.get_dashboard_variables(dashboard_uid)
+            # Get connector credentials
+            generated_credentials = generate_credentials_dict(grafana_connector.type, grafana_connector.keys)
+            
+            # Create metadata extractor instance
+            grafana_metadata_extractor = GrafanaSourceMetadataExtractor(
+                request_id="dashboard_variables_request",
+                connector_name=grafana_connector.name.value,
+                grafana_host=generated_credentials.get('grafana_host'),
+                grafana_api_key=generated_credentials.get('grafana_api_key'),
+                ssl_verify=generated_credentials.get('ssl_verify', 'true')
+            )
 
-            if not variables_data or not variables_data.get('variables'):
+            # Use metadata extractor to get dashboard variables directly
+            variables_data = grafana_metadata_extractor.extract_dashboard_variables(dashboard_uid)
+
+            if variables_data.get('error'):
                 return PlaybookTaskResult(
                     type=PlaybookTaskResultType.TEXT,
-                    text=TextResult(output=StringValue(value=f"No variables found for dashboard: {dashboard_uid}. Send an empty dictionary for template variables")),
+                    text=TextResult(output=StringValue(value=variables_data['error'])),
                     source=self.source,
                 )
 
-            # Also get current values from dashboard assets to supplement the API response
-            try:
-                dashboard_asset_filter = AccountConnectorAssetsModelFilters(
-                    grafana_dashboard_model_filters=GrafanaDashboardAssetOptions(
-                        dashboards=[GrafanaDashboardAssetOptions.GrafanaDashboardOptions(
-                            dashboard_uid=StringValue(value=dashboard_uid)
-                        )]
-                    )
+            if not variables_data.get('variables'):
+                message = variables_data.get('message', f"No variables found for dashboard: {dashboard_uid}. Send an empty dictionary for template variables")
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=message)),
+                    source=self.source,
                 )
-                
-                prototype_client = PrototypeClient()
-                assets_result: AccountConnectorAssets = prototype_client.get_connector_assets(
-                    "GRAFANA",
-                    grafana_connector.id.value,
-                    SourceModelType.GRAFANA_DASHBOARD,
-                    proto_to_dict(dashboard_asset_filter)
-                )
-
-                # Extract current values from dashboard assets if available
-                current_values_from_assets = {}
-                if assets_result and assets_result.grafana and assets_result.grafana.assets:
-                    dashboard_asset_model: GrafanaAssetModel = assets_result.grafana.assets[0]
-                    dashboard_data: GrafanaDashboardAssetModel = dashboard_asset_model.grafana_dashboard
-                    
-                    # Convert the dashboard JSON struct to dict
-                    dashboard_dict = proto_to_dict(dashboard_data.dashboard_json)
-                    
-                    # Extract current values from stored dashboard JSON
-                    dashboard_templating = dashboard_dict.get("templating", {})
-                    if isinstance(dashboard_templating, dict) and "list" in dashboard_templating:
-                        template_vars = dashboard_templating.get("list", [])
-                        print("Template vars", template_vars)
-                        for var in template_vars:
-                            if not isinstance(var, dict):
-                                continue
-                            
-                            var_name = var.get("name", "")
-                            if not var_name:
-                                continue
-                            
-                            current = var.get("current", {})
-                            if isinstance(current, dict):
-                                current_values_from_assets[var_name] = {
-                                    "current_value": current.get("value"),
-                                    "current_text": current.get("text")
-                                }
-                print("Current values from assets", current_values_from_assets)
-                # Enhance the API response with current values from assets
-                api_variables = variables_data.get('variables', {})
-                enhanced_variables = {}
-                for var_name, var_info in api_variables.items():
-                    print("Var name", var_name)
-                    print("Var info", var_info)
-                    enhanced_variables[var_name] = {}
-                    enhanced_variables[var_name]['allowed_values'] = var_info
-                    if var_name in current_values_from_assets:
-                        # Add current values from assets to the API response
-                        enhanced_variables[var_name]['current_value'] = current_values_from_assets[var_name]['current_value']
-                
-                # Also add a summary of current values
-                variables_data['variables'] = enhanced_variables
-                
-            except Exception as asset_error:
-                logger.warning(f"Failed to get current values from dashboard assets: {asset_error}")
-                variables_data['asset_retrieval_error'] = str(asset_error)
 
             # Ensure we have a proper Struct instance
             if isinstance(variables_data, dict):
@@ -548,19 +553,33 @@ class GrafanaSourceManager(SourceManager):
         resolved_string = input_string
         # Regex to find $var or ${var} or ${var:format}
         var_refs = re.findall(r"\$\{([^}]+)(?::(?:csv|json|pipe|regex|distributed))?\}|\$([a-zA-Z0-9_]+)", input_string)
+        
+        if var_refs:
+            logger.debug(f"Found variable references in '{input_string}': {var_refs}")
+            logger.debug(f"Available template variables: {template_vars_dict}")
+        
         for ref_tuple in var_refs:
             var_ref = next((item for item in ref_tuple if item), None)  # Get the captured group (variable name)
             if var_ref and var_ref in template_vars_dict:
                 var_value = template_vars_dict[var_ref]
+                logger.debug(f"Resolving variable '{var_ref}' with value '{var_value}'")
                 # Basic handling for multi-value variables (join with '|')
                 if isinstance(var_value, list):
                     replacement = "|".join(map(str, var_value)) if var_value else ""
                 else:
                     replacement = str(var_value) if var_value is not None else ""
+                
+                logger.debug(f"Replacement for '{var_ref}': '{replacement}'")
                 # Replace both ${var} and $var formats, ensuring word boundaries for $var
                 resolved_string = re.sub(r"\$\{" + re.escape(var_ref) + r"(?::(?:csv|json|pipe|regex|distributed))?\}",
                                          replacement, resolved_string)
                 resolved_string = re.sub(r"\$" + re.escape(var_ref) + r"\b", replacement, resolved_string)
+            else:
+                logger.debug(f"Variable '{var_ref}' not found in template_vars_dict: {template_vars_dict}")
+        
+        if resolved_string != input_string:
+            logger.debug(f"Resolved '{input_string}' to '{resolved_string}'")
+        
         return resolved_string
 
     def _resolve_target_datasource(
@@ -595,8 +614,10 @@ class GrafanaSourceManager(SourceManager):
             return None
 
         # Resolve any variables in the datasource string (UID or name)
+        logger.debug(f"Resolving datasource '{datasource_value_to_resolve}' for panel {panel_id}")
         resolved_uid_or_name = self._resolve_template_variables_in_string(datasource_value_to_resolve,
                                                                           template_vars_dict)
+        logger.debug(f"Resolved datasource '{datasource_value_to_resolve}' to '{resolved_uid_or_name}' for panel {panel_id}")
 
         if not resolved_uid_or_name:
             logger.warning(
@@ -852,26 +873,44 @@ class GrafanaSourceManager(SourceManager):
 
             # 2. Extract default template variable values and override with user-provided ones
             template_vars_dict = self._extract_template_variable_values(dashboard_dict)
-            
+
             # Handle template_variables from the task
             override_template_vars = {}
             if task.HasField("template_variables") and task.template_variables.value:
                 try:
-                    user_vars = json.loads(task.template_variables.value)
+                    # Handle both cases: when it's already a dict or when it's a JSON string
+                    logger.info(f"Task template variables value: {task.template_variables.value}, type: {type(task.template_variables.value)}")
+                    user_vars = None
+                    val = task.template_variables.value
+                    if isinstance(val, dict):
+                        user_vars = val
+                    elif isinstance(val, str):
+                        try:
+                            user_vars = json.loads(val)
+                        except json.JSONDecodeError:
+                            logger.warning(f"Failed to decode template_variables as JSON, trying ast.literal_eval: {val}")
+                            try:
+                                user_vars = ast.literal_eval(val)
+                            except (ValueError, SyntaxError) as e:
+                                logger.warning(f"Could not parse template_variables: {e}")
+                    
                     if isinstance(user_vars, dict):
                         override_template_vars = user_vars
+                        logger.info(f"Successfully parsed template variables: {override_template_vars}")
                     else:
-                        logger.warning(f"Template variables from task is not a valid JSON object string: {task.template_variables.value}")
-                except json.JSONDecodeError:
-                    logger.warning(f"Failed to decode template_variables JSON: {task.template_variables.value}")
+                        logger.warning(f"Template variables from task is not a valid object: {task.template_variables.value}")
+                except Exception as e:
+                    logger.warning(f"Error processing template variables: {e}, value: {task.template_variables.value}")
             
             if override_template_vars:
                 template_vars_dict.update(override_template_vars)
+                logger.info(f"Updated template vars dict with override: {template_vars_dict}")
 
             # 3. Create datasource name to UID mapping
             datasource_name_to_uid_map = self._create_datasource_name_to_uid_mapping(grafana_api_processor)
 
             # 4. Prepare queries for API call, passing the filter
+            logger.info(f"Final template_vars_dict before query preparation: {template_vars_dict}")
             all_queries, panel_ref_map = self._prepare_grafana_queries(dashboard_dict, template_vars_dict,
                                                                        datasource_name_to_uid_map, panel_ids_filter)
 
@@ -990,3 +1029,181 @@ class GrafanaSourceManager(SourceManager):
             q["intervalMs"] = interval_ms
 
         return queries
+
+    def execute_get_dashboard_config(self, time_range: TimeRange, grafana_task: Grafana,
+                                     grafana_connector: ConnectorProto):
+        """Executes the get dashboard config task to retrieve dashboard configuration details."""
+        try:
+            if not grafana_connector:
+                raise Exception("Task execution Failed:: No Grafana source found")
+
+            task = grafana_task.get_dashboard_config
+            dashboard_uid = task.dashboard_uid.value
+
+            grafana_api_processor = self.get_connector_processor(grafana_connector)
+
+            print(
+                f"Playbook Task Downstream Request: Type -> Grafana GET_DASHBOARD_CONFIG, Dashboard_UID -> {dashboard_uid}",
+                flush=True,
+            )
+
+            dashboard_config = grafana_api_processor.get_dashboard_config_details(dashboard_uid)
+
+            if not dashboard_config:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value=f"No dashboard configuration found for UID: {dashboard_uid}")),
+                    source=self.source,
+                )
+
+            response_struct = dict_to_proto(dashboard_config, Struct)
+            output = ApiResponseResult(response_body=response_struct)
+
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
+            return task_result
+        except Exception as e:
+            logger.error(f"Error while executing Grafana get dashboard config task: {e}")
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TEXT,
+                text=TextResult(output=StringValue(value=f"Error executing dashboard config task: {str(e)}")),
+                source=self.source,
+            )
+
+    def execute_fetch_all_dashboards(self, time_range: TimeRange, grafana_task: Grafana,
+                                     grafana_connector: ConnectorProto):
+        """Executes the fetch all dashboards task to retrieve all dashboards from Grafana."""
+        try:
+            if not grafana_connector:
+                raise Exception("Task execution Failed:: No Grafana source found")
+
+            task = grafana_task.fetch_all_dashboards
+            limit = task.limit.value if task.HasField("limit") and task.limit.value else 100
+
+            grafana_api_processor = self.get_connector_processor(grafana_connector)
+
+            print(
+                f"Playbook Task Downstream Request: Type -> Grafana FETCH_ALL_DASHBOARDS, Limit -> {limit}",
+                flush=True,
+            )
+
+            # Use the existing fetch_dashboards method which already returns the right format
+            dashboards = grafana_api_processor.fetch_dashboards()
+
+            if not dashboards:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value="No dashboards found in Grafana")),
+                    source=self.source,
+                )
+
+            # Limit the results if needed
+            if limit and len(dashboards) > limit:
+                dashboards = dashboards[:limit]
+
+            response_data = {
+                "status": "success",
+                "total_count": len(dashboards),
+                "limit": limit,
+                "dashboards": dashboards
+            }
+
+            response_struct = dict_to_proto(response_data, Struct)
+            output = ApiResponseResult(response_body=response_struct)
+
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
+            return task_result
+        except Exception as e:
+            logger.error(f"Error while executing Grafana fetch all dashboards task: {e}")
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TEXT,
+                text=TextResult(output=StringValue(value=f"Error executing fetch all dashboards task: {str(e)}")),
+                source=self.source,
+            )
+
+    def execute_fetch_datasources(self, time_range: TimeRange, grafana_task: Grafana,
+                                  grafana_connector: ConnectorProto):
+        """Executes the fetch datasources task to retrieve all datasources from Grafana."""
+        try:
+            if not grafana_connector:
+                raise Exception("Task execution Failed:: No Grafana source found")
+
+            grafana_api_processor = self.get_connector_processor(grafana_connector)
+
+            print(
+                f"Playbook Task Downstream Request: Type -> Grafana FETCH_DATASOURCES",
+                flush=True,
+            )
+
+            datasources = grafana_api_processor.fetch_data_sources()
+
+            if not datasources:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value="No datasources found in Grafana")),
+                    source=self.source,
+                )
+
+            response_data = {
+                "status": "success",
+                "total_count": len(datasources),
+                "datasources": datasources
+            }
+
+            response_struct = dict_to_proto(response_data, Struct)
+            output = ApiResponseResult(response_body=response_struct)
+
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
+            return task_result
+        except Exception as e:
+            logger.error(f"Error while executing Grafana fetch datasources task: {e}")
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TEXT,
+                text=TextResult(output=StringValue(value=f"Error executing fetch datasources task: {str(e)}")),
+                source=self.source,
+            )
+
+    def execute_fetch_folders(self, time_range: TimeRange, grafana_task: Grafana,
+                              grafana_connector: ConnectorProto):
+        """Executes the fetch folders task to retrieve all folders from Grafana."""
+        try:
+            if not grafana_connector:
+                raise Exception("Task execution Failed:: No Grafana source found")
+
+            grafana_api_processor = self.get_connector_processor(grafana_connector)
+
+            print(
+                f"Playbook Task Downstream Request: Type -> Grafana FETCH_FOLDERS",
+                flush=True,
+            )
+
+            folders = grafana_api_processor.fetch_folders()
+
+            if not folders:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.TEXT,
+                    text=TextResult(output=StringValue(value="No folders found in Grafana")),
+                    source=self.source,
+                )
+
+            response_data = {
+                "status": "success",
+                "total_count": len(folders),
+                "folders": folders
+            }
+
+            response_struct = dict_to_proto(response_data, Struct)
+            output = ApiResponseResult(response_body=response_struct)
+
+            task_result = PlaybookTaskResult(source=self.source, type=PlaybookTaskResultType.API_RESPONSE,
+                                             api_response=output)
+            return task_result
+        except Exception as e:
+            logger.error(f"Error while executing Grafana fetch folders task: {e}")
+            return PlaybookTaskResult(
+                type=PlaybookTaskResultType.TEXT,
+                text=TextResult(output=StringValue(value=f"Error executing fetch folders task: {str(e)}")),
+                source=self.source,
+            )

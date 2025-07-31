@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  mcp_server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    image: drd_agent_mcp
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      - "DJANGO_DEBUG=True"
+      - "DRD_AGENT_MODE=mcp"
+      - "DRD_CLOUD_API_TOKEN=mcp-mode"
+    restart: unless-stopped
+    networks:
+      - mcp_network
+
+networks:
+  mcp_network:
+    driver: bridge 

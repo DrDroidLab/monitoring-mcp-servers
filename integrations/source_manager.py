@@ -75,6 +75,17 @@ class SourceManager:
         connector_proto: ConnectorProto = credential_yaml_to_connector_proto(connector_name,
                                                                              loaded_connections[connector_name], connector_id)
         return connector_proto
+    
+    def get_all_active_connectors(self):
+        loaded_connections = settings.LOADED_CONNECTIONS
+        if not loaded_connections:
+            raise Exception("No loaded connections found")
+        all_active_connections = []
+        for c, metadata in loaded_connections.items():
+            print(c, metadata)
+            connector_proto = credential_yaml_to_connector_proto(c, metadata)
+            all_active_connections.append(connector_proto)
+        return all_active_connections
 
     def get_resolved_task(self, global_variable_set: Struct, input_task: PlaybookTask):
         source = input_task.source
@@ -98,10 +109,6 @@ class SourceManager:
         if 'form_fields' not in self.task_type_callable_map[task_type]:
             raise Exception(f"PlaybookSourceManager.get_source_task:: Form fields not found for task type: "
                             f"{task_type_name} in {source_str} source manager")
-
-        if not source_task_type_dict and self.task_type_callable_map[task_type]['form_fields']:
-            raise Exception(f"PlaybookSourceManager.get_source_task:: No definition for task type: {task_type_name} "
-                            f"found in task")
 
         # Resolve global variables in source_type_task_def
         form_fields = self.task_type_callable_map[task_type]['form_fields']
