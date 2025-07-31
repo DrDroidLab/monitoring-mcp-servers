@@ -13,7 +13,7 @@ Spinning up this repo gives you an endpoint that you can connect to any MCP Clie
    }
    ```
 
-For sample usage, clone [Slack AI Bot](https://github.com/DrDroidLab/slack-ai-bot-builder) and create your own AI Slack Bot that interacts with the following sources:
+For sample usage, add this to Cursor, Claude Desktop or clone [Slack AI Bot](https://github.com/DrDroidLab/slack-ai-bot-builder) and create your own AI Slack Bot that interacts with the following sources:
 - Grafana -- logs, metrics, dashboards fetching and analysis
 - Kubernetes -- run kubectl commands
 - Grafana Loki -- logs fetching (Can also be done via Grafana)
