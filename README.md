@@ -59,6 +59,14 @@ Command:
 cd mcp_helm
 ./deploy_mcp_helm.sh
 ```
+2. After you spin this up, you need to either (A) Create an Ingress to expose the service via a URL or (B) port forward to your localhost and access the MCP server for your testing.
+
+Run this command for option (B).
+
+```shell
+   kubectl port-forward -n drdroid service/mcp-server-service 8000:8000"
+```
+Once you do this, the url `http://localhost:8000/playbooks/mcp` can be used as an MCP server to connect to all integrations configured in the credentials + k8s cluster.
 
 Note:
 * The agent will be installed in the namespace 'drdroid' by default. This can be changed in the helm/deploy_helm.sh
