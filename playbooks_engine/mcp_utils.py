@@ -178,6 +178,11 @@ def generate_mcp_tools_for_source_manager(source_manager: Any) -> Tuple[List[Dic
                         "type": "object",
                         "properties": properties,
                         "required": required
+                    },
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": properties,
+                        "required": required
                     }
                 }
 
@@ -373,6 +378,11 @@ def generate_mcp_tools_for_connector(connector_name: str, source: Any, source_ma
                     "name": tool_name,
                     "description": f"{task_info.get('display_name', f'{connector_name} task')} (Connector: {connector_name})",
                     "parameters": {
+                        "type": "object",
+                        "properties": properties,
+                        "required": required
+                    },
+                    "inputSchema": {
                         "type": "object",
                         "properties": properties,
                         "required": required
