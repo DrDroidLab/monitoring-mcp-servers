@@ -1,62 +1,53 @@
-# Doctor Droid Python Proxy Agent
+# MCP Server for AI Automation on your Monitoring Data
 
-The present repository contains the source code of the Doctor Droid Python Proxy Agent version 1.0.0.
-Read more [here](https://github.com/DrDroidLab/drd-vpc-agent).
-![VPC Agent](https://github.com/user-attachments/assets/a17b8904-7811-4597-b4cc-bae34f02cb48)
+## About
 
-## Documentation
+Spinning up this repo gives you an endpoint that you can connect to any MCP Client (Claude Desktop, Cursor, DrDroid, etc.) and connect AI to your respective tools with just this change in your mcp.json
+   ```shell
+   {
+      "mcpServers": {
+         "multi-tool-mcp-server": {
+            "url": "your_url/playbooks/mcp"
+         }
+      }
+   }
+   ```
 
-The Agent runs inside your VPC and acts as a reverse proxy to connect with your metric sources and send
-metrics and related data to doctor droid cloud platform. The agent is designed to be lightweight and easy to deploy
-with only egress tcp calls to Doctor Droid Cloud Platform.
+For sample usage, clone [Slack AI Bot](https://github.com/DrDroidLab/slack-ai-bot-builder) and create your own AI Slack Bot that interacts with the following sources:
+- Grafana -- logs, metrics, dashboards fetching and analysis
+- Kubernetes -- run kubectl commands
+- Grafana Loki -- logs fetching (Can also be done via Grafana)
+- Signoz -- Query your OpenTelemetry data directly from Signoz / Clickhouse.
+- Bash Commands -- Run commands on terminal
 
-Currently, the agent supports the following metric sources in your VPC:
+Additional support: Apart from these, there is also support for 30+ other tools. Browse full list of integrations supported [here](https://github.com/DrDroidLab/drd-vpc-agent/tree/mcp_main/integrations/source_manangers)
 
-* Grafana
-* Grafana Loki
-* Cloudwatch
-* Kubernetes
-* Azure AKS (via native Kubernetes)
-* AWS EKS (via native Kubernetes)
-* GKE (via native Kubernetes)
-* New Relic
-* Datadog
-* Opensearch
-* MongoDB
-* Github
-* Postgres
-* Any SQL Database (via Sql Connection String)
-* Bash Commands
+## Installation for MCP Mode
 
-Releasing soon (reach out to us if you need support for these or any other source):
+**Note:**
+* If you want the MCP Server to be connected to your k8s cluster without any additional configuration effort, install using the HELM chart.
 
-* Azure
+### Docker Compose (MCP Mode)
 
-## Env vars
+1. Add your credentials in `credentials/secrets.yaml`
+2. Run the MCP server:
+   ```shell
+   docker compose -f mcp.docker-compose.yaml up --build -d
+   ```
+3. Add it to your Cursor using the localhost setup with this `mcp.json` configuration:
+   ```json
+   {
+     "mcpServers": {
+       "droid-vpc-agent": {
+         "url": "http://localhost:8000/playbooks/mcp"
+       }
+     }
+   }
+   ```
 
-| Env Var Name        | Description                                    | Required | 
-|---------------------|------------------------------------------------|----------|
-| DRD_CLOUD_API_TOKEN | Authentication token for doctor droid platform | True     |
+### Helm (MCP Mode)
 
-## Installation
-
-To get started create an agent authentication token by visiting [site](https://playbooks.drdroid.io/agent-tokens)
-
-### Docker Compose
-
-1. Create credentials/secret.yaml file with valid credentials. Secrets format for different connections can be
-   referenced
-   from: [credentials/credentials_template.yaml.](https://github.com/DrDroidLab/drd-vpc-agent/blob/main/credentials/credentials_template.yaml)
-
-Command:
-
-```shell
-./deploy_docker.sh <API_TOKEN>
-```
-
-For any update the agent, re-run the command.
-
-### Helm
+For Helm deployment, the process is the same as the normal Helm deployment:
 
 1. Add the secrets for the integrations in helm/configmap.yaml file.
    Refer to the image below for a sample:
@@ -65,26 +56,51 @@ For any update the agent, re-run the command.
 Command:
 
 ```shell
-cd helm
-./deploy_helm.sh <API_TOKEN>
+cd mcp_helm
+./deploy_mcp_helm.sh
 ```
+2. After you spin this up, you need to either (A) Create an Ingress to expose the service via a URL or (B) port forward to your localhost and access the MCP server for your testing.
 
+Run this command for option (B).
+
+```shell
+   kubectl port-forward -n drdroid service/mcp-server-service 8000:8000"
+```
+Once you do this, the url `http://localhost:8000/playbooks/mcp` can be used as an MCP server to connect to all integrations configured in the credentials + k8s cluster.
+
+Note:
 * The agent will be installed in the namespace 'drdroid' by default. This can be changed in the helm/deploy_helm.sh
   file.
-* Agent updates the image automatically every day at 00:00 UTC.
 * Agent will have read access to the cluster and will be able to fetch the metrics from the cluster.
+
+### Local Development (MCP Mode)
+
+1. Create and activate a virtual environment:
+   ```shell
+   uv venv env
+   source .venv/bin/activate
+   ```
+2. Install dependencies:
+   ```shell
+   uv pip sync requirements.txt
+   ```
+3. Start the MCP server:
+   ```shell
+   sh start_mcp_server.sh
+   ```
+[TODO] -- add instructions on how to port forward and test kubernetes from local.
+
+## Installation -- VPC Mode
+
+Apart from the MCP mode, we also have VPC mode. The integrations accessible are same, but in this mode:
+* No ingress port is required to be open on the machine where this service is deployed. (This operates on a redis + polling model)
+* This is designed for DrDroid Cloud users who want to connect our platform to integrations that are behind their VPC.
+* Read instructions on installation & getting started on [main branch](https://github.com/DrDroidLab/drd-vpc-agent/tree/main/).
 
 ## Support
 
-Go through our [documentation](https://docs.drdroid.io?utm_param=github-py) to learn more.
-Visit [Doctor Droid website](https://drdroid.io?utm_param=github-py) for more information.
-
-For any queries, reach out at [support@drdroid.io](mailto:support@drdroid.io).
+For any queries or help in setup, join [Discord](https://discord.gg/AQ3tusPtZn)
 
 ## Contributions
-We welcome contributions to the Doctor Droid Python Proxy Agent. If you have any suggestions or improvements, please
-feel free to open an issue or submit a pull request. We appreciate your help in making this project better!
 
-### Maintainers:
-* [Mohit Goyal](https://github.com/droid-mohit)
-
+We welcome contributions. If you have any suggestions or improvements, please feel free to open an issue or submit a pull request. We appreciate your help in making this project better!
