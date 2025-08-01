@@ -1201,7 +1201,7 @@ class SignozSourceManager(SourceManager):
                 )
             else:
                 return PlaybookTaskResult(
-                    type=PlaybookTaskResultType.ERROR,
+                    type=PlaybookTaskResultType.API_RESPONSE,
                     text=TextResult(output=StringValue(value="Failed to fetch traces or logs")),
                     source=self.source,
                 )
