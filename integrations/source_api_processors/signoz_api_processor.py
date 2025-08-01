@@ -750,11 +750,12 @@ class SignozApiProcessor(Processor):
         try:
             # Use standardized time range logic
             start_dt, end_dt = self._get_time_range(start_time, end_time, duration, default_hours=3)
-            time_geq = int(start_dt.timestamp())
-            time_lt = int(end_dt.timestamp())
+            from_time = int(start_dt.timestamp() * 1000)
+            to_time = int(end_dt.timestamp() * 1000)
             limit = int(limit) if limit else 100
             
             if data_type == "traces":
+                # For traces, use ClickHouse SQL approach
                 table = "signoz_traces.distributed_signoz_index_v3"
                 select_cols = "traceID, serviceName, name, durationNano, statusCode, timestamp"
                 where_clauses = [
@@ -763,38 +764,90 @@ class SignozApiProcessor(Processor):
                 ]
                 if service_name:
                     where_clauses.append(f"serviceName = '{service_name}'")
+                
+                where_sql = " AND ".join(where_clauses)
+                query = f"SELECT {select_cols} FROM {table} WHERE {where_sql} LIMIT {limit}"
+                
+                result = self.execute_clickhouse_query_tool(
+                    query=query, 
+                    time_geq=int(start_dt.timestamp()), 
+                    time_lt=int(end_dt.timestamp()), 
+                    panel_type="table", 
+                    fill_gaps=False, 
+                    step=60
+                )
+                
             elif data_type == "logs":
-                table = "signoz_logs.distributed_logs_v2"
-                select_cols = "timestamp, body, severity_text, trace_id, span_id"
-                where_clauses = [
-                    f"timestamp >= toDateTime64({int(start_dt.timestamp())}, 9)", 
-                    f"timestamp < toDateTime64({int(end_dt.timestamp())}, 9)"
-                ]
+                # For logs, use the builder query approach that matches the working payload
+                filters = {"items": [], "op": "AND"}
+                
                 if service_name:
-                    where_clauses.append(f"resource_string_service$$name = '{service_name}'")
+                    filters["items"].append({
+                        "key": {"key": "service.name", "dataType": "string", "isColumn": False, "type": "resource"},
+                        "op": "IN",
+                        "value": [service_name]
+                    })
+                
+                builder_queries = {
+                    "A": {
+                        "dataSource": "logs",
+                        "queryName": "A",
+                        "aggregateOperator": "noop",
+                        "aggregateAttribute": {
+                            "id": "------false",
+                            "dataType": "",
+                            "key": "",
+                            "isColumn": False,
+                            "type": "",
+                            "isJSON": False
+                        },
+                        "timeAggregation": "rate",
+                        "spaceAggregation": "sum",
+                        "functions": [],
+                        "filters": filters,
+                        "expression": "A",
+                        "disabled": False,
+                        "stepInterval": 60,
+                        "having": [],
+                        "limit": None,
+                        "orderBy": [
+                            {"columnName": "timestamp", "order": "desc"},
+                            {"columnName": "id", "order": "desc"}
+                        ],
+                        "groupBy": [],
+                        "legend": "",
+                        "reduceTo": "avg",
+                        "offset": 0,
+                        "pageSize": limit
+                    }
+                }
+                
+                payload = {
+                    "start": from_time,
+                    "end": to_time,
+                    "step": 60,
+                    "variables": {},
+                    "compositeQuery": {
+                        "queryType": "builder",
+                        "panelType": "list",
+                        "fillGaps": False,
+                        "builderQueries": builder_queries
+                    }
+                }
+                
+                result = self._post_query_range(payload)
+                
             else:
                 return {
                     "status": "error", 
                     "message": f"Invalid data_type: {data_type}. Must be 'traces' or 'logs'."
                 }
             
-            where_sql = " AND ".join(where_clauses)
-            query = f"SELECT {select_cols} FROM {table} WHERE {where_sql} LIMIT {limit}"
-            
-            result = self.execute_clickhouse_query_tool(
-                query=query, 
-                time_geq=time_geq, 
-                time_lt=time_lt, 
-                panel_type="table", 
-                fill_gaps=False, 
-                step=60
-            )
-            
             return {
                 "status": "success", 
                 "message": f"Fetched {data_type}", 
                 "data": result, 
-                "query": query
+                "query": query if data_type == "traces" else "builder_query"
             }
         except Exception as e:
             return {
