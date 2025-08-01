@@ -8,6 +8,7 @@ from google.protobuf.wrappers_pb2 import (
     BoolValue,
     DoubleValue,
     StringValue,
+    Int64Value,
 )
 
 from integrations.source_api_processors.signoz_api_processor import SignozApiProcessor
@@ -409,6 +410,76 @@ class SignozSourceManager(SourceManager):
                         description=StringValue(value="Duration string (e.g., '2h', '90m')"),
                         data_type=LiteralType.STRING,
                         is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                ],
+            },
+            Signoz.TaskType.FETCH_TRACES_OR_LOGS: {
+                "executor": self.execute_fetch_traces_or_logs,
+                "model_types": [],
+                "result_type": PlaybookTaskResultType.API_RESPONSE,
+                "display_name": "Fetch Traces or Logs",
+                "category": "Observability",
+                "form_fields": [
+                    FormField(
+                        key_name=StringValue(value="data_type"),
+                        display_name=StringValue(value="Data Type"),
+                        description=StringValue(value="Type of data to fetch: 'traces' or 'logs'"),
+                        data_type=LiteralType.STRING,
+                        form_field_type=FormFieldType.DROPDOWN_FT,
+                        valid_values=[
+                            Literal(
+                                type=LiteralType.STRING,
+                                string=StringValue(value="traces"),
+                            ),
+                            Literal(
+                                type=LiteralType.STRING,
+                                string=StringValue(value="logs"),
+                            ),
+                        ],
+                    ),
+                    FormField(
+                        key_name=StringValue(value="start_time"),
+                        display_name=StringValue(value="Start Time"),
+                        description=StringValue(value="Start time (RFC3339 or relative like 'now-2h')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="end_time"),
+                        display_name=StringValue(value="End Time"),
+                        description=StringValue(value="End time (RFC3339 or relative like 'now-30m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="duration"),
+                        display_name=StringValue(value="Duration"),
+                        description=StringValue(value="Duration string (e.g., '2h', '90m')"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="service_name"),
+                        display_name=StringValue(value="Service Name"),
+                        description=StringValue(value="Optional service name to filter by"),
+                        data_type=LiteralType.STRING,
+                        is_optional=True,
+                        form_field_type=FormFieldType.TEXT_FT,
+                    ),
+                    FormField(
+                        key_name=StringValue(value="limit"),
+                        display_name=StringValue(value="Limit"),
+                        description=StringValue(value="Maximum number of records to return"),
+                        data_type=LiteralType.LONG,
+                        is_optional=True,
+                        default_value=Literal(
+                            type=LiteralType.LONG,
+                            long=Int64Value(value=100),
+                        ),
                         form_field_type=FormFieldType.TEXT_FT,
                     ),
                 ],
@@ -1088,6 +1159,55 @@ class SignozSourceManager(SourceManager):
         except Exception as e:
             logger.error(f"Error while executing Signoz fetch APM metrics task: {e}")
             raise Exception(f"Error while executing Signoz fetch APM metrics task: {e}") from e
+
+    def execute_fetch_traces_or_logs(
+        self,
+        time_range: TimeRange,
+        signoz_task: Signoz,
+        signoz_connector: ConnectorProto,
+    ) -> PlaybookTaskResult:
+        """Executes fetch traces or logs task."""
+        try:
+            if not signoz_connector:
+                raise Exception("Task execution Failed:: No Signoz source found")
+
+            task = signoz_task.fetch_traces_or_logs
+            data_type = task.data_type.value if task.HasField("data_type") else "traces"
+            start_time = task.start_time.value if task.HasField("start_time") else None
+            end_time = task.end_time.value if task.HasField("end_time") else None
+            duration = task.duration.value if task.HasField("duration") else None
+            service_name = task.service_name.value if task.HasField("service_name") else None
+            limit = task.limit.value if task.HasField("limit") else 100
+
+            signoz_api_processor = self.get_connector_processor(signoz_connector)
+            result = signoz_api_processor.fetch_traces_or_logs(
+                data_type, start_time, end_time, duration, service_name, limit
+            )
+
+            if result:
+                # Handle different response formats from fetch_traces_or_logs
+                if isinstance(result, dict):
+                    # If result is already a dictionary, use it as is
+                    response_data = result
+                else:
+                    # Fallback: wrap in a generic structure
+                    response_data = {"data": result}
+                
+                response_struct = dict_to_proto(response_data, Struct)
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.API_RESPONSE,
+                    api_response=ApiResponseResult(response_body=response_struct),
+                    source=self.source,
+                )
+            else:
+                return PlaybookTaskResult(
+                    type=PlaybookTaskResultType.ERROR,
+                    text=TextResult(output=StringValue(value="Failed to fetch traces or logs")),
+                    source=self.source,
+                )
+        except Exception as e:
+            logger.error(f"Error while executing Signoz fetch traces or logs task: {e}")
+            raise Exception(f"Error while executing Signoz fetch traces or logs task: {e}") from e
 
     def _convert_apm_metrics_to_timeseries(self, apm_metrics_result: dict, service_name: str) -> typing.Optional[TimeseriesResult]:
         """Converts APM metrics result to TimeseriesResult format."""

@@ -730,4 +730,74 @@ class SignozApiProcessor(Processor):
                 "builderQueries": builder_queries,
             },
         }
-        return self._post_query_range(payload) 
+        return self._post_query_range(payload)
+
+    def fetch_traces_or_logs(self, data_type, start_time=None, end_time=None, duration=None, service_name=None, limit=100):
+        """
+        Fetch traces or logs from SigNoz using ClickHouse SQL.
+        
+        Args:
+            data_type: Either 'traces' or 'logs'
+            start_time: Start time as RFC3339 or relative string
+            end_time: End time as RFC3339 or relative string  
+            duration: Duration string (e.g., '2h', '90m')
+            service_name: Optional service name filter
+            limit: Maximum number of records to return
+            
+        Returns:
+            Dict with status, message, data, and query used
+        """
+        try:
+            # Use standardized time range logic
+            start_dt, end_dt = self._get_time_range(start_time, end_time, duration, default_hours=3)
+            time_geq = int(start_dt.timestamp())
+            time_lt = int(end_dt.timestamp())
+            limit = int(limit) if limit else 100
+            
+            if data_type == "traces":
+                table = "signoz_traces.distributed_signoz_index_v3"
+                select_cols = "traceID, serviceName, name, durationNano, statusCode, timestamp"
+                where_clauses = [
+                    f"timestamp >= toDateTime64({int(start_dt.timestamp())}, 9)", 
+                    f"timestamp < toDateTime64({int(end_dt.timestamp())}, 9)"
+                ]
+                if service_name:
+                    where_clauses.append(f"serviceName = '{service_name}'")
+            elif data_type == "logs":
+                table = "signoz_logs.distributed_logs_v2"
+                select_cols = "timestamp, body, severity_text, trace_id, span_id"
+                where_clauses = [
+                    f"timestamp >= toDateTime64({int(start_dt.timestamp())}, 9)", 
+                    f"timestamp < toDateTime64({int(end_dt.timestamp())}, 9)"
+                ]
+                if service_name:
+                    where_clauses.append(f"resource_string_service$$name = '{service_name}'")
+            else:
+                return {
+                    "status": "error", 
+                    "message": f"Invalid data_type: {data_type}. Must be 'traces' or 'logs'."
+                }
+            
+            where_sql = " AND ".join(where_clauses)
+            query = f"SELECT {select_cols} FROM {table} WHERE {where_sql} LIMIT {limit}"
+            
+            result = self.execute_clickhouse_query_tool(
+                query=query, 
+                time_geq=time_geq, 
+                time_lt=time_lt, 
+                panel_type="table", 
+                fill_gaps=False, 
+                step=60
+            )
+            
+            return {
+                "status": "success", 
+                "message": f"Fetched {data_type}", 
+                "data": result, 
+                "query": query
+            }
+        except Exception as e:
+            return {
+                "status": "error", 
+                "message": f"Failed to fetch {data_type}: {e!s}"
+            } 
