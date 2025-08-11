@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from typing import Optional
 from django.conf import settings
 
-from integrations.source_facade import source_facade
+from drdroid_debug_toolkit.core.integrations.source_facade import source_facade
 from playbooks_engine.mcp_utils import generate_mcp_tools_for_source_manager, execute_mcp_tool, generate_mcp_tools_for_connectors, execute_mcp_tool_with_connector
 from utils.decorators import mcp_api
 from utils.credentilal_utils import credential_yaml_to_connector_proto

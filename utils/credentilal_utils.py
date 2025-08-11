@@ -315,6 +315,11 @@ def generate_credentials_dict(connector_type, connector_keys):
 
 
 def credential_yaml_to_connector_proto(connector_name, credential_yaml, connector_id=None):
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Creating connector proto for {connector_name} with config: {credential_yaml}")
+    
     if 'type' not in credential_yaml:
         raise Exception(f'Type not found in credential yaml for connector: {connector_name}')
 
@@ -322,6 +327,7 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
         raise Exception(f'Connector name not found in credential yaml for connector: {connector_name}')
 
     c_type = credential_yaml['type']
+    logger.info(f"Connector type: {c_type}")
     c_keys: [ConnectorKey] = []
     if c_type == 'CLOUDWATCH':
         if 'region' not in credential_yaml:
@@ -408,9 +414,14 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
             key=StringValue(value=credential_yaml['grafana_api_key'])
         ))
         if credential_yaml.get('ssl_verify', None):
+            ssl_verify_flag = credential_yaml['ssl_verify']
+            if isinstance(ssl_verify_flag, str):
+                ssl_verify_flag = ssl_verify_flag.lower()
+            if isinstance(ssl_verify_flag, bool):
+                ssl_verify_flag = str(ssl_verify_flag).lower()
             c_keys.append(ConnectorKey(
                 key_type=SourceKeyType.SSL_VERIFY,
-                key=StringValue(value=credential_yaml['ssl_verify'])
+                key=StringValue(value=ssl_verify_flag)
             ))
     elif c_type == 'GRAFANA_LOKI':
         if 'host' not in credential_yaml:
@@ -736,10 +747,16 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
             key_type=SourceKeyType.SIGNOZ_API_TOKEN,
             key=StringValue(value=credential_yaml['signoz_api_token'])
         ))
-        c_keys.append(ConnectorKey(
-            key_type=SourceKeyType.SSL_VERIFY,
-            key=StringValue(value=credential_yaml['ssl_verify'])
-        ))
+        if credential_yaml.get('ssl_verify', None):
+            ssl_verify_flag = credential_yaml['ssl_verify']
+            if isinstance(ssl_verify_flag, str):
+                ssl_verify_flag = ssl_verify_flag.lower()
+            if isinstance(ssl_verify_flag, bool):
+                ssl_verify_flag = str(ssl_verify_flag).lower()
+            c_keys.append(ConnectorKey(
+                key_type=SourceKeyType.SSL_VERIFY,
+                key=StringValue(value=ssl_verify_flag)
+            ))
 
     elif c_type == 'SENTRY':
         if 'api_key' not in credential_yaml or 'org_slug' not in credential_yaml:
@@ -829,7 +846,12 @@ def credential_yaml_to_connector_proto(connector_name, credential_yaml, connecto
     else:
         raise Exception(f'Invalid type in credential yaml for connector: {connector_name}')
     
+    logger.info(f"Creating final connector proto with type: {c_source}, name: {connector_name}, keys count: {len(c_keys)}")
+    
     if connector_id:
-        return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys, id=UInt64Value(value=connector_id))
+        connector = Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys, id=UInt64Value(value=connector_id))
     else:
-        return Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
+        connector = Connector(type=c_source, name=StringValue(value=connector_name), keys=c_keys)
+    
+    logger.info(f"Successfully created connector proto: {type(connector)}")
+    return connector
