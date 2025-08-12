@@ -5,7 +5,7 @@ from celery import shared_task
 from django.conf import settings
 
 from drdroid_debug_toolkit.core.integrations.source_facade import source_facade
-from protos.connectors.connector_pb2 import Connector
+from drdroid_debug_toolkit.core.protos.connectors.connector_pb2 import Connector
 from utils.credentilal_utils import credential_yaml_to_connector_proto
 from utils.proto_utils import proto_to_dict
 
