@@ -7,12 +7,12 @@ from django.conf import settings
 from google.protobuf.struct_pb2 import Struct
 from google.protobuf.wrappers_pb2 import StringValue
 
-from integrations.source_facade import source_facade
+from drdroid_debug_toolkit.core.integrations.source_facade import source_facade
 from protos.base_pb2 import TimeRange
 from protos.playbooks.playbook_commons_pb2 import PlaybookTaskResult
 from protos.playbooks.playbook_pb2 import PlaybookTask
 from utils.proto_utils import dict_to_proto, proto_to_dict
-from integrations.utils.executor_utils import check_multiple_task_results
+from drdroid_debug_toolkit.core.integrations.utils.executor_utils import check_multiple_task_results
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple
 from google.protobuf.struct_pb2 import Struct
 from django.conf import settings
 
-from integrations.source_facade import source_facade
+from drdroid_debug_toolkit.core.integrations.source_facade import source_facade
 from protos.base_pb2 import TimeRange
 from protos.playbooks.playbook_pb2 import PlaybookTask
 from utils.proto_utils import dict_to_proto, proto_to_dict
@@ -432,27 +432,49 @@ def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_nam
         print(f"Building task with source_name: {source_name}, task_type: {task_type}, task_type_name: {task_type_name}")
 
         # Build the task structure
+        # Convert source enum to integer value for protobuf
+        source_value = source if isinstance(source, int) else source.value if hasattr(source, 'value') else int(source)
+        # Convert task_type enum to integer value for protobuf
+        task_type_value = task_type if isinstance(task_type, int) else task_type.value if hasattr(task_type, 'value') else int(task_type)
+        
         task_dict = {
-            "source": source,
+            "source": source_value,
             "task_connector_sources": [{
                 "id": connector_id,
-                "source": source,
+                "source": source_value,
                 "name": connector_name,
             }]
         }
 
+        # Validate and clean arguments
+        cleaned_arguments = {}
+        for k, v in arguments.items():
+            # Ensure all values are JSON serializable
+            if isinstance(v, (str, int, float, bool, list, dict)) or v is None:
+                cleaned_arguments[k] = v
+            else:
+                # Convert to string if not JSON serializable
+                cleaned_arguments[k] = str(v)
+
         # Add task-specific fields
         task_field = task_type_name.lower()
         task_dict[source_name] = {
-            "type": task_type
+            "type": task_type_value
         }
-        task_dict[source_name][task_field] = arguments
+        task_dict[source_name][task_field] = cleaned_arguments
 
         print(f"Task dict structure: {task_dict}")
+        logger.info(f"Task dict structure: {task_dict}")
 
         # Convert to PlaybookTask proto
-        task_proto = dict_to_proto(task_dict, PlaybookTask)
-        return task_proto
+        try:
+            task_proto = dict_to_proto(task_dict, PlaybookTask)
+            return task_proto
+        except Exception as proto_error:
+            logger.error(f"Error converting task dict to proto: {proto_error}")
+            logger.error(f"Task dict that failed: {task_dict}")
+            logger.error(f"Task dict types: {[(k, type(v)) for k, v in task_dict.items()]}")
+            raise
     except Exception as e:
         logger.error(f"Error building playbook task: {e}")
         raise
@@ -461,15 +483,20 @@ def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_nam
 def build_playbook_task_from_mcp_args_with_connector(source: Any, task_type: Any, task_type_name: str, arguments: Dict[str, Any], connector_name: str) -> Any:
     """Build a PlaybookTask proto from MCP arguments using connector name."""
     try:
+        logger.info(f"Starting build_playbook_task_from_mcp_args_with_connector with source: {source}, task_type: {task_type}, task_type_name: {task_type_name}, connector_name: {connector_name}")
+        
         # Import ConnectorType to get the proper name
         from protos.base_pb2 import Source as ConnectorType
 
         # Get source name for task structure - handle enum properly
         source_name = "unknown"
         try:
+            logger.info(f"Attempting to get source name for source: {source} (type: {type(source)})")
             # Use ConnectorType.Name to get the proper string name
             source_name = ConnectorType.Name(source).lower()
-        except:
+            logger.info(f"Successfully got source name: {source_name}")
+        except Exception as e:
+            logger.error(f"Error getting source name with ConnectorType.Name: {e}")
             # Fallback to string conversion
             try:
                 source_name = str(source).lower()
@@ -477,58 +504,101 @@ def build_playbook_task_from_mcp_args_with_connector(source: Any, task_type: Any
                     source_name = source_name.split('.')[-1]
                 elif '.' in source_name:
                     source_name = source_name.split('.')[-1]
-            except:
+                logger.info(f"Fallback source name: {source_name}")
+            except Exception as e2:
+                logger.error(f"Error in fallback source name conversion: {e2}")
                 raise ValueError(f"Could not determine source name for source: {source}")
 
         print(f"Building task with source_name: {source_name}, task_type: {task_type}, task_type_name: {task_type_name}, connector_name: {connector_name}")
 
         # Get connector proto from credentials using connector name
+        logger.info(f"Loading connections from settings...")
         loaded_connections = settings.LOADED_CONNECTIONS or {}
+        logger.info(f"Loaded connections: {list(loaded_connections.keys()) if loaded_connections else 'None'}")
         
         # Add native Kubernetes connector if NATIVE_KUBERNETES_API_MODE is enabled and not already present
         if settings.NATIVE_KUBERNETES_API_MODE:
+            logger.info("NATIVE_KUBERNETES_API_MODE is enabled")
             has_k8s_connector = any(config.get('type') == 'KUBERNETES' for config in loaded_connections.values())
             if not has_k8s_connector:
                 api_token_identifier = settings.DRD_CLOUD_API_TOKEN[-3:] if settings.DRD_CLOUD_API_TOKEN else "xxx"
                 native_k8s_connector_name = f'native_k8_connection_{api_token_identifier}'
                 loaded_connections[native_k8s_connector_name] = {'type': 'KUBERNETES'}
+                logger.info(f"Added native Kubernetes connector: {native_k8s_connector_name}")
         
+        logger.info(f"Looking for connector: {connector_name}")
         if connector_name not in loaded_connections:
+            logger.error(f"Connector {connector_name} not found in loaded connections: {list(loaded_connections.keys())}")
             raise ValueError(f"Connector {connector_name} not found in loaded connections")
 
         connector_config = loaded_connections[connector_name]
+        logger.info(f"Found connector config: {connector_config}")
+        
         # Create connector proto without connector_id (since we don't have it in MCP context)
+        logger.info("Creating connector proto...")
         connector_proto = credential_yaml_to_connector_proto(connector_name, connector_config)
+        logger.info(f"Created connector proto: {type(connector_proto)}")
         
         # For the task structure, we'll use a dummy connector_id (0) since it's required for the task structure
         # but the actual connector proto doesn't need it
         connector_id = 0
 
         # Build the task structure
+        logger.info("Building task structure...")
+        # Convert source enum to integer value for protobuf
+        source_value = source if isinstance(source, int) else source.value if hasattr(source, 'value') else int(source)
+        logger.info(f"Converted source value: {source_value} (type: {type(source_value)})")
+        
         task_dict = {
-            "source": source,
+            "source": source_value,
             "task_connector_sources": [{
                 "id": connector_id,
-                "source": source,
+                "source": source_value,
                 "name": connector_name,
             }]
         }
+        logger.info(f"Created base task dict: {task_dict}")
 
         # Remove connector_name from arguments since it's not part of the task parameters
         task_arguments = {k: v for k, v in arguments.items() if k != 'connector_name'}
+        logger.info(f"Task arguments after removing connector_name: {task_arguments}")
+
+        # Validate and clean task arguments
+        cleaned_arguments = {}
+        for k, v in task_arguments.items():
+            # Ensure all values are JSON serializable
+            if isinstance(v, (str, int, float, bool, list, dict)) or v is None:
+                cleaned_arguments[k] = v
+            else:
+                # Convert to string if not JSON serializable
+                cleaned_arguments[k] = str(v)
+        logger.info(f"Cleaned arguments: {cleaned_arguments}")
 
         # Add task-specific fields
         task_field = task_type_name.lower()
+        logger.info(f"Task field: {task_field}")
+        # Convert task_type enum to integer value for protobuf
+        task_type_value = task_type if isinstance(task_type, int) else task_type.value if hasattr(task_type, 'value') else int(task_type)
+        logger.info(f"Converted task type value: {task_type_value} (type: {type(task_type_value)})")
+        
         task_dict[source_name] = {
-            "type": task_type
+            "type": task_type_value
         }
-        task_dict[source_name][task_field] = task_arguments
+        task_dict[source_name][task_field] = cleaned_arguments
+        logger.info(f"Added task-specific fields to task dict")
 
         print(f"Task dict structure: {task_dict}")
+        logger.info(f"Task dict structure: {task_dict}")
 
         # Convert to PlaybookTask proto
-        task_proto = dict_to_proto(task_dict, PlaybookTask)
-        return task_proto, connector_proto
+        try:
+            task_proto = dict_to_proto(task_dict, PlaybookTask)
+            return task_proto, connector_proto
+        except Exception as proto_error:
+            logger.error(f"Error converting task dict to proto: {proto_error}")
+            logger.error(f"Task dict that failed: {task_dict}")
+            logger.error(f"Task dict types: {[(k, type(v)) for k, v in task_dict.items()]}")
+            raise
     except Exception as e:
         logger.error(f"Error building playbook task with connector: {e}")
         raise
@@ -658,7 +728,7 @@ def execute_mcp_tool_with_connector(tool_name: str, arguments: Dict[str, Any], t
             )
 
             # Post-process the result
-            from integrations.utils.executor_utils import check_multiple_task_results
+            from drdroid_debug_toolkit.core.integrations.utils.executor_utils import check_multiple_task_results
             if check_multiple_task_results(playbook_task_result):
                 task_results = []
                 for result in playbook_task_result:
