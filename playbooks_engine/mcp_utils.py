@@ -4,8 +4,8 @@ from google.protobuf.struct_pb2 import Struct
 from django.conf import settings
 
 from drdroid_debug_toolkit.core.integrations.source_facade import source_facade
-from protos.base_pb2 import TimeRange
-from protos.playbooks.playbook_pb2 import PlaybookTask
+from drdroid_debug_toolkit.core.protos.base_pb2 import TimeRange
+from drdroid_debug_toolkit.core.protos.playbooks.playbook_pb2 import PlaybookTask
 from utils.proto_utils import dict_to_proto, proto_to_dict
 from utils.time_utils import current_epoch_timestamp
 from utils.credentilal_utils import credential_yaml_to_connector_proto
@@ -220,7 +220,7 @@ def generate_mcp_tools_for_connectors() -> Tuple[List[Dict[str, Any]], Dict[str,
         loaded_connections = {}
 
     # Create mapping from credential type to source enum
-    from protos.base_pb2 import Source
+    from drdroid_debug_toolkit.core.protos.base_pb2 import Source
     credential_type_to_source = {
         'CLOUDWATCH': Source.CLOUDWATCH,
         'DATADOG': Source.DATADOG,
@@ -411,7 +411,7 @@ def build_playbook_task_from_mcp_args(source: Any, task_type: Any, task_type_nam
     """Build a PlaybookTask proto from MCP arguments."""
     try:
         # Import ConnectorType to get the proper name
-        from protos.base_pb2 import Source as ConnectorType
+        from drdroid_debug_toolkit.core.protos.base_pb2 import Source as ConnectorType
 
         # Get source name for task structure - handle enum properly
         source_name = "unknown"
@@ -486,7 +486,7 @@ def build_playbook_task_from_mcp_args_with_connector(source: Any, task_type: Any
         logger.info(f"Starting build_playbook_task_from_mcp_args_with_connector with source: {source}, task_type: {task_type}, task_type_name: {task_type_name}, connector_name: {connector_name}")
         
         # Import ConnectorType to get the proper name
-        from protos.base_pb2 import Source as ConnectorType
+        from drdroid_debug_toolkit.core.protos.base_pb2 import Source as ConnectorType
 
         # Get source name for task structure - handle enum properly
         source_name = "unknown"

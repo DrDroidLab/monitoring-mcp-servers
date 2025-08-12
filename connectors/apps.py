@@ -6,7 +6,7 @@ from django.conf import settings
 
 from asset_manager.tasks import populate_connector_metadata
 from connectors.tasks import register_connectors
-from protos.base_pb2 import Source
+from drdroid_debug_toolkit.core.protos.base_pb2 import Source
 from utils.credentilal_utils import credential_yaml_to_connector_proto, generate_credentials_dict
 from utils.static_mappings import integrations_connector_type_connector_keys_map
 
